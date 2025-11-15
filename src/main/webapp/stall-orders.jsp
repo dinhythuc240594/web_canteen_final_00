@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="java.util.*, model.OrderDAO, model.Order_FoodDAO, model.StallDAO" %>
+<%@ page import="java.util.*, model.OrderDAO, model.Order_FoodDAO, model.StallDAO, model.UserDAO" %>
 <%
     // Security check: Only stall and admin can access this page
     String username = (String) session.getAttribute("username");
@@ -17,6 +17,8 @@
     
     List<OrderDAO> orders = (List<OrderDAO>) request.getAttribute("orders");
     Map<Integer, List<Order_FoodDAO>> orderFoodMap = (Map<Integer, List<Order_FoodDAO>>) request.getAttribute("orderFoodMap");
+    StallDAO stall = (StallDAO) request.getAttribute("stall");
+    UserDAO managerUser = (UserDAO) request.getAttribute("managerUser");
     String contextPath = request.getContextPath();
     String selectedStatus = request.getParameter("status") != null ? request.getParameter("status") : "all";
 %>
@@ -34,10 +36,78 @@
 
 <main class="min-h-screen">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Back Button and Header -->
         <div class="mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-4">
+                    <a href="<%=contextPath%>/stall" 
+                       class="flex items-center text-blue-600 hover:text-blue-800 transition-colors">
+                        <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
+                        <span class="font-medium">Quay lại trang tổng quan</span>
+                    </a>
+                </div>
+            </div>
             <h1 class="text-2xl font-bold text-gray-800">Quản lý đơn hàng</h1>
             <p class="text-gray-600">Cập nhật trạng thái đơn hàng của quầy</p>
         </div>
+
+        <!-- Stall Information Card -->
+        <% if (stall != null) { %>
+        <div class="bg-white p-6 rounded-lg shadow-sm border mb-6">
+            <div class="flex justify-between items-start">
+                <div class="flex-1">
+                    <h2 class="text-xl font-bold text-gray-800 mb-2">Thông tin quầy hàng</h2>
+                    <div class="space-y-2">
+                        <div>
+                            <span class="text-sm font-medium text-gray-600">Tên quầy:</span>
+                            <span class="text-sm text-gray-800 ml-2"><%= stall.getName() != null ? stall.getName() : "N/A" %></span>
+                        </div>
+                        <% if (stall.getDescription() != null && !stall.getDescription().isEmpty()) { %>
+                        <div>
+                            <span class="text-sm font-medium text-gray-600">Mô tả:</span>
+                            <span class="text-sm text-gray-800 ml-2"><%= stall.getDescription() %></span>
+                        </div>
+                        <% } %>
+                        <div>
+                            <span class="text-sm font-medium text-gray-600">Trạng thái:</span>
+                            <span class="px-2 py-1 rounded text-xs ml-2 <%= stall.getIsOpen() != null && stall.getIsOpen() ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800" %>">
+                                <%= stall.getIsOpen() != null && stall.getIsOpen() ? "Đang mở cửa" : "Đã đóng cửa" %>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="ml-6 pl-6 border-l border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Người quản lý</h3>
+                    <% if (managerUser != null) { %>
+                    <div class="space-y-2">
+                        <div>
+                            <span class="text-sm font-medium text-gray-600">Họ tên:</span>
+                            <span class="text-sm text-gray-800 ml-2"><%= managerUser.getFull_name() != null ? managerUser.getFull_name() : "N/A" %></span>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-600">Tên đăng nhập:</span>
+                            <span class="text-sm text-gray-800 ml-2"><%= managerUser.getUsername() != null ? managerUser.getUsername() : "N/A" %></span>
+                        </div>
+                        <% if (managerUser.getEmail() != null && !managerUser.getEmail().isEmpty()) { %>
+                        <div>
+                            <span class="text-sm font-medium text-gray-600">Email:</span>
+                            <span class="text-sm text-gray-800 ml-2"><%= managerUser.getEmail() %></span>
+                        </div>
+                        <% } %>
+                        <% if (managerUser.getPhone() != null && !managerUser.getPhone().isEmpty()) { %>
+                        <div>
+                            <span class="text-sm font-medium text-gray-600">Số điện thoại:</span>
+                            <span class="text-sm text-gray-800 ml-2"><%= managerUser.getPhone() %></span>
+                        </div>
+                        <% } %>
+                    </div>
+                    <% } else { %>
+                    <p class="text-sm text-gray-500">Không có thông tin người quản lý</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+        <% } %>
 
         <!-- Filter -->
         <div class="mb-6 bg-white p-4 rounded-lg shadow-sm border">

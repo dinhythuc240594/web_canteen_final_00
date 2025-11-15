@@ -2,6 +2,7 @@
 <%@ page import="java.util.*, model.StallDAO" %>
 <%
     List<StallDAO> stalls = (List<StallDAO>) request.getAttribute("stalls");
+    Integer currentUserId = (Integer) request.getAttribute("currentUserId");
     String contextPath = request.getContextPath();
 %>
 <!DOCTYPE html>
@@ -23,7 +24,14 @@
             %>
             <div class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 hover:shadow-md transition-shadow">
                 <div class="p-4">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-2"><%= stall.getName() %></h3>
+                    <div class="flex items-start justify-between mb-2">
+                        <h3 class="text-lg font-semibold text-gray-800"><%= stall.getName() %></h3>
+                        <% if (currentUserId != null && currentUserId == stall.getManagerUserId()) { %>
+                        <span class="px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full font-medium">
+                            Quầy của tôi
+                        </span>
+                        <% } %>
+                    </div>
                     <p class="text-gray-600 text-sm mb-3"><%= stall.getDescription() != null ? stall.getDescription() : "Món ăn ngon và đa dạng" %></p>
                     <div class="flex items-center justify-between">
                         <span class="text-xs text-gray-500">Có sẵn</span>

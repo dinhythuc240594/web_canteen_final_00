@@ -9,9 +9,11 @@ import jakarta.servlet.http.HttpSession;
 import model.OrderDAO;
 import model.Order_FoodDAO;
 import model.StallDAO;
+import model.UserDAO;
 import serviceimpl.OrderServiceImpl;
 import serviceimpl.StallServiceImpl;
 import serviceimpl.Order_FoodServiceImpl;
+import serviceimpl.UserServiceImpl;
 import utils.DataSourceUtil;
 
 import java.io.IOException;
@@ -28,6 +30,7 @@ public class StallOrderServlet extends HttpServlet {
 	private OrderServiceImpl orderService;
 	private StallServiceImpl stallService;
 	private Order_FoodServiceImpl orderFoodService;
+	private UserServiceImpl userService;
 	
 	@Override
 	public void init() throws ServletException {
@@ -35,6 +38,7 @@ public class StallOrderServlet extends HttpServlet {
 		this.orderService = new OrderServiceImpl(ds);
 		this.stallService = new StallServiceImpl(ds);
 		this.orderFoodService = new Order_FoodServiceImpl(ds);
+		this.userService = new UserServiceImpl(ds);
 	}
 	
 	@Override
@@ -43,9 +47,9 @@ public class StallOrderServlet extends HttpServlet {
 		HttpSession session = request.getSession(false);
 		String userRole = (String) (session != null ? session.getAttribute("type_user") : null);
 		String username = (String) (session != null ? session.getAttribute("username") : null);
-		int userId = (int) session.getAttribute("userId");
+		Integer userId = (Integer) (session != null ? session.getAttribute("userId") : null);
 		
-		if (username == null) {
+		if (username == null || userId == null) {
 			response.sendRedirect(request.getContextPath() + "/login");
 			return;
 		}
@@ -92,8 +96,18 @@ public class StallOrderServlet extends HttpServlet {
 			orderFoodMap.put(order.getId(), items);
 		}
 		
+		// Get stall and manager user information
+		StallDAO stall = null;
+		UserDAO managerUser = null;
+		if (!userStalls.isEmpty()) {
+			stall = userStalls.get(0);
+			managerUser = userService.getUserById(stall.getManagerUserId());
+		}
+		
 		request.setAttribute("orders", orders);
 		request.setAttribute("orderFoodMap", orderFoodMap);
+		request.setAttribute("stall", stall);
+		request.setAttribute("managerUser", managerUser);
 		
 		request.getRequestDispatcher("/stall-orders.jsp").forward(request, response);
 	}

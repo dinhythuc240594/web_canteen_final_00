@@ -34,8 +34,8 @@ public class FoodServiceImpl implements FoodService {
 	}
 
 	@Override
-	public boolean create(String nameFood, double priceFood, int inventoryFood) {
-		return this.foodRepository.create(nameFood, priceFood, inventoryFood);
+	public boolean create(String nameFood, double priceFood, int inventoryFood, int stallId) {
+		return this.foodRepository.create(nameFood, priceFood, inventoryFood, stallId);
 	}
 
 	@Override

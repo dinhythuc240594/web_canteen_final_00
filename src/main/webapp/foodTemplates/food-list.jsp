@@ -26,6 +26,10 @@
 	
 	String userRole = (String) request.getAttribute("userRole");
 	boolean isStallRole = "stall".equals(userRole);
+	Integer userStallId = (Integer) request.getAttribute("userStallId");
+	
+	// Chỉ hiển thị các button quản lý món khi người dùng là chủ quầy và có quầy
+	boolean isStallOwner = isStallRole && userStallId != null;
 	
 	java.util.List<model.StallDAO> stalls = (java.util.List<model.StallDAO>) request.getAttribute("stalls");
 %>
@@ -48,16 +52,16 @@
   </div>
 </section>
 
-<!-- Action Buttons (Only for stall role) -->
-<% if (isStallRole) { %>
-<section class="py-4 bg-white">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <a href="foods?action=create" class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
-      <i data-lucide="plus"></i> Thêm món ăn mới
-    </a>
-  </div>
-</section>
-<% } %>
+<%--<!-- Action Buttons (Chỉ hiển thị cho chủ quầy) -->--%>
+<%--<% if (isStallOwner) { %>--%>
+<%--<section class="py-4 bg-white">--%>
+<%--  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">--%>
+<%--    <a href="foods?action=create" class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">--%>
+<%--      <i data-lucide="plus"></i> Thêm món ăn mới--%>
+<%--    </a>--%>
+<%--  </div>--%>
+<%--</section>--%>
+<%--<% } %>--%>
 
 <!-- 🥗 Danh sách món ăn -->
 <section class="py-8 bg-gradient-to-b from-gray-50 to-blue-50">
@@ -83,7 +87,11 @@
             <span class="text-xs <%= food.getInventoryFood() > 0 ? "text-green-600" : "text-red-600" %>">
               Tồn kho: <%= food.getInventoryFood() %>
             </span>
-            <% if (isStallRole) { %>
+            <% 
+              // Chỉ hiển thị button sửa/xóa nếu người dùng là chủ quầy và món ăn thuộc về quầy của họ
+              boolean canEdit = isStallOwner && food.getStallId() == userStallId;
+            %>
+            <% if (canEdit) { %>
             <div class="flex gap-1">
               <a href="foods?id=<%= food.getId() %>&action=update" 
                  class="p-1 text-yellow-600 hover:text-yellow-700" title="Sửa">

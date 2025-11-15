@@ -50,15 +50,54 @@
         <!-- Stall Information -->
         <div class="bg-white p-6 rounded-lg shadow-sm border mb-6">
             <div class="flex justify-between items-start mb-4">
-                <div>
-                    <h2 class="text-xl font-bold text-gray-800"><%= stall != null ? stall.getName() : "N/A" %></h2>
-                    <p class="text-gray-600 mt-1"><%= stall != null && stall.getDescription() != null ? stall.getDescription() : "N/A" %></p>
+                <div class="flex-1">
+                    <h2 class="text-xl font-bold text-gray-800 mb-2">Thông tin quầy hàng</h2>
+                    <div class="space-y-2 mb-4">
+                        <div>
+                            <span class="text-sm font-medium text-gray-600">Tên quầy:</span>
+                            <span class="text-sm text-gray-800 ml-2"><%= stall != null ? stall.getName() : "N/A" %></span>
+                        </div>
+                        <% if (stall != null && stall.getDescription() != null && !stall.getDescription().isEmpty()) { %>
+                        <div>
+                            <span class="text-sm font-medium text-gray-600">Mô tả:</span>
+                            <span class="text-sm text-gray-800 ml-2"><%= stall.getDescription() %></span>
+                        </div>
+                        <% } %>
+                        <div>
+                            <span class="text-sm font-medium text-gray-600">Trạng thái:</span>
+                            <span class="px-2 py-1 rounded text-xs ml-2 <%= stall != null && stall.getIsOpen() ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800" %>">
+                                <%= stall != null && stall.getIsOpen() ? "Đang mở cửa" : "Đã đóng cửa" %>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">Người quản lý quầy</h3>
+                        <div class="space-y-2">
+                            <div>
+                                <span class="text-sm font-medium text-gray-600">Họ tên:</span>
+                                <span class="text-sm text-gray-800 ml-2"><%= user != null && user.getFull_name() != null ? user.getFull_name() : "N/A" %></span>
+                            </div>
+                            <div>
+                                <span class="text-sm font-medium text-gray-600">Tên đăng nhập:</span>
+                                <span class="text-sm text-gray-800 ml-2"><%= user != null && user.getUsername() != null ? user.getUsername() : username %></span>
+                            </div>
+                            <% if (user != null && user.getEmail() != null && !user.getEmail().isEmpty()) { %>
+                            <div>
+                                <span class="text-sm font-medium text-gray-600">Email:</span>
+                                <span class="text-sm text-gray-800 ml-2"><%= user.getEmail() %></span>
+                            </div>
+                            <% } %>
+                            <% if (user != null && user.getPhone() != null && !user.getPhone().isEmpty()) { %>
+                            <div>
+                                <span class="text-sm font-medium text-gray-600">Số điện thoại:</span>
+                                <span class="text-sm text-gray-800 ml-2"><%= user.getPhone() %></span>
+                            </div>
+                            <% } %>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <span class="px-3 py-1 rounded text-sm <%= stall != null && stall.getIsOpen() ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800" %>">
-                        <%= stall != null && stall.getIsOpen() ? "Đang mở cửa" : "Đã đóng cửa" %>
-                    </span>
-                    <form method="POST" action="<%=contextPath%>/stall" class="inline">
+                <div class="ml-6 pl-6 border-l border-gray-200 flex flex-col items-end">
+                    <form method="POST" action="<%=contextPath%>/stall" class="mb-4">
                         <input type="hidden" name="action" value="toggleStatus">
                         <button type="submit" 
                                 class="px-4 py-2 rounded-md text-sm font-medium <%= stall != null && stall.getIsOpen() ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700" %> text-white">

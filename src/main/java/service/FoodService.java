@@ -13,7 +13,7 @@ public interface FoodService {
 	FoodDTO findById(int id);	
 	List<FoodDTO> newFoods();
 	List<FoodDTO> promotionFoods();
-	boolean create(String nameFood, double priceFood, int inventoryFood);
+	boolean create(String nameFood, double priceFood, int inventoryFood, int stallId);
 	boolean update(int id, String nameFood, double priceFood, int inventoryFood);
 	boolean delete(int id);
 	int count(String keyword);

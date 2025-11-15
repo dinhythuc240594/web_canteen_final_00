@@ -58,6 +58,12 @@ public class StoreServerlet extends HttpServlet {
 	private void handleList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		List<StallDAO> stalls = stallService.findAll();
 		request.setAttribute("stalls", stalls);
+		
+		// Get current user ID from session to check if user manages any stalls
+		jakarta.servlet.http.HttpSession session = request.getSession(false);
+		Integer userId = (Integer) (session != null ? session.getAttribute("userId") : null);
+		request.setAttribute("currentUserId", userId);
+		
 		request.getRequestDispatcher("/store.jsp").forward(request, response);
 	}
 	

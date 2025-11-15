@@ -53,14 +53,15 @@ public class FoodRepositoryImpl implements FoodRepository{
 	}
 
 	@Override
-	public boolean create(String nameFood, double priceFood, int inventoryFood) {
-        String sql = "INSERT INTO foods (name, price, inventory) VALUES (?,?,?)";
+	public boolean create(String nameFood, double priceFood, int inventoryFood, int stallId) {
+        String sql = "INSERT INTO foods (name, price, inventory, stall_id) VALUES (?,?,?,?)";
         try (
         	Connection conn = ds.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);) {
             ps.setString(1, nameFood);
             ps.setDouble(2, priceFood);
             ps.setInt(3, inventoryFood);
+            ps.setInt(4, stallId);
             ps.executeUpdate();
             return true;
 	    } catch (Exception e) {

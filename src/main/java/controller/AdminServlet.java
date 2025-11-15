@@ -94,22 +94,32 @@ public class AdminServlet extends HttpServlet {
 	
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// Security check: Only admin can access
 		HttpSession session = request.getSession(false);
 		String userRole = (String) (session != null ? session.getAttribute("type_user") : null);
 		String username = (String) (session != null ? session.getAttribute("username") : null);
+		Integer userId = (Integer) (session != null ? session.getAttribute("userId") : null);
 		
 		if (username == null) {
 			response.sendRedirect(request.getContextPath() + "/login");
 			return;
 		}
 		
-		if (!"admin".equals(userRole)) {
+		String action = request.getParameter("action");
+		
+		// Check permissions based on action
+		boolean isStallAction = "createStall".equals(action) || "updateStall".equals(action) || "deleteStall".equals(action);
+		
+		// For non-stall actions, only admin can access
+		// For stall actions, admin or stall managers can access
+		if (!isStallAction && !"admin".equals(userRole)) {
 			response.sendRedirect(request.getContextPath() + "/home");
 			return;
 		}
 		
-		String action = request.getParameter("action");
+		if (isStallAction && !"admin".equals(userRole) && !"stall".equals(userRole)) {
+			response.sendRedirect(request.getContextPath() + "/home");
+			return;
+		}
 		
 		switch (action) {
 			case "createUser":
@@ -125,13 +135,13 @@ public class AdminServlet extends HttpServlet {
 				handleToggleUserStatus(request, response);
 				break;
 			case "createStall":
-				handleCreateStall(request, response);
+				handleCreateStall(request, response, userId, userRole);
 				break;
 			case "updateStall":
-				handleUpdateStall(request, response);
+				handleUpdateStall(request, response, userId, userRole);
 				break;
 			case "deleteStall":
-				handleDeleteStall(request, response);
+				handleDeleteStall(request, response, userId, userRole);
 				break;
 			default:
 				response.sendRedirect(request.getContextPath() + "/admin");
@@ -140,6 +150,8 @@ public class AdminServlet extends HttpServlet {
 	}
 	
 	private void handleDashboard(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		HttpSession session = request.getSession(false);
+		
 		// Get statistics
 		int totalUsers = this.userServiceImpl.count();
 		List<StallDAO> stalls = this.stallServiceImpl.findAll();
@@ -182,6 +194,8 @@ public class AdminServlet extends HttpServlet {
 			}
 		}
 		
+		Integer userId = (Integer) (session != null ? session.getAttribute("userId") : null);
+		
 		request.setAttribute("totalUsers", totalUsers);
 		request.setAttribute("totalStalls", totalStalls);
 		request.setAttribute("totalRevenue", totalRevenue);
@@ -189,6 +203,7 @@ public class AdminServlet extends HttpServlet {
 		request.setAttribute("recentOrders", recentOrders);
 		request.setAttribute("userNames", userNames);
 		request.setAttribute("stallNames", stallNames);
+		request.setAttribute("currentUserId", userId);
 		
 		request.getRequestDispatcher("/admin.jsp").forward(request, response);
 	}
@@ -368,11 +383,36 @@ public class AdminServlet extends HttpServlet {
 		response.getWriter().write(json);
 	}
 	
-	private void handleCreateStall(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void handleCreateStall(HttpServletRequest request, HttpServletResponse response, Integer userId, String userRole) throws ServletException, IOException {
+		// Check permission: Only admin or stall managers can create stalls
+		// Stall managers can only create stalls for themselves
+		if (!"admin".equals(userRole) && !"stall".equals(userRole)) {
+			response.setContentType("application/json");
+			response.setCharacterEncoding("UTF-8");
+			Map<String, Object> result = new HashMap<>();
+			result.put("success", false);
+			result.put("message", "Bạn không có quyền tạo quầy");
+			Gson gson = new Gson();
+			response.getWriter().write(gson.toJson(result));
+			return;
+		}
+		
 		String name = request.getParameter("name");
 		String description = request.getParameter("description");
 		int managerUserId = Integer.parseInt(request.getParameter("managerUserId"));
 		boolean isOpen = Boolean.parseBoolean(request.getParameter("isOpen"));
+		
+		// If user is stall manager, they can only create stalls for themselves
+		if ("stall".equals(userRole) && userId != null && !userId.equals(managerUserId)) {
+			response.setContentType("application/json");
+			response.setCharacterEncoding("UTF-8");
+			Map<String, Object> result = new HashMap<>();
+			result.put("success", false);
+			result.put("message", "Bạn chỉ có thể tạo quầy cho chính mình");
+			Gson gson = new Gson();
+			response.getWriter().write(gson.toJson(result));
+			return;
+		}
 		
 		StallDAO stall = new StallDAO();
 		stall.setName(name);
@@ -400,12 +440,63 @@ public class AdminServlet extends HttpServlet {
 		response.getWriter().write(json);
 	}
 	
-	private void handleUpdateStall(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void handleUpdateStall(HttpServletRequest request, HttpServletResponse response, Integer userId, String userRole) throws ServletException, IOException {
+		// Check permission: Only admin or stall managers can update stalls
+		// Stall managers can only update their own stalls
+		if (!"admin".equals(userRole) && !"stall".equals(userRole)) {
+			response.setContentType("application/json");
+			response.setCharacterEncoding("UTF-8");
+			Map<String, Object> result = new HashMap<>();
+			result.put("success", false);
+			result.put("message", "Bạn không có quyền sửa quầy");
+			Gson gson = new Gson();
+			response.getWriter().write(gson.toJson(result));
+			return;
+		}
+		
 		int id = Integer.parseInt(request.getParameter("id"));
+		
+		// Check if stall exists and user has permission
+		StallDAO existingStall = this.stallServiceImpl.findById(id);
+		if (existingStall == null) {
+			response.setContentType("application/json");
+			response.setCharacterEncoding("UTF-8");
+			Map<String, Object> result = new HashMap<>();
+			result.put("success", false);
+			result.put("message", "Quầy không tồn tại");
+			Gson gson = new Gson();
+			response.getWriter().write(gson.toJson(result));
+			return;
+		}
+		
+		// If user is stall manager, they can only update their own stalls
+		if ("stall".equals(userRole) && userId != null && !userId.equals(existingStall.getManagerUserId())) {
+			response.setContentType("application/json");
+			response.setCharacterEncoding("UTF-8");
+			Map<String, Object> result = new HashMap<>();
+			result.put("success", false);
+			result.put("message", "Bạn chỉ có thể sửa quầy do mình quản lý");
+			Gson gson = new Gson();
+			response.getWriter().write(gson.toJson(result));
+			return;
+		}
+		
 		String name = request.getParameter("name");
 		String description = request.getParameter("description");
 		int managerUserId = Integer.parseInt(request.getParameter("managerUserId"));
 		boolean isOpen = Boolean.parseBoolean(request.getParameter("isOpen"));
+		
+		// If user is stall manager, they cannot change the manager
+		if ("stall".equals(userRole) && userId != null && !userId.equals(managerUserId)) {
+			response.setContentType("application/json");
+			response.setCharacterEncoding("UTF-8");
+			Map<String, Object> result = new HashMap<>();
+			result.put("success", false);
+			result.put("message", "Bạn không thể thay đổi người quản lý quầy");
+			Gson gson = new Gson();
+			response.getWriter().write(gson.toJson(result));
+			return;
+		}
 		
 		StallDAO stall = new StallDAO();
 		stall.setId(id);
@@ -433,8 +524,47 @@ public class AdminServlet extends HttpServlet {
 		response.getWriter().write(json);
 	}
 	
-	private void handleDeleteStall(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void handleDeleteStall(HttpServletRequest request, HttpServletResponse response, Integer userId, String userRole) throws ServletException, IOException {
+		// Check permission: Only admin or stall managers can delete stalls
+		// Stall managers can only delete their own stalls
+		if (!"admin".equals(userRole) && !"stall".equals(userRole)) {
+			response.setContentType("application/json");
+			response.setCharacterEncoding("UTF-8");
+			Map<String, Object> result = new HashMap<>();
+			result.put("success", false);
+			result.put("message", "Bạn không có quyền xóa quầy");
+			Gson gson = new Gson();
+			response.getWriter().write(gson.toJson(result));
+			return;
+		}
+		
 		int id = Integer.parseInt(request.getParameter("id"));
+		
+		// Check if stall exists and user has permission
+		StallDAO existingStall = this.stallServiceImpl.findById(id);
+		if (existingStall == null) {
+			response.setContentType("application/json");
+			response.setCharacterEncoding("UTF-8");
+			Map<String, Object> result = new HashMap<>();
+			result.put("success", false);
+			result.put("message", "Quầy không tồn tại");
+			Gson gson = new Gson();
+			response.getWriter().write(gson.toJson(result));
+			return;
+		}
+		
+		// If user is stall manager, they can only delete their own stalls
+		if ("stall".equals(userRole) && userId != null && !userId.equals(existingStall.getManagerUserId())) {
+			response.setContentType("application/json");
+			response.setCharacterEncoding("UTF-8");
+			Map<String, Object> result = new HashMap<>();
+			result.put("success", false);
+			result.put("message", "Bạn chỉ có thể xóa quầy do mình quản lý");
+			Gson gson = new Gson();
+			response.getWriter().write(gson.toJson(result));
+			return;
+		}
+		
 		this.stallServiceImpl.deleteById(id);
 		
 		response.setContentType("application/json");

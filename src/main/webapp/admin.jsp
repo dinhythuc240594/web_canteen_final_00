@@ -29,6 +29,7 @@
     java.util.List<model.OrderDAO> recentOrders = (java.util.List<model.OrderDAO>) request.getAttribute("recentOrders");
     java.util.Map<Integer, String> userNames = (java.util.Map<Integer, String>) request.getAttribute("userNames");
     java.util.Map<Integer, String> stallNames = (java.util.Map<Integer, String>) request.getAttribute("stallNames");
+    Integer currentUserId = (Integer) request.getAttribute("currentUserId");
     
     if (recentOrders == null) recentOrders = new java.util.ArrayList<>();
     if (userNames == null) userNames = new java.util.HashMap<>();
@@ -444,31 +445,31 @@
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
                             <h1 class="text-2xl font-bold text-gray-800">Quản lý quầy ăn</h1>
-                            <p class="text-gray-600">Tất cả quầy (mock)</p>
+                            <p class="text-gray-600">Tất cả quầy</p>
                         </div>
                         <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center space-x-2">
                             <i data-lucide="plus-circle"></i><span>Thêm quầy</span>
                         </button>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div class="bg-white rounded-lg shadow-sm border p-4">
-                            <div class="flex justify-between items-start mb-2">
-                                <h3 class="font-semibold text-gray-800">Quầy cơm & món khô</h3>
-                                <span class="px-2 py-1 rounded text-xs bg-green-100 text-green-800">Hoạt động</span>
-                            </div>
-                            <p class="text-sm text-gray-600 mb-2">Cơm, mì xào, hủ tiếu xào...</p>
-                            <p class="text-xs text-gray-500 mb-3">Quản lý: Nguyễn Văn A</p>
-                            <div class="flex justify-between items-center">
-                                <span class="text-xs text-gray-500">26 món</span>
-                                <div class="flex space-x-2">
-                                    <button class="p-1 text-blue-600 hover:text-blue-800"><i data-lucide="edit" class="w-4 h-4"></i></button>
-                                    <button class="p-1 text-red-600 hover:text-red-800"><i data-lucide="x-circle" class="w-4 h-4"></i></button>
-                                    <button class="p-1 text-red-600 hover:text-red-800"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                                </div>
-                            </div>
+                    <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="text-left py-3 px-4">ID</th>
+                                    <th class="text-left py-3 px-4">Tên quầy</th>
+                                    <th class="text-left py-3 px-4">Mô tả</th>
+                                    <th class="text-left py-3 px-4">Người quản lý</th>
+                                    <th class="text-left py-3 px-4">Trạng thái</th>
+                                    <th class="text-left py-3 px-4">Hành động</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <!-- Stalls will be loaded here via JavaScript -->
+                                </tbody>
+                            </table>
                         </div>
-                        <!-- thêm thẻ quầy khác tương tự -->
                     </div>
                 </div>
 
@@ -539,6 +540,13 @@
 <jsp:include page="/WEB-INF/jsp/common/footer.jsp" />
 
 <script>
+    // Set current user ID for JavaScript
+    <% if (currentUserId != null) { %>
+    const currentUserId = <%= currentUserId %>;
+    <% } else { %>
+    const currentUserId = null;
+    <% } %>
+    
     // Active state cho menu + chuyển view theo hash
     function setActiveView(hash) {
         const views = document.querySelectorAll('.admin-view');
@@ -633,11 +641,18 @@
                     tbody.innerHTML = stalls.map(stall => {
                         const statusClass = stall.isOpen ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
                         const statusText = stall.isOpen ? 'Mở cửa' : 'Đóng cửa';
+                        const isMyStall = currentUserId !== null && currentUserId === stall.managerUserId;
+                        const myStallLabel = isMyStall ? '<span class="px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full font-medium ml-2">Quầy của tôi</span>' : '';
                         
                         return `
                             <tr class="border-b hover:bg-gray-50">
                                 <td class="py-3 px-4">#${stall.id}</td>
-                                <td class="py-3 px-4">${stall.name}</td>
+                                <td class="py-3 px-4">
+                                    <div class="flex items-center">
+                                        ${stall.name}
+                                        ${myStallLabel}
+                                    </div>
+                                </td>
                                 <td class="py-3 px-4">${stall.description || 'N/A'}</td>
                                 <td class="py-3 px-4">User #${stall.managerUserId}</td>
                                 <td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs ${statusClass}">${statusText}</span></td>
