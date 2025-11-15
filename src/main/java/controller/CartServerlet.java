@@ -176,13 +176,6 @@ public class CartServerlet extends HttpServlet {
 
             // Lấy userId từ session (đã được kiểm tra ở trên khi checkout)
             int userId = (int) session.getAttribute("userId");
-            // Kiểm tra username đã được xử lý ở trên (dòng 83-92), không cần kiểm tra lại
-            // String username = (String) session.getAttribute("username");
-            // if (username == null) {
-            //     session.setAttribute("redirectAfterLogin", request.getRequestURI());
-            //     response.sendRedirect(request.getContextPath() + "/login");
-            //     return;
-            // }
 
             String address = request.getParameter("address");
             String payment = request.getParameter("payment");
