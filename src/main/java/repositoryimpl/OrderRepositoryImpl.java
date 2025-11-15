@@ -1,11 +1,11 @@
 package repositoryimpl;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -279,9 +279,9 @@ public class OrderRepositoryImpl implements OrderRepository{
         order.setTotalPrice(rs.getDouble("total_price"));
         order.setStatus(rs.getString("status"));
 
-        Date date = rs.getDate("created_at");
-        if (date != null) {
-            order.setCreatedAt(date);
+        Timestamp timestamp = rs.getTimestamp("created_at");
+        if (timestamp != null) {
+            order.setCreatedAt(timestamp);
         }
         
         order.setDeliveryLocation(rs.getString("delivery_location"));

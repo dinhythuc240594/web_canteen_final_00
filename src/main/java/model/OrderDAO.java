@@ -1,6 +1,6 @@
 package model;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 public class OrderDAO {
 
@@ -9,14 +9,14 @@ public class OrderDAO {
     private int stallId;
     private Double totalPrice;
     private String status;
-    private Date createdAt;
+    private Timestamp createdAt;
     private String deliveryLocation;
     private String paymentMethod;
     
     public OrderDAO() {
     	
     }
-	public OrderDAO(int id, int userId, int stallId, Double totalPrice, String status, Date createdAt,
+	public OrderDAO(int id, int userId, int stallId, Double totalPrice, String status, Timestamp createdAt,
 			String deliveryLocation, String paymentMethod) {
 		super();
 		this.id = id;
@@ -58,10 +58,10 @@ public class OrderDAO {
 	public void setStatus(String status) {
 		this.status = status;
 	}
-	public Date getCreatedAt() {
+	public Timestamp getCreatedAt() {
 		return createdAt;
 	}
-	public void setCreatedAt(Date createdAt) {
+	public void setCreatedAt(Timestamp createdAt) {
 		this.createdAt = createdAt;
 	}
 	public String getDeliveryLocation() {

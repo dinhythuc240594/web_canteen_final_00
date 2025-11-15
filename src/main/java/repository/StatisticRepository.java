@@ -15,5 +15,7 @@ public interface StatisticRepository {
     List<StatisticDAO> findByStallIdAndDateRange(int stallId, Date startDate, Date endDate);
     
     StatisticDAO findByStallIdAndFoodIdAndDate(int stallId, int foodId, Date statDate);
+    
+    List<StatisticDAO> findByDateRange(Date startDate, Date endDate);
 	
 }

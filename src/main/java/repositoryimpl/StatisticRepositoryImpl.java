@@ -117,6 +117,29 @@ public class StatisticRepositoryImpl implements StatisticRepository{
         }
         return null;
     }
+    
+    @Override
+    public List<StatisticDAO> findByDateRange(Date startDate, Date endDate) {
+        List<StatisticDAO> stats = new ArrayList<>();
+        String sql = "SELECT * FROM statistics WHERE stat_date BETWEEN ? AND ? ORDER BY stat_date ASC, stall_id ASC, food_id ASC";
+
+        try (Connection conn = ds.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setDate(1, startDate);
+            pstmt.setDate(2, endDate);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    stats.add(mapResultSetToStatisticsDAO(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi tìm thống kê theo khoảng thời gian.", e);
+        }
+        return stats;
+    }
 
 	public StatisticDAO findById(int id) {
         String sql = "SELECT id, stat_date, stall_id, food_id, orders_count, revenue, quantity_sold FROM statistics WHERE id = ?";

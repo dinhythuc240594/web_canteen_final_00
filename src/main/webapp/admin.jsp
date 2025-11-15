@@ -551,6 +551,8 @@
                                          'bg-blue-100 text-blue-800';
                         const statusClass = user.status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
                         const statusText = user.status ? 'Hoạt động' : 'Khóa';
+                        // Format date to avoid JSP EL parsing issue
+                        const formattedDate = user.createDate ? new Date(user.createDate).toLocaleDateString('vi-VN') : 'N/A';
                         
                         return `
                             <tr class="border-b hover:bg-gray-50">
@@ -560,7 +562,7 @@
                                 <td class="py-3 px-4">${user.phone || 'N/A'}</td>
                                 <td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs ${roleClass}">${user.role}</span></td>
                                 <td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs ${statusClass}">${statusText}</span></td>
-                                <td class="py-3 px-4">${user.createDate ? new Date(user.createDate).toLocaleDateString('vi-VN') : 'N/A'}</td>
+                                <td class="py-3 px-4">${formattedDate}</td>
                                 <td class="py-3 px-4">
                                     <div class="flex space-x-2">
                                         <button onclick="toggleUserStatus(${user.id}, ${!user.status})" class="p-1 text-blue-600 hover:text-blue-800" title="${user.status ? 'Khóa' : 'Mở khóa'}">
