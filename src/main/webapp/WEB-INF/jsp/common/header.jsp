@@ -37,9 +37,6 @@
 						Đơn hàng
 					</a>
 					<% } %>
-					<a href="${pageContext.request.contextPath}/admin.jsp" class="px-3 py-2 rounded-md text-sm font-medium text-white/80 hover:text-white">
-						Admin
-					</a>
 				</nav>
 			</div>
 			<div class="flex items-center space-x-4">
@@ -52,7 +49,11 @@
 					</button>
 					<div class="flex items-center space-x-2">
 						<i data-lucide="user" class="w-6 h-6 text-white"></i>
-						<span class="text-sm font-medium text-white"><%= username != null ? username : "User" %></span>
+						<a href="admin" class="text-sm font-medium text-white">
+							<span class="text-sm font-medium text-white">
+								<%= username != null ? username : "User" %>
+							</span>
+						</a>
 						<a href="logout" class="text-sm text-white/80 hover:text-white">Đăng xuất</a>
 					</div>
 				</div>
