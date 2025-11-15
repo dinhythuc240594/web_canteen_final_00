@@ -46,12 +46,12 @@ public class LoginFilter extends HttpFilter implements Filter {
         resp.setHeader("Pragma", "no-cache");
         resp.setDateHeader("Expires", 0);
 
-        HttpSession ses = req.getSession(false);
-        if (ses != null && ses.getAttribute("username") != null) {
-        	System.out.println("login filter");
-        	resp.sendRedirect(req.getContextPath() + "/foods");
-            return;
-        }
+        // HttpSession ses = req.getSession(false);
+        // if (ses != null && ses.getAttribute("username") != null) {
+        // 	System.out.println("login filter");
+        // 	resp.sendRedirect(req.getContextPath() + "/foods");
+        //     return;
+        // }
 
 		// pass the request along the filter chain
 		chain.doFilter(request, response);
