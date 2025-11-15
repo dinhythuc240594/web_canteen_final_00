@@ -8,6 +8,7 @@ public class PageRequest {
 	private String orderField;
 	private String keyword;
 	private Integer stallId;
+	private Integer categoryId;
 	
 	public PageRequest() {
 		
@@ -28,6 +29,16 @@ public class PageRequest {
 		this.orderField = orderField;
 		this.keyword = keyword;
 		this.stallId = stallId;
+	}
+	
+	public PageRequest(int page, int pageSize, String sortField, String orderField, String keyword, Integer stallId, Integer categoryId) {
+		this.page = page;
+		this.pageSize = pageSize;
+		this.sortField = sortField;
+		this.orderField = orderField;
+		this.keyword = keyword;
+		this.stallId = stallId;
+		this.categoryId = categoryId;
 	}
 	
 	public int getOffset() {
@@ -80,6 +91,14 @@ public class PageRequest {
 
 	public void setStallId(Integer stallId) {
 		this.stallId = stallId;
+	}
+	
+	public Integer getCategoryId() {
+		return categoryId;
+	}
+	
+	public void setCategoryId(Integer categoryId) {
+		this.categoryId = categoryId;
 	}
 	
 }

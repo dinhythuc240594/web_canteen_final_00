@@ -24,7 +24,7 @@ public class FoodServiceImpl implements FoodService {
 	public Page<FoodDTO> findAll(PageRequest pageRequest) {
 		List<FoodDTO> data = this.foodRepository.findAll(pageRequest); 
 		FoodRepositoryImpl repoImpl = (FoodRepositoryImpl) this.foodRepository;
-		int totalCount = repoImpl.count(pageRequest.getKeyword(), pageRequest.getStallId());
+		int totalCount = repoImpl.count(pageRequest.getKeyword(), pageRequest.getStallId(), pageRequest.getCategoryId());
 		return new Page<>(data, pageRequest.getPage(), totalCount, pageRequest.getPageSize());
 	}
 

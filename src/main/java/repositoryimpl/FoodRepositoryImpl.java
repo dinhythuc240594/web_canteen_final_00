@@ -112,8 +112,9 @@ public class FoodRepositoryImpl implements FoodRepository{
         String sortField = pageRequest.getSortField();
         String orderField = pageRequest.getOrderField();
         Integer stallId = pageRequest.getStallId();
+        Integer categoryId = pageRequest.getCategoryId();
         
-        String sql = "SELECT id, name, price, inventory, promotion, stall_id FROM foods ";
+        String sql = "SELECT id, name, price, inventory, promotion, stall_id, category_id, image FROM foods ";
         List<String> conditions = new ArrayList<>();
         List<Object> params = new ArrayList<>();
         
@@ -126,6 +127,11 @@ public class FoodRepositoryImpl implements FoodRepository{
         if(stallId != null && stallId > 0) {
         	conditions.add("stall_id = ?");
         	params.add(stallId);
+        }
+        
+        if(categoryId != null && categoryId > 0) {
+        	conditions.add("category_id = ?");
+        	params.add(categoryId);
         }
         
         if(!conditions.isEmpty()) {
@@ -156,8 +162,13 @@ public class FoodRepositoryImpl implements FoodRepository{
                 int inventory = rs.getInt("inventory");
                 double promotion = rs.getDouble("promotion");
                 int stall_id = rs.getInt("stall_id");
+                int category_id = rs.getInt("category_id");
+                String image = rs.getString("image");
 
-                foods.add(FoodDTO.toDto(new FoodDAO(id, name, price, inventory), promotion, stall_id));
+                FoodDAO foodDAO = new FoodDAO(id, name, price, inventory);
+                foodDAO.setCategory_id(category_id);
+                foodDAO.setImage(image);
+                foods.add(FoodDTO.toDto(foodDAO, promotion, stall_id));
             }
         } catch (Exception e) {
         	System.err.println("Lỗi findAll: " + e.getMessage());
@@ -171,6 +182,10 @@ public class FoodRepositoryImpl implements FoodRepository{
 	}
 	
 	public int count(String keyword, Integer stallId) {
+        return count(keyword, stallId, null);
+	}
+	
+	public int count(String keyword, Integer stallId, Integer categoryId) {
         String sql = "SELECT COUNT(1) FROM foods";
         List<String> conditions = new ArrayList<>();
         List<Object> params = new ArrayList<>();
@@ -186,6 +201,11 @@ public class FoodRepositoryImpl implements FoodRepository{
         if(stallId != null && stallId > 0) {
         	conditions.add("stall_id = ?");
         	params.add(stallId);
+        }
+        
+        if(categoryId != null && categoryId > 0) {
+        	conditions.add("category_id = ?");
+        	params.add(categoryId);
         }
         
         if(!conditions.isEmpty()) {
