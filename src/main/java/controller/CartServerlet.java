@@ -61,7 +61,8 @@ public class CartServerlet extends HttpServlet {
         //     return;
         // }
         System.out.println("Get cart page");
-        // Get cart from session (no need to set it again)
+        
+        // Get cart from session - will be null/empty after successful checkout
         List<Order_FoodDAO> cart = (List<Order_FoodDAO>) session.getAttribute("cart");
         if (cart == null) {
             cart = new ArrayList<>();
@@ -218,12 +219,14 @@ public class CartServerlet extends HttpServlet {
                 orderFoodRepository.create(item);
             }
 
-            // Clear cart and stallId from session
+            // Clear cart and stallId from session immediately after successful order
             session.removeAttribute("cart");
             session.removeAttribute("stallId");
             
-            request.setAttribute("order", createdOrder);
-            request.getRequestDispatcher("/order-success.jsp").forward(request, response);
+            // Use redirect instead of forward to ensure cart is cleared
+            // Store order ID in session temporarily to display on success page
+            session.setAttribute("lastOrderId", createdOrder.getId());
+            response.sendRedirect(request.getContextPath() + "/order-success?orderId=" + createdOrder.getId());
 
         } catch (NumberFormatException e) {
             response.sendRedirect(request.getContextPath() + "/cart?error=invalid_stallId");

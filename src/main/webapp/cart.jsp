@@ -158,19 +158,34 @@
       e.preventDefault();
       alert('Vui lòng đăng nhập để thanh toán.');
       window.location.href = 'login';
+    <% } else { %>
+      // Clear localStorage cart when submitting checkout
+      localStorage.removeItem('cart');
+      localStorage.removeItem('cartStallId');
     <% } %>
   });
   
-  // Clear localStorage cart after successful transfer to server
-  if (<%= !cart.isEmpty() %>) {
+  // Always ensure cart is cleared from localStorage if session cart is empty
+  <% if (cart.isEmpty()) { %>
     localStorage.removeItem('cart');
+    localStorage.removeItem('cartStallId');
+    
     // Update cart count in header
     const cartCountEl = document.getElementById('cart-count');
     if (cartCountEl) {
       cartCountEl.textContent = '0';
       cartCountEl.classList.add('hidden');
     }
-  }
+  <% } %>
+  
+  // Initialize cart display when page loads
+  window.addEventListener('DOMContentLoaded', function() {
+    // If cart was just cleared after checkout, ensure localStorage is also cleared
+    <% if (cart.isEmpty()) { %>
+      localStorage.removeItem('cart');
+      localStorage.removeItem('cartStallId');
+    <% } %>
+  });
 </script>
 </body>
 </html>
