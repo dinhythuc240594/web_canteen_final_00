@@ -46,9 +46,9 @@ public class LoginFilter extends HttpFilter implements Filter {
         resp.setHeader("Pragma", "no-cache");
         resp.setDateHeader("Expires", 0);
 
-		HttpSession session = request.getSession(true);
-		String requestedUrl = request.getRequestURI();
-		String queryString = request.getQueryString();
+		HttpSession session = req.getSession(true);
+		String requestedUrl = req.getRequestURI();
+		String queryString = req.getQueryString();
 		if (queryString != null) {
 			requestedUrl += "?" + queryString;
 		}
