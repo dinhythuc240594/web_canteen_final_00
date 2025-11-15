@@ -6,10 +6,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import model.OrderDAO;
-import model.StallDAO;
-import model.StatisticDAO;
-import model.UserDAO;
+import model.*;
 import serviceimpl.OrderServiceImpl;
 import serviceimpl.StallServiceImpl;
 import serviceimpl.StatisticServiceImpl;
@@ -31,18 +28,18 @@ import com.google.gson.Gson;
 public class AdminServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	
-	private UserServiceImpl userService;
-	private StallServiceImpl stallService;
-	private OrderServiceImpl orderService;
-	private StatisticServiceImpl statisticService;
+	private UserServiceImpl userServiceImpl;
+	private StallServiceImpl stallServiceImpl;
+	private OrderServiceImpl orderServiceImpl;
+	private StatisticServiceImpl statisticServiceImpl;
 	
 	@Override
 	public void init() throws ServletException {
 		DataSource ds = DataSourceUtil.getDataSource();
-		this.userService = new UserServiceImpl(ds);
-		this.stallService = new StallServiceImpl(ds);
-		this.orderService = new OrderServiceImpl(ds);
-		this.statisticService = new StatisticServiceImpl(ds);
+		this.userServiceImpl = new UserServiceImpl(ds);
+		this.stallServiceImpl = new StallServiceImpl(ds);
+		this.orderServiceImpl = new OrderServiceImpl(ds);
+		this.statisticServiceImpl = new StatisticServiceImpl(ds);
 	}
 	
 	@Override
@@ -144,8 +141,8 @@ public class AdminServlet extends HttpServlet {
 	
 	private void handleDashboard(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// Get statistics
-		int totalUsers = userService.count();
-		List<StallDAO> stalls = stallService.findAll();
+		int totalUsers = this.userServiceImpl.count();
+		List<StallDAO> stalls = this.stallServiceImpl.findAll();
 		int totalStalls = stalls.size();
 		
 		// Get today's statistics
@@ -156,22 +153,48 @@ public class AdminServlet extends HttpServlet {
 		double totalRevenue = 0.0;
 		int totalOrders = 0;
 		
-		List<StatisticDAO> todayStats = statisticService.findByDateRange(sqlToday, sqlToday);
+		List<StatisticDAO> todayStats = this.statisticServiceImpl.findByDateRange(sqlToday, sqlToday);
 		for (StatisticDAO stat : todayStats) {
 			totalRevenue += stat.getRevenue();
 			totalOrders += stat.getOrdersCount();
+		}
+		
+		// Get recent orders (last 10)
+		PageRequest pageReq = new PageRequest(1, 10, "created_at", "DESC", "");
+        Page<OrderDAO> pageOrders = this.orderServiceImpl.findAll(pageReq);
+		List<OrderDAO> recentOrders = pageOrders.getData();
+		
+		// Load user and stall names for each order
+		Map<Integer, String> userNames = new HashMap<>();
+		Map<Integer, String> stallNames = new HashMap<>();
+		for (OrderDAO order : recentOrders) {
+			if (!userNames.containsKey(order.getUserId())) {
+				UserDAO user = this.userServiceImpl.getUserById(order.getUserId());
+				if (user != null) {
+					userNames.put(order.getUserId(), user.getFull_name());
+				}
+			}
+			if (!stallNames.containsKey(order.getStallId())) {
+				StallDAO stall = this.stallServiceImpl.findById(order.getStallId());
+				if (stall != null) {
+					stallNames.put(order.getStallId(), stall.getName());
+				}
+			}
 		}
 		
 		request.setAttribute("totalUsers", totalUsers);
 		request.setAttribute("totalStalls", totalStalls);
 		request.setAttribute("totalRevenue", totalRevenue);
 		request.setAttribute("totalOrders", totalOrders);
+		request.setAttribute("recentOrders", recentOrders);
+		request.setAttribute("userNames", userNames);
+		request.setAttribute("stallNames", stallNames);
 		
 		request.getRequestDispatcher("/admin.jsp").forward(request, response);
 	}
 	
 	private void handleUsers(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		List<UserDAO> users = userService.findAll();
+		List<UserDAO> users = this.userServiceImpl.findAll();
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
 		
@@ -181,7 +204,7 @@ public class AdminServlet extends HttpServlet {
 	}
 	
 	private void handleStalls(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		List<StallDAO> stalls = stallService.findAll();
+		List<StallDAO> stalls = this.stallServiceImpl.findAll();
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
 		
@@ -210,7 +233,7 @@ public class AdminServlet extends HttpServlet {
 		Date sqlStartDate = Date.valueOf(startDate);
 		Date sqlEndDate = Date.valueOf(endDate);
 		
-		List<StatisticDAO> statistics = statisticService.findByDateRange(sqlStartDate, sqlEndDate);
+		List<StatisticDAO> statistics = this.statisticServiceImpl.findByDateRange(sqlStartDate, sqlEndDate);
 		
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
@@ -222,7 +245,7 @@ public class AdminServlet extends HttpServlet {
 	
 	private void handleGetUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		int id = Integer.parseInt(request.getParameter("id"));
-		UserDAO user = userService.getUserById(id);
+		UserDAO user = this.userServiceImpl.getUserById(id);
 		
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
@@ -234,7 +257,7 @@ public class AdminServlet extends HttpServlet {
 	
 	private void handleGetStall(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		int id = Integer.parseInt(request.getParameter("id"));
-		StallDAO stall = stallService.findById(id);
+		StallDAO stall = this.stallServiceImpl.findById(id);
 		
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
@@ -259,7 +282,7 @@ public class AdminServlet extends HttpServlet {
 		user.setRole(role);
 		user.setStatus(true);
 		
-		UserDAO savedUser = userService.save(user);
+		UserDAO savedUser = this.userServiceImpl.save(user);
 		
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
@@ -297,7 +320,7 @@ public class AdminServlet extends HttpServlet {
 		user.setRole(role);
 		user.setStatus(status);
 		
-		boolean updated = userService.update(user);
+		boolean updated = this.userServiceImpl.update(user);
 		
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
@@ -313,7 +336,7 @@ public class AdminServlet extends HttpServlet {
 	
 	private void handleDeleteUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		int id = Integer.parseInt(request.getParameter("id"));
-		boolean deleted = userService.deleteById(id);
+		boolean deleted = this.userServiceImpl.deleteById(id);
 		
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
@@ -331,7 +354,7 @@ public class AdminServlet extends HttpServlet {
 		int id = Integer.parseInt(request.getParameter("id"));
 		boolean status = Boolean.parseBoolean(request.getParameter("status"));
 		
-		boolean updated = userService.updateStatus(id, status);
+		boolean updated = this.userServiceImpl.updateStatus(id, status);
 		
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
@@ -357,7 +380,7 @@ public class AdminServlet extends HttpServlet {
 		stall.setManagerUserId(managerUserId);
 		stall.setIsOpen(isOpen);
 		
-		StallDAO savedStall = stallService.save(stall);
+		StallDAO savedStall = this.stallServiceImpl.save(stall);
 		
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
@@ -391,7 +414,7 @@ public class AdminServlet extends HttpServlet {
 		stall.setManagerUserId(managerUserId);
 		stall.setIsOpen(isOpen);
 		
-		StallDAO updatedStall = stallService.save(stall);
+		StallDAO updatedStall = this.stallServiceImpl.save(stall);
 		
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
@@ -412,7 +435,7 @@ public class AdminServlet extends HttpServlet {
 	
 	private void handleDeleteStall(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		int id = Integer.parseInt(request.getParameter("id"));
-		stallService.deleteById(id);
+		this.stallServiceImpl.deleteById(id);
 		
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");

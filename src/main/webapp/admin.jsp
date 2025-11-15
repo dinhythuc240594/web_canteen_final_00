@@ -26,6 +26,13 @@
     int totalStalls = (int) request.getAttribute("totalStalls");
     Double totalRevenue = (Double) request.getAttribute("totalRevenue");
     int totalOrders = (int) request.getAttribute("totalOrders");
+    java.util.List<model.OrderDAO> recentOrders = (java.util.List<model.OrderDAO>) request.getAttribute("recentOrders");
+    java.util.Map<Integer, String> userNames = (java.util.Map<Integer, String>) request.getAttribute("userNames");
+    java.util.Map<Integer, String> stallNames = (java.util.Map<Integer, String>) request.getAttribute("stallNames");
+    
+    if (recentOrders == null) recentOrders = new java.util.ArrayList<>();
+    if (userNames == null) userNames = new java.util.HashMap<>();
+    if (stallNames == null) stallNames = new java.util.HashMap<>();
     
     String contextPath = request.getContextPath();
 %>
@@ -187,22 +194,59 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr class="border-b">
-                                    <td class="py-2 px-3">#1</td>
-                                    <td class="py-2 px-3">Nguyễn Văn A</td>
-                                    <td class="py-2 px-3">47,000đ</td>
-                                    <td class="py-2 px-3"><span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">Hoàn thành</span></td>
-                                    <td class="py-2 px-3">2025-11-10 08:30</td>
-                                    <td class="py-2 px-3">Quầy cơm & món khô</td>
-                                </tr>
+                                <% if (recentOrders.isEmpty()) { %>
                                 <tr>
-                                    <td class="py-2 px-3">#2</td>
-                                    <td class="py-2 px-3">Trần Thị B</td>
-                                    <td class="py-2 px-3">45,000đ</td>
-                                    <td class="py-2 px-3"><span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs">Chờ xử lý</span></td>
-                                    <td class="py-2 px-3">2025-11-10 09:15</td>
-                                    <td class="py-2 px-3">Quầy món nước</td>
+                                    <td colspan="6" class="py-4 px-3 text-center text-gray-500">Chưa có đơn hàng nào</td>
                                 </tr>
+                                <% } else { %>
+                                    <% for (model.OrderDAO order : recentOrders) { %>
+                                    <tr class="border-b hover:bg-gray-50">
+                                        <td class="py-2 px-3">#<%= order.getId() %></td>
+                                        <td class="py-2 px-3"><%= userNames.getOrDefault(order.getUserId(), "N/A") %></td>
+                                        <td class="py-2 px-3"><%= String.format("%,.0f", order.getTotalPrice()) %>đ</td>
+                                        <td class="py-2 px-3">
+                                            <%
+                                                String status = order.getStatus();
+                                                String statusText = "N/A";
+                                                String statusClass = "bg-gray-100 text-gray-800";
+                                                if (status != null) {
+                                                    switch(status) {
+                                                        case "new_order":
+                                                            statusText = "Chờ xử lý";
+                                                            statusClass = "bg-yellow-100 text-yellow-800";
+                                                            break;
+                                                        case "confirmed":
+                                                            statusText = "Đã xác nhận";
+                                                            statusClass = "bg-blue-100 text-blue-800";
+                                                            break;
+                                                        case "in_delivery":
+                                                            statusText = "Đang giao";
+                                                            statusClass = "bg-purple-100 text-purple-800";
+                                                            break;
+                                                        case "delivered":
+                                                            statusText = "Hoàn thành";
+                                                            statusClass = "bg-green-100 text-green-800";
+                                                            break;
+                                                        default:
+                                                            statusText = status;
+                                                    }
+                                                }
+                                            %>
+                                            <span class="px-2 py-1 rounded text-xs <%= statusClass %>">
+                                                <%= statusText %>
+                                            </span>
+                                        </td>
+                                        <td class="py-2 px-3">
+                                            <% if (order.getCreatedAt() != null) { %>
+                                                <%= new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm").format(order.getCreatedAt()) %>
+                                            <% } else { %>
+                                                N/A
+                                            <% } %>
+                                        </td>
+                                        <td class="py-2 px-3"><%= stallNames.getOrDefault(order.getStallId(), "N/A") %></td>
+                                    </tr>
+                                    <% } %>
+                                <% } %>
                                 </tbody>
                             </table>
                         </div>

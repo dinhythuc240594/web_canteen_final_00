@@ -48,8 +48,18 @@
 						<span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
 					</button>
 					<div class="flex items-center space-x-2">
-						<i data-lucide="user" class="w-6 h-6 text-white"></i>
-						<a href="admin" class="text-sm font-medium text-white">
+						<%
+							String dashboardUrl = "admin";
+							if ("customer".equals(type_user)) {
+								dashboardUrl = "customer";
+							} else if ("stall".equals(type_user)) {
+								dashboardUrl = "stall";
+							} else if ("admin".equals(type_user)) {
+								dashboardUrl = "admin";
+							}
+						%>
+						<a href="<%= dashboardUrl %>" class="flex items-center space-x-2 text-sm font-medium text-white hover:text-white/80 transition-colors cursor-pointer">
+							<i data-lucide="user" class="w-6 h-6 text-white"></i>
 							<span class="text-sm font-medium text-white">
 								<%= username != null ? username : "User" %>
 							</span>
