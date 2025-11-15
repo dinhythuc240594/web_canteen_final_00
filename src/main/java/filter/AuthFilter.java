@@ -103,14 +103,8 @@ public class AuthFilter extends HttpFilter implements Filter {
         String username = "";
         String type_user = "";
         if (ses != null) {
-          username = (String) (ses.getAttribute("username"));
-          type_user = (String) (ses.getAttribute("type_user"));  
-        }
-
-        List<Order_FoodDAO> cart = (List<Order_FoodDAO>) ses.getAttribute("cart");
-        if (cart == null) {
-            cart = new ArrayList<>();
-            ses.setAttribute("cart", cart);
+            username = (String) (ses.getAttribute("username"));
+            type_user = (String) (ses.getAttribute("type_user"));
         }
 
         request.setAttribute("is_login", is_login);
