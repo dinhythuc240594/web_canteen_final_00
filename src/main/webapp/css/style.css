@@ -1,0 +1,208 @@
+/* General Styles */
+body {
+	background: linear-gradient(135deg, #f8f9fa 0%, #e3f2fd 100%);
+	min-height: 100vh;
+}
+
+/* Header Gradient */
+.header-gradient {
+	background: linear-gradient(90deg, #2563eb 0%, #4f46e5 100%);
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Scrollable Section */
+.horizontal-scroll {
+	overflow-x: auto;
+	scrollbar-width: thin;
+	scrollbar-color: #cbd5e0 #f7fafc;
+	-webkit-overflow-scrolling: touch;
+}
+
+.horizontal-scroll::-webkit-scrollbar {
+	height: 8px;
+}
+
+.horizontal-scroll::-webkit-scrollbar-track {
+	background: #f7fafc;
+}
+
+.horizontal-scroll::-webkit-scrollbar-thumb {
+	background: #cbd5e0;
+	border-radius: 4px;
+}
+
+.horizontal-scroll::-webkit-scrollbar-thumb:hover {
+	background: #a0aec0;
+}
+
+.scroll-container {
+	display: flex;
+	gap: 1rem;
+	padding-bottom: 1rem;
+}
+
+/* Food Card Styles */
+.food-card {
+	min-width: 200px;
+	transition: transform 0.3s ease, box-shadow 0.3s ease;
+	cursor: pointer;
+}
+
+.food-card:hover {
+	transform: translateY(-5px);
+	box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.food-card-img {
+	height: 120px;
+	object-fit: cover;
+}
+
+.discount-badge {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	background-color: #ef4444;
+	color: white;
+	padding: 2px 8px;
+	border-radius: 4px;
+	font-size: 0.75rem;
+	font-weight: bold;
+}
+
+/* Category Sidebar */
+.category-item {
+	cursor: pointer;
+	transition: all 0.2s ease;
+	border-left: 3px solid transparent;
+}
+
+.category-item:hover {
+	background-color: #f1f5f9;
+	border-left-color: #2563eb;
+}
+
+.category-item.active {
+	background-color: #e0f2fe;
+	border-left-color: #2563eb;
+	font-weight: 600;
+}
+
+/* Stall Card */
+.stall-card {
+	transition: transform 0.3s ease, box-shadow 0.3s ease;
+	cursor: pointer;
+}
+
+.stall-card:hover {
+	transform: translateY(-5px);
+	box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Rating Stars */
+.rating-star {
+	color: #fbbf24;
+}
+
+/* Footer Gradient */
+.footer-gradient {
+	background: linear-gradient(90deg, #2563eb 0%, #4f46e5 100%);
+}
+
+/* Form Styles */
+.form-container {
+	max-width: 500px;
+	margin: 2rem auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+	.food-card {
+		min-width: 180px;
+	}
+}
+
+/* Animation */
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.fade-in {
+	animation: fadeIn 0.3s ease;
+}
+
+/* Navbar custom styles */
+.navbar-dark .navbar-nav .nav-link {
+	color: rgba(255, 255, 255, 0.9);
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+	color: white;
+}
+
+.card {
+	border: none;
+}
+
+.scrollbar-hide {
+	overflow-x: auto;
+	scrollbar-width: thin;
+	scrollbar-color: #cbd5e0 #f7fafc;
+	-webkit-overflow-scrolling: touch;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+	height: 8px;
+}
+
+.scrollbar-hide::-webkit-scrollbar-track {
+	background: #f7fafc;
+}
+
+.scrollbar-hide::-webkit-scrollbar-thumb {
+	background: #cbd5e0;
+	border-radius: 4px;
+}
+
+.scrollbar-hide::-webkit-scrollbar-thumb:hover {
+	background: #a0aec0;
+}
+
+/* Line clamp utilities */
+.line-clamp-1 {
+	overflow: hidden;
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 1;
+}
+
+/* Smooth scrolling */
+html {
+	scroll-behavior: smooth;
+}
+
+/* Cart sidebar overlay */
+.cart-overlay {
+	background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Food card hover effects */
+.food-card-hover {
+	transition: all 0.3s ease;
+}
+
+.food-card-hover:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.cke_notification_warning {
+	display: none !important;
+}

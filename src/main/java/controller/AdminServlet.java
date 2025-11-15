@@ -1,0 +1,429 @@
+package controller;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import model.OrderDAO;
+import model.StallDAO;
+import model.StatisticDAO;
+import model.UserDAO;
+import serviceimpl.OrderServiceImpl;
+import serviceimpl.StallServiceImpl;
+import serviceimpl.StatisticServiceImpl;
+import serviceimpl.UserServiceImpl;
+import utils.DataSourceUtil;
+
+import java.io.IOException;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.sql.DataSource;
+
+import com.google.gson.Gson;
+
+@WebServlet("/admin")
+public class AdminServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+	
+	private UserServiceImpl userService;
+	private StallServiceImpl stallService;
+	private OrderServiceImpl orderService;
+	private StatisticServiceImpl statisticService;
+	
+	@Override
+	public void init() throws ServletException {
+		DataSource ds = DataSourceUtil.getDataSource();
+		this.userService = new UserServiceImpl(ds);
+		this.stallService = new StallServiceImpl(ds);
+		this.orderService = new OrderServiceImpl(ds);
+		this.statisticService = new StatisticServiceImpl(ds);
+	}
+	
+	@Override
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// Security check: Only admin can access
+		HttpSession session = request.getSession(false);
+		String userRole = (String) (session != null ? session.getAttribute("type_user") : null);
+		String username = (String) (session != null ? session.getAttribute("username") : null);
+		
+		if (username == null) {
+			response.sendRedirect(request.getContextPath() + "/login");
+			return;
+		}
+		
+		if (!"admin".equals(userRole)) {
+			response.sendRedirect(request.getContextPath() + "/home");
+			return;
+		}
+		
+		String action = request.getParameter("action");
+		if (action == null) {
+			action = "dashboard";
+		}
+		
+		switch (action) {
+			case "dashboard":
+				handleDashboard(request, response);
+				break;
+			case "users":
+				handleUsers(request, response);
+				break;
+			case "stalls":
+				handleStalls(request, response);
+				break;
+			case "orders":
+				handleOrders(request, response);
+				break;
+			case "statistics":
+				handleStatistics(request, response);
+				break;
+			case "getUser":
+				handleGetUser(request, response);
+				break;
+			case "getStall":
+				handleGetStall(request, response);
+				break;
+			default:
+				response.sendRedirect(request.getContextPath() + "/admin");
+				break;
+		}
+	}
+	
+	@Override
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// Security check: Only admin can access
+		HttpSession session = request.getSession(false);
+		String userRole = (String) (session != null ? session.getAttribute("type_user") : null);
+		String username = (String) (session != null ? session.getAttribute("username") : null);
+		
+		if (username == null) {
+			response.sendRedirect(request.getContextPath() + "/login");
+			return;
+		}
+		
+		if (!"admin".equals(userRole)) {
+			response.sendRedirect(request.getContextPath() + "/home");
+			return;
+		}
+		
+		String action = request.getParameter("action");
+		
+		switch (action) {
+			case "createUser":
+				handleCreateUser(request, response);
+				break;
+			case "updateUser":
+				handleUpdateUser(request, response);
+				break;
+			case "deleteUser":
+				handleDeleteUser(request, response);
+				break;
+			case "toggleUserStatus":
+				handleToggleUserStatus(request, response);
+				break;
+			case "createStall":
+				handleCreateStall(request, response);
+				break;
+			case "updateStall":
+				handleUpdateStall(request, response);
+				break;
+			case "deleteStall":
+				handleDeleteStall(request, response);
+				break;
+			default:
+				response.sendRedirect(request.getContextPath() + "/admin");
+				break;
+		}
+	}
+	
+	private void handleDashboard(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// Get statistics
+		int totalUsers = userService.count();
+		List<StallDAO> stalls = stallService.findAll();
+		int totalStalls = stalls.size();
+		
+		// Get today's statistics
+		LocalDate today = LocalDate.now();
+		Date sqlToday = Date.valueOf(today);
+		
+		// Calculate total revenue and orders for today
+		double totalRevenue = 0.0;
+		int totalOrders = 0;
+		
+		List<StatisticDAO> todayStats = statisticService.findByDateRange(sqlToday, sqlToday);
+		for (StatisticDAO stat : todayStats) {
+			totalRevenue += stat.getRevenue();
+			totalOrders += stat.getOrdersCount();
+		}
+		
+		request.setAttribute("totalUsers", totalUsers);
+		request.setAttribute("totalStalls", totalStalls);
+		request.setAttribute("totalRevenue", totalRevenue);
+		request.setAttribute("totalOrders", totalOrders);
+		
+		request.getRequestDispatcher("/admin.jsp").forward(request, response);
+	}
+	
+	private void handleUsers(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		List<UserDAO> users = userService.findAll();
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+		
+		Gson gson = new Gson();
+		String json = gson.toJson(users);
+		response.getWriter().write(json);
+	}
+	
+	private void handleStalls(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		List<StallDAO> stalls = stallService.findAll();
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+		
+		Gson gson = new Gson();
+		String json = gson.toJson(stalls);
+		response.getWriter().write(json);
+	}
+	
+	private void handleOrders(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// For simplicity, we'll return a limited set of recent orders
+		// In a real application, you might want to implement pagination
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+		
+		// Return empty array for now - orders can be fetched through other means
+		response.getWriter().write("[]");
+	}
+	
+	private void handleStatistics(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String startDateStr = request.getParameter("startDate");
+		String endDateStr = request.getParameter("endDate");
+		
+		LocalDate startDate = startDateStr != null ? LocalDate.parse(startDateStr) : LocalDate.now().minusDays(7);
+		LocalDate endDate = endDateStr != null ? LocalDate.parse(endDateStr) : LocalDate.now();
+		
+		Date sqlStartDate = Date.valueOf(startDate);
+		Date sqlEndDate = Date.valueOf(endDate);
+		
+		List<StatisticDAO> statistics = statisticService.findByDateRange(sqlStartDate, sqlEndDate);
+		
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+		
+		Gson gson = new Gson();
+		String json = gson.toJson(statistics);
+		response.getWriter().write(json);
+	}
+	
+	private void handleGetUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		int id = Integer.parseInt(request.getParameter("id"));
+		UserDAO user = userService.getUserById(id);
+		
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+		
+		Gson gson = new Gson();
+		String json = gson.toJson(user);
+		response.getWriter().write(json);
+	}
+	
+	private void handleGetStall(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		int id = Integer.parseInt(request.getParameter("id"));
+		StallDAO stall = stallService.findById(id);
+		
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+		
+		Gson gson = new Gson();
+		String json = gson.toJson(stall);
+		response.getWriter().write(json);
+	}
+	
+	private void handleCreateUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String username = request.getParameter("username");
+		String fullName = request.getParameter("fullName");
+		String email = request.getParameter("email");
+		String phone = request.getParameter("phone");
+		String role = request.getParameter("role");
+		
+		UserDAO user = new UserDAO();
+		user.setUsername(username);
+		user.setFull_name(fullName);
+		user.setEmail(email);
+		user.setPhone(phone);
+		user.setRole(role);
+		user.setStatus(true);
+		
+		UserDAO savedUser = userService.save(user);
+		
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+		
+		Map<String, Object> result = new HashMap<>();
+		if (savedUser != null) {
+			result.put("success", true);
+			result.put("message", "User created successfully");
+			result.put("user", savedUser);
+		} else {
+			result.put("success", false);
+			result.put("message", "Failed to create user");
+		}
+		
+		Gson gson = new Gson();
+		String json = gson.toJson(result);
+		response.getWriter().write(json);
+	}
+	
+	private void handleUpdateUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		int id = Integer.parseInt(request.getParameter("id"));
+		String username = request.getParameter("username");
+		String fullName = request.getParameter("fullName");
+		String email = request.getParameter("email");
+		String phone = request.getParameter("phone");
+		String role = request.getParameter("role");
+		boolean status = Boolean.parseBoolean(request.getParameter("status"));
+		
+		UserDAO user = new UserDAO();
+		user.setId(id);
+		user.setUsername(username);
+		user.setFull_name(fullName);
+		user.setEmail(email);
+		user.setPhone(phone);
+		user.setRole(role);
+		user.setStatus(status);
+		
+		boolean updated = userService.update(user);
+		
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+		
+		Map<String, Object> result = new HashMap<>();
+		result.put("success", updated);
+		result.put("message", updated ? "User updated successfully" : "Failed to update user");
+		
+		Gson gson = new Gson();
+		String json = gson.toJson(result);
+		response.getWriter().write(json);
+	}
+	
+	private void handleDeleteUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		int id = Integer.parseInt(request.getParameter("id"));
+		boolean deleted = userService.deleteById(id);
+		
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+		
+		Map<String, Object> result = new HashMap<>();
+		result.put("success", deleted);
+		result.put("message", deleted ? "User deleted successfully" : "Failed to delete user");
+		
+		Gson gson = new Gson();
+		String json = gson.toJson(result);
+		response.getWriter().write(json);
+	}
+	
+	private void handleToggleUserStatus(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		int id = Integer.parseInt(request.getParameter("id"));
+		boolean status = Boolean.parseBoolean(request.getParameter("status"));
+		
+		boolean updated = userService.updateStatus(id, status);
+		
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+		
+		Map<String, Object> result = new HashMap<>();
+		result.put("success", updated);
+		result.put("message", updated ? "User status updated successfully" : "Failed to update user status");
+		
+		Gson gson = new Gson();
+		String json = gson.toJson(result);
+		response.getWriter().write(json);
+	}
+	
+	private void handleCreateStall(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String name = request.getParameter("name");
+		String description = request.getParameter("description");
+		int managerUserId = Integer.parseInt(request.getParameter("managerUserId"));
+		boolean isOpen = Boolean.parseBoolean(request.getParameter("isOpen"));
+		
+		StallDAO stall = new StallDAO();
+		stall.setName(name);
+		stall.setDescription(description);
+		stall.setManagerUserId(managerUserId);
+		stall.setIsOpen(isOpen);
+		
+		StallDAO savedStall = stallService.save(stall);
+		
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+		
+		Map<String, Object> result = new HashMap<>();
+		if (savedStall != null) {
+			result.put("success", true);
+			result.put("message", "Stall created successfully");
+			result.put("stall", savedStall);
+		} else {
+			result.put("success", false);
+			result.put("message", "Failed to create stall");
+		}
+		
+		Gson gson = new Gson();
+		String json = gson.toJson(result);
+		response.getWriter().write(json);
+	}
+	
+	private void handleUpdateStall(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		int id = Integer.parseInt(request.getParameter("id"));
+		String name = request.getParameter("name");
+		String description = request.getParameter("description");
+		int managerUserId = Integer.parseInt(request.getParameter("managerUserId"));
+		boolean isOpen = Boolean.parseBoolean(request.getParameter("isOpen"));
+		
+		StallDAO stall = new StallDAO();
+		stall.setId(id);
+		stall.setName(name);
+		stall.setDescription(description);
+		stall.setManagerUserId(managerUserId);
+		stall.setIsOpen(isOpen);
+		
+		StallDAO updatedStall = stallService.save(stall);
+		
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+		
+		Map<String, Object> result = new HashMap<>();
+		if (updatedStall != null) {
+			result.put("success", true);
+			result.put("message", "Stall updated successfully");
+		} else {
+			result.put("success", false);
+			result.put("message", "Failed to update stall");
+		}
+		
+		Gson gson = new Gson();
+		String json = gson.toJson(result);
+		response.getWriter().write(json);
+	}
+	
+	private void handleDeleteStall(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		int id = Integer.parseInt(request.getParameter("id"));
+		stallService.deleteById(id);
+		
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+		
+		Map<String, Object> result = new HashMap<>();
+		result.put("success", true);
+		result.put("message", "Stall deleted successfully");
+		
+		Gson gson = new Gson();
+		String json = gson.toJson(result);
+		response.getWriter().write(json);
+	}
+}
+
