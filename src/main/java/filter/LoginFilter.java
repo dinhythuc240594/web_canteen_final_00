@@ -46,13 +46,33 @@ public class LoginFilter extends HttpFilter implements Filter {
         resp.setHeader("Pragma", "no-cache");
         resp.setDateHeader("Expires", 0);
 
-		HttpSession session = req.getSession(true);
+		HttpSession session = req.getSession(false);
+		
+		// Kiểm tra nếu đã đăng nhập thì redirect về home
+		if (session != null && session.getAttribute("is_login") != null) {
+			Boolean isLogin = (Boolean) session.getAttribute("is_login");
+			if (isLogin != null && isLogin) {
+				// Đã đăng nhập, redirect về home
+				resp.sendRedirect(req.getContextPath() + "/home");
+				return;
+			}
+		}
+		
+		// Nếu chưa đăng nhập, lưu URL hiện tại để redirect sau khi đăng nhập
+		// (chỉ lưu nếu chưa có và không phải là trang login để tránh vòng lặp)
+		if (session == null) {
+			session = req.getSession(true);
+		}
 		String requestedUrl = req.getRequestURI();
 		String queryString = req.getQueryString();
 		if (queryString != null) {
 			requestedUrl += "?" + queryString;
 		}
-		session.setAttribute("redirectAfterLogin", requestedUrl);
+		// Chỉ lưu redirectAfterLogin nếu chưa có và không phải là trang login
+		// (để giữ URL từ trang đặt hàng hoặc trang khác)
+		if (session.getAttribute("redirectAfterLogin") == null && !requestedUrl.contains("/login")) {
+			session.setAttribute("redirectAfterLogin", requestedUrl);
+		}
 
 		// pass the request along the filter chain
 		chain.doFilter(request, response);

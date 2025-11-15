@@ -68,10 +68,10 @@
 					   class="px-4 py-2 text-sm font-medium text-white/80 hover:text-white transition-colors">
 						Đăng nhập
 					</a>
-					<a href="register"
-					   class="px-4 py-2 bg-white text-blue-600 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors">
-						Đăng ký
-					</a>
+<%--					<a href="register"--%>
+<%--					   class="px-4 py-2 bg-white text-blue-600 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors">--%>
+<%--						Đăng ký--%>
+<%--					</a>--%>
 				</div>
 				<% } %>
 

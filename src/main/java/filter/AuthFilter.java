@@ -96,56 +96,72 @@ public class AuthFilter extends HttpFilter implements Filter {
         resp.setHeader("Pragma", "no-cache");
         resp.setDateHeader("Expires", 0);
 
-        HttpSession ses = req.getSession(false);
-
-        boolean is_login = (boolean) (ses != null && ses.getAttribute("is_login") != null) || false;
-      
-        String username = "";
-        String type_user = "";
-        if (ses != null) {
-            username = (String) (ses.getAttribute("username"));
-            type_user = (String) (ses.getAttribute("type_user"));
-        }
-
-        request.setAttribute("is_login", is_login);
-        request.setAttribute("username", username);
-        request.setAttribute("type_user", type_user);
-
+        // Kiểm tra token trước để tự động đăng nhập nếu token còn thời hạn
         String rawToken = getRememberMeToken(req);        
         if (rawToken != null) {
-
             String tokenHash = SHA256.hash256(rawToken);
             TokenDAO dbToken = this.tokenSerImpl.findTokenByHash(tokenHash);
 
             if (dbToken != null) {
+                // Nếu token còn thời hạn, tự động tạo session và đăng nhập
                 if(!isTokenExpired(dbToken)) {
                     UserDAO user = this.userSerImpl.getUser(dbToken.getUsername());
-                    System.out.println("session live");
+                    System.out.println("Token còn thời hạn - tự động đăng nhập");
                     HttpSession newSession = req.getSession(true);
                     newSession.setAttribute("is_login", true);
                     newSession.setAttribute("userId", user.getId());
                     newSession.setAttribute("username", user.getUsername());
                     newSession.setAttribute("type_user", user.getRole());
                     
+                    // Tạo token mới để bảo mật
                     String newToken = UUID.randomUUID().toString();
                     String newTokenHash = SHA256.hash256(newToken);
                     
                     Cookie newCookie = new Cookie("canteenSID", newToken);
+                    newCookie.setMaxAge(30 * 24 * 60 * 60); // 30 ngày
+                    newCookie.setHttpOnly(true);
+                    newCookie.setPath("/");
 
                     this.tokenSerImpl.updateTokenHash(dbToken.getSeries(), newTokenHash);
 
                     ((HttpServletResponse) response).addCookie(newCookie);	
                 } else {
-                	System.out.println("expries session");
+                    // Token đã hết hạn - xóa token và cookie
+                	System.out.println("Token đã hết hạn - xóa token");
                 	this.tokenSerImpl.deleteTokenBySeries(dbToken.getSeries());
                 	deleteRememberMeCookie(resp);
                 }
             } else {
-            	System.out.println("expries not exists");
+                // Token không tồn tại trong database - xóa cookie
+            	System.out.println("Token không tồn tại - xóa cookie");
             	deleteRememberMeCookie(resp);
             }
-        }       
+        }
+
+        // Sau khi kiểm tra token, lấy thông tin session (có thể là session mới được tạo từ token)
+        // Sử dụng getSession(false) để không tạo session mới nếu chưa có
+        HttpSession ses = req.getSession(false);
+
+        boolean is_login = false;
+        String username = "";
+        String type_user = "";
         
+        // Nếu session tồn tại và có thuộc tính is_login, lấy thông tin
+        if (ses != null) {
+            Object isLoginAttr = ses.getAttribute("is_login");
+            if (isLoginAttr != null) {
+                is_login = (boolean) isLoginAttr;
+                username = (String) ses.getAttribute("username");
+                type_user = (String) ses.getAttribute("type_user");
+            }
+        }
+
+        // Set attribute cho request để JSP có thể sử dụng
+        // Nếu token còn thời hạn, is_login sẽ là true và nút đăng nhập sẽ không hiển thị
+        request.setAttribute("is_login", is_login);
+        request.setAttribute("username", username);
+        request.setAttribute("type_user", type_user);       
+        System.out.println("redirect page");
         chain.doFilter(request, response);
      
 	}	

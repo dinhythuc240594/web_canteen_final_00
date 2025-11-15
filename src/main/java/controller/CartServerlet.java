@@ -79,8 +79,14 @@ public class CartServerlet extends HttpServlet {
 
         HttpSession session = request.getSession(false);
         String action = RequestUtil.getString(request, "action", "");
-        // Check if user is logged in for all cart operations
+        // Check if user is logged in for checkout operation
         if ((session == null || session.getAttribute("username") == null) && action.equals("checkout")) {
+            // Lưu URL trang cart vào session để redirect về sau khi đăng nhập
+            if (session == null) {
+                session = request.getSession(true);
+            }
+            String cartUrl = request.getContextPath() + "/cart";
+            session.setAttribute("redirectAfterLogin", cartUrl);
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }

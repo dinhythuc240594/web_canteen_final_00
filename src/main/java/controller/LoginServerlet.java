@@ -97,6 +97,9 @@ public class LoginServerlet extends HttpServlet {
 			if (redirectUrl != null && !redirectUrl.isEmpty()) {
 				session.removeAttribute("redirectAfterLogin");
 				response.sendRedirect(redirectUrl);
+			} else {
+				// Nếu không có URL redirect, chuyển về trang home
+				response.sendRedirect(request.getContextPath() + "/home");
 			}
 		}
 		else {
