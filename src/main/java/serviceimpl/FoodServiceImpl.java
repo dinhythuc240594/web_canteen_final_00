@@ -23,7 +23,9 @@ public class FoodServiceImpl implements FoodService {
 	@Override
 	public Page<FoodDTO> findAll(PageRequest pageRequest) {
 		List<FoodDTO> data = this.foodRepository.findAll(pageRequest); 
-		return new Page<>(data, pageRequest.getPage(), this.foodRepository.count(pageRequest.getKeyword()), pageRequest.getPageSize());
+		FoodRepositoryImpl repoImpl = (FoodRepositoryImpl) this.foodRepository;
+		int totalCount = repoImpl.count(pageRequest.getKeyword(), pageRequest.getStallId());
+		return new Page<>(data, pageRequest.getPage(), totalCount, pageRequest.getPageSize());
 	}
 
 	@Override

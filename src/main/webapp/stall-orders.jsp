@@ -166,29 +166,6 @@
 
 <jsp:include page="/WEB-INF/jsp/common/footer.jsp" />
 
-<style>
-    .filter-btn {
-        padding: 0.5rem 1rem;
-        border: 1px solid #e5e7eb;
-        border-radius: 0.375rem;
-        background-color: white;
-        color: #6b7280;
-        font-size: 0.875rem;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    
-    .filter-btn:hover {
-        background-color: #f3f4f6;
-    }
-    
-    .filter-btn.active {
-        background-color: #3b82f6;
-        color: white;
-        border-color: #3b82f6;
-    }
-</style>
-
 <script>
     function filterOrders(status) {
         const url = new URL(window.location.href);

@@ -111,24 +111,40 @@ public class FoodRepositoryImpl implements FoodRepository{
         String keyword = pageRequest.getKeyword();
         String sortField = pageRequest.getSortField();
         String orderField = pageRequest.getOrderField();
+        Integer stallId = pageRequest.getStallId();
         
         String sql = "SELECT id, name, price, inventory, promotion, stall_id FROM foods ";
-        if(keyword != "") {
-        	sql += "WHERE name LIKE ? ";
+        List<String> conditions = new ArrayList<>();
+        List<Object> params = new ArrayList<>();
+        
+        if(keyword != null && !keyword.trim().isEmpty()) {
+        	conditions.add("name LIKE ?");
+        	params.add("%" + keyword + "%");
         }
-        sql += "ORDER BY %s %s LIMIT ? OFFSET ?";
-        sql = String.format(sql, sortField, orderField);
+        
+        if(stallId != null && stallId > 0) {
+        	conditions.add("stall_id = ?");
+        	params.add(stallId);
+        }
+        
+        if(!conditions.isEmpty()) {
+        	sql += "WHERE " + String.join(" AND ", conditions) + " ";
+        }
+        
+        sql += "ORDER BY " + sortField + " " + orderField + " LIMIT ? OFFSET ?";
+        params.add(pageSize);
+        params.add(offset);
+        
         try (Connection conn = ds.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);) {
 
-        	if(keyword != "") {
-        		String search = "%" + keyword + "%";
-        		ps.setString(1, search);
-        		ps.setInt(2, pageSize);
-        		ps.setInt(3, offset);
-        	} else {
-        		ps.setInt(1, pageSize);
-        		ps.setInt(2, offset);
+        	for(int i = 0; i < params.size(); i++) {
+        		Object param = params.get(i);
+        		if(param instanceof String) {
+        			ps.setString(i + 1, (String) param);
+        		} else if(param instanceof Integer) {
+        			ps.setInt(i + 1, (Integer) param);
+        		}
         	}
         	
         	ResultSet rs = ps.executeQuery();
@@ -150,23 +166,43 @@ public class FoodRepositoryImpl implements FoodRepository{
 
 	@Override
 	public int count(String keyword) {
+        return count(keyword, null);
+	}
+	
+	public int count(String keyword, Integer stallId) {
         String sql = "SELECT COUNT(1) FROM foods";
-        int total = 0;
+        List<String> conditions = new ArrayList<>();
+        List<Object> params = new ArrayList<>();
         
         boolean hasKeywords = keyword != null && !keyword.trim().isEmpty();
         
         if (hasKeywords) {
-            sql += " WHERE title LIKE ? OR author LIKE ?";
+            conditions.add("name LIKE ?");
+            params.add("%" + keyword + "%");
         }
         
+        if(stallId != null && stallId > 0) {
+        	conditions.add("stall_id = ?");
+        	params.add(stallId);
+        }
+        
+        if(!conditions.isEmpty()) {
+        	sql += " WHERE " + String.join(" AND ", conditions);
+        }
+        
+        int total = 0;
         try (Connection conn = ds.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            if (hasKeywords) {
-                String searchPattern = "%" + keyword + "%";
-                ps.setString(1, searchPattern);
-                ps.setString(2, searchPattern);
-            }
+            for(int i = 0; i < params.size(); i++) {
+        		Object param = params.get(i);
+        		if(param instanceof String) {
+        			ps.setString(i + 1, (String) param);
+        		} else if(param instanceof Integer) {
+        			ps.setInt(i + 1, (Integer) param);
+        		}
+        	}
+            
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 total = rs.getInt(1);

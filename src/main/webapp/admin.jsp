@@ -34,16 +34,6 @@
 <head>
     <title>Quản trị - Canteen ĐH</title>
     <jsp:include page="/WEB-INF/jsp/common/head.jsp" />
-    <style>
-        /* Tùy chọn: cố định sidebar trên desktop */
-        @media (min-width: 1024px) {
-            .admin-sidebar {
-                position: sticky;
-                top: 0;
-                height: calc(100vh - 64px);
-            }
-        }
-    </style>
 </head>
 <body class="bg-gray-50">
 <jsp:include page="/WEB-INF/jsp/common/header.jsp" />

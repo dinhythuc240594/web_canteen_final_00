@@ -14,6 +14,7 @@ import model.PageRequest;
 import repositoryimpl.Food_CategoryRepositoryImpl;
 import serviceimpl.FoodServiceImpl;
 import serviceimpl.Food_CategoryServiceImpl;
+import serviceimpl.StallServiceImpl;
 import utils.DataSourceUtil;
 import utils.RequestUtil;
 
@@ -23,6 +24,7 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import dto.FoodDTO;
+import model.StallDAO;
 
 
 @WebServlet("/foods")
@@ -31,6 +33,7 @@ public class FoodServerlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private FoodServiceImpl foodServiceImpl;
 	private Food_CategoryServiceImpl categoryServiceImpl;
+	private StallServiceImpl stallServiceImpl;
 	private int PAGE_SIZE = 25;
 	
 	@Override
@@ -38,6 +41,7 @@ public class FoodServerlet extends HttpServlet {
 		DataSource ds = DataSourceUtil.getDataSource();
 		this.foodServiceImpl = new FoodServiceImpl(ds);
 		this.categoryServiceImpl = new Food_CategoryServiceImpl(ds);
+		this.stallServiceImpl = new StallServiceImpl(ds);
 	}
 
 	/**
@@ -51,6 +55,16 @@ public class FoodServerlet extends HttpServlet {
 		String orderField = RequestUtil.getString(request, "orderField", "DESC");
 		int page = RequestUtil.getInt(request, "page", 1);
 		int id = RequestUtil.getInt(request, "id", 1);
+		String stallIdParam = request.getParameter("stallId");
+		Integer stallId = null;
+		if (stallIdParam != null && !stallIdParam.trim().isEmpty()) {
+			try {
+				int sid = Integer.parseInt(stallIdParam);
+				stallId = sid > 0 ? sid : null;
+			} catch (NumberFormatException e) {
+				stallId = null;
+			}
+		}
 		FoodDTO foundFood = null;
 		
 		// Check authentication for sensitive operations
@@ -64,8 +78,8 @@ public class FoodServerlet extends HttpServlet {
 				response.sendRedirect(request.getContextPath() + "/login");
 				return;
 			}
-			// Only admin and stall can create/update/delete foods
-			if (!"admin".equals(userRole) && !"stall".equals(userRole)) {
+			// Only stall role can create/update/delete foods
+			if (!"stall".equals(userRole)) {
 				response.sendRedirect(request.getContextPath() + "/home");
 				return;
 			}
@@ -75,10 +89,13 @@ public class FoodServerlet extends HttpServlet {
 		switch (action) {
 			case "list":
 				
-				PageRequest pageReq = new PageRequest(page, PAGE_SIZE, sortField, orderField, keyword);
+				PageRequest pageReq = new PageRequest(page, PAGE_SIZE, sortField, orderField, keyword, stallId);
 				Page<FoodDTO> pageFood = this.foodServiceImpl.findAll(pageReq);
+				List<StallDAO> stalls = this.stallServiceImpl.findAll();
 		        request.setAttribute("pageFood", pageFood);
 		        request.setAttribute("pageReq", pageReq);
+		        request.setAttribute("stalls", stalls);
+		        request.setAttribute("userRole", userRole);
 		        rd = request.getRequestDispatcher("/foodTemplates/food-list.jsp");
 		        rd.forward(request, response);
 		        break;
@@ -150,8 +167,8 @@ public class FoodServerlet extends HttpServlet {
 			return;
 		}
 		
-		// Only admin and stall can create/update foods
-		if (!"admin".equals(userRole) && !"stall".equals(userRole)) {
+		// Only stall role can create/update foods
+		if (!"stall".equals(userRole)) {
 			response.sendRedirect(request.getContextPath() + "/home");
 			return;
 		}
