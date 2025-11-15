@@ -208,7 +208,7 @@ public class CartServerlet extends HttpServlet {
             order.setUserId(userId);
             order.setStallId(stallId);
             order.setTotalPrice(total);
-            order.setStatus("Đang xử lý");
+            order.setStatus("new_order");
             order.setPaymentMethod(payment != null ? payment : "COD");
             order.setDeliveryLocation(address);
 
