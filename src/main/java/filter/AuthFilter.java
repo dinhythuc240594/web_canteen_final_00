@@ -160,11 +160,21 @@ public class AuthFilter extends HttpFilter implements Filter {
 
         // 2. Kiểm tra các trang cần đăng nhập (checkout và các trang khác)
         // Danh sách các URL cần đăng nhập
-        String[] protectedPaths = {"/cart", "/order", "/profile", "/admin", "/food"};
+        String[] protectedPaths = {"/order", "/profile", "/admin", "/food"};
         boolean isProtectedPath = false;
         
-        // Kiểm tra nếu là /foods, cho phép list và detail không cần đăng nhập
-        if (path.startsWith("/foods")) {
+        // Kiểm tra nếu là /cart, chỉ yêu cầu đăng nhập khi action=checkout
+        if (path.startsWith("/cart")) {
+            String action = req.getParameter("action");
+            // Chỉ yêu cầu đăng nhập khi action là checkout
+            if (action != null && action.equals("checkout")) {
+                isProtectedPath = true;
+            } else {
+                // Các trường hợp khác (xem giỏ hàng, thêm vào giỏ hàng) không yêu cầu đăng nhập
+                isProtectedPath = false;
+            }
+        } else if (path.startsWith("/foods")) {
+            // Kiểm tra nếu là /foods, cho phép list và detail không cần đăng nhập
             String action = req.getParameter("action");
             // Nếu action là list, detail hoặc không có (mặc định là list), không yêu cầu đăng nhập
             if (action == null || action.equals("list") || action.equals("detail")) {
