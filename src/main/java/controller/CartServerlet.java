@@ -168,24 +168,28 @@ public class CartServerlet extends HttpServlet {
         try {
         	
             if (cart == null || cart.isEmpty()) {
-                response.sendRedirect(request.getContextPath() + "/cart?error=empty_cart");
+                // Giỏ hàng trống - redirect đến trang thất bại
+                response.sendRedirect(request.getContextPath() + "/order-failed.jsp?error=Giỏ hàng trống. Vui lòng thêm sản phẩm vào giỏ hàng trước khi đặt hàng.");
                 return;
             }
 
+            // Lấy userId từ session (đã được kiểm tra ở trên khi checkout)
             int userId = (int) session.getAttribute("userId");
-            String username = (String) session.getAttribute("username");
-            if (username == null) {
-                session.setAttribute("redirectAfterLogin", request.getRequestURI());
-                response.sendRedirect(request.getContextPath() + "/login");
-                return;
-            }
+            // Kiểm tra username đã được xử lý ở trên (dòng 83-92), không cần kiểm tra lại
+            // String username = (String) session.getAttribute("username");
+            // if (username == null) {
+            //     session.setAttribute("redirectAfterLogin", request.getRequestURI());
+            //     response.sendRedirect(request.getContextPath() + "/login");
+            //     return;
+            // }
 
             String address = request.getParameter("address");
             String payment = request.getParameter("payment");
             String stallParam = request.getParameter("stallId");
 
             if (address == null || address.trim().isEmpty()) {
-                response.sendRedirect(request.getContextPath() + "/cart?error=empty_address");
+                // Địa chỉ trống - redirect đến trang thất bại
+                response.sendRedirect(request.getContextPath() + "/order-failed.jsp?error=Vui lòng nhập địa chỉ giao hàng.");
                 return;
             }
 
@@ -194,15 +198,24 @@ public class CartServerlet extends HttpServlet {
             if (stallParam != null && !stallParam.isEmpty()) {
                 try {
                     stallId = Integer.parseInt(stallParam);
-                } catch (NumberFormatException ignored) {
+                } catch (NumberFormatException e) {
+                    // stallId không hợp lệ - redirect đến trang thất bại
+                    response.sendRedirect(request.getContextPath() + "/order-failed.jsp?error=Thông tin quầy hàng không hợp lệ.");
+                    return;
                 }
             }
             
             // If not in parameter, try to get from session
             if (stallId == 0) {
-                int sessionStallId = (int) session.getAttribute("stallId");
-                if (sessionStallId > 0) {
-                    stallId = sessionStallId;
+                Object sessionStallIdObj = session.getAttribute("stallId");
+                if (sessionStallIdObj != null) {
+                    try {
+                        stallId = (int) sessionStallIdObj;
+                    } catch (ClassCastException e) {
+                        // stallId trong session không hợp lệ
+                        response.sendRedirect(request.getContextPath() + "/order-failed.jsp?error=Thông tin quầy hàng không hợp lệ.");
+                        return;
+                    }
                 }
             }
 
@@ -218,8 +231,15 @@ public class CartServerlet extends HttpServlet {
             order.setPaymentMethod(payment != null ? payment : "COD");
             order.setDeliveryLocation(address);
 
+            // Lưu đơn hàng - nếu thất bại sẽ throw exception
             OrderDAO createdOrder = orderRepository.save(order);
+            if (createdOrder == null || createdOrder.getId() == 0) {
+                // Không thể tạo đơn hàng
+                response.sendRedirect(request.getContextPath() + "/order-failed.jsp?error=Không thể tạo đơn hàng. Vui lòng thử lại sau.");
+                return;
+            }
 
+            // Lưu các món ăn trong đơn hàng
             for (Order_FoodDAO item : cart) {
                 item.setOrderId(createdOrder.getId());
                 orderFoodRepository.create(item);
@@ -229,16 +249,16 @@ public class CartServerlet extends HttpServlet {
             session.removeAttribute("cart");
             session.removeAttribute("stallId");
             
-            // Use redirect instead of forward to ensure cart is cleared
-            // Store order ID in session temporarily to display on success page
-            session.setAttribute("lastOrderId", createdOrder.getId());
+            // Đặt hàng thành công - redirect đến trang thành công
             response.sendRedirect(request.getContextPath() + "/order-success.jsp?orderId=" + createdOrder.getId());
 
         } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/cart?error=invalid_stallId");
+            e.printStackTrace();
+            response.sendRedirect(request.getContextPath() + "/order-failed.jsp?error=Thông tin đơn hàng không hợp lệ: " + e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/cart?error=server_error");
+            // Lỗi hệ thống - redirect đến trang thất bại
+            response.sendRedirect(request.getContextPath() + "/order-failed.jsp?error=Đã xảy ra lỗi hệ thống khi xử lý đơn hàng. Vui lòng thử lại sau.");
         }
     }
 

@@ -57,7 +57,9 @@ public class LoginServerlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String username = request.getParameter("username");
 		String password = request.getParameter("password");
-		String rememberMe = request.getParameter("remember");
+		// ========== COMMENT: Chức năng Remember Me đã được tắt ==========
+		// String rememberMe = request.getParameter("remember");
+		// ========== END COMMENT: Remember Me ==========
 		boolean isLogin = this.userSerImpl.isAuthenticated(username, password);
 		HttpSession session = request.getSession();
 		UserDAO user = this.userSerImpl.getUser(username);
@@ -67,30 +69,32 @@ public class LoginServerlet extends HttpServlet {
 			session.setAttribute("username", user.getUsername());
 			session.setAttribute("type_user", user.getRole());
 			
-			if (rememberMe != null && rememberMe.equals("on")) {
-				String rawToken = UUID.randomUUID().toString();
-				String tokenHash = SHA256.hash256(rawToken);
-				
-				Cookie rememberCookie = new Cookie("canteenSID", rawToken);
-				
-				int days = 30; 
-				Calendar calendar = Calendar.getInstance();
-				calendar.add(Calendar.DAY_OF_MONTH, days);
-				Date expirationDate = calendar.getTime();
-				long currentTimeMillis = System.currentTimeMillis();
-				long expirationTimeMillis = expirationDate.getTime();
-				long durationMillis = expirationTimeMillis - currentTimeMillis;
-				
-				int maxAgeInSeconds = (int) (durationMillis / 1000);
-	            rememberCookie.setMaxAge(maxAgeInSeconds); 
-	            rememberCookie.setHttpOnly(true);
-	            rememberCookie.setSecure(request.isSecure());
-	            rememberCookie.setPath("/");
-	            String series = UUID.randomUUID().toString();
-	            this.tokenSerImpl.saveToken(user.getUsername(), series, tokenHash, new Timestamp(expirationDate.getTime()));
-	            
-	            response.addCookie(rememberCookie);
-			}
+			// ========== COMMENT: Chức năng Remember Me đã được tắt ==========
+			// if (rememberMe != null && rememberMe.equals("on")) {
+			// 	String rawToken = UUID.randomUUID().toString();
+			// 	String tokenHash = SHA256.hash256(rawToken);
+			// 	
+			// 	Cookie rememberCookie = new Cookie("canteenSID", rawToken);
+			// 	
+			// 	int days = 30; 
+			// 	Calendar calendar = Calendar.getInstance();
+			// 	calendar.add(Calendar.DAY_OF_MONTH, days);
+			// 	Date expirationDate = calendar.getTime();
+			// 	long currentTimeMillis = System.currentTimeMillis();
+			// 	long expirationTimeMillis = expirationDate.getTime();
+			// 	long durationMillis = expirationTimeMillis - currentTimeMillis;
+			// 	
+			// 	int maxAgeInSeconds = (int) (durationMillis / 1000);
+			//     rememberCookie.setMaxAge(maxAgeInSeconds); 
+			//     rememberCookie.setHttpOnly(true);
+			//     rememberCookie.setSecure(request.isSecure());
+			//     rememberCookie.setPath("/");
+			//     String series = UUID.randomUUID().toString();
+			//     this.tokenSerImpl.saveToken(user.getUsername(), series, tokenHash, new Timestamp(expirationDate.getTime()));
+			//     
+			//     response.addCookie(rememberCookie);
+			// }
+			// ========== END COMMENT: Remember Me ==========
 			
 			// Check if there's a saved URL to redirect to after login
 			String redirectUrl = (String) session.getAttribute("redirectAfterLogin");
