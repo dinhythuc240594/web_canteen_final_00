@@ -37,21 +37,8 @@
       <input type="hidden" name="action" value="list">
       
       <input type="text" name="keyword" value="<%= keyword != null ? keyword : "" %>"
-             placeholder="Tìm món ăn bạn muốn..." 
+             placeholder="Tìm theo tên hoặc giá món ăn..." 
              class="w-full sm:w-2/3 rounded-full border border-gray-300 px-5 py-2 focus:ring-2 focus:ring-blue-400 outline-none transition-all" />
-
-      <select name="stallId" class="rounded-full border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-400">
-        <option value="">Tất cả quầy</option>
-        <% if (stalls != null) {
-            for (model.StallDAO stall : stalls) {
-                boolean selected = selectedStallId != null && selectedStallId == stall.getId();
-        %>
-        <option value="<%= stall.getId() %>" <%= selected ? "selected" : "" %>>
-            <%= stall.getName() %>
-        </option>
-        <% }
-        } %>
-      </select>
 
       <button type="submit"
               class="bg-blue-600 text-white rounded-full px-3 py-2 focus:ring-2 focus:ring-blue-400" style="width:150px;">
