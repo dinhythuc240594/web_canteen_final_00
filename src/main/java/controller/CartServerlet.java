@@ -226,7 +226,7 @@ public class CartServerlet extends HttpServlet {
             // Use redirect instead of forward to ensure cart is cleared
             // Store order ID in session temporarily to display on success page
             session.setAttribute("lastOrderId", createdOrder.getId());
-            response.sendRedirect(request.getContextPath() + "/order-success?orderId=" + createdOrder.getId());
+            response.sendRedirect(request.getContextPath() + "/order-success.jsp?orderId=" + createdOrder.getId());
 
         } catch (NumberFormatException e) {
             response.sendRedirect(request.getContextPath() + "/cart?error=invalid_stallId");
