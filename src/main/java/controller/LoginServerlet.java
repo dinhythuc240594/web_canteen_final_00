@@ -47,6 +47,18 @@ public class LoginServerlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		HttpSession session = request.getSession();
+		Boolean isLogin = (Boolean) session.getAttribute("is_login");
+		
+		// Nếu đã đăng nhập, điều hướng về trang home
+		if (isLogin != null) {
+            if(isLogin){
+                response.sendRedirect(request.getContextPath() + "/home");
+                return;
+            }
+		}
+		
+		// Nếu chưa đăng nhập, hiển thị trang login
         RequestDispatcher rd = request.getRequestDispatcher("login.jsp");
         rd.forward(request, response);
 	}
