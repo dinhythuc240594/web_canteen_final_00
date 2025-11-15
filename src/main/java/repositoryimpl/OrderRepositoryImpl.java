@@ -64,18 +64,29 @@ public class OrderRepositoryImpl implements OrderRepository{
         String orderField = pageRequest.getOrderField();
         
         String sql = "SELECT id, user_id, stall_id, total_price, status, created_at, delivery_location, payment_method FROM orders";
-        if(keyword != "") {
-        	sql += "WHERE name LIKE ? ";
+        boolean hasKeyword = keyword != null && !keyword.isEmpty();
+        
+        if (hasKeyword) {
+        	sql += " WHERE id LIKE ? OR status LIKE ?";
         }
-        sql += "ORDER BY %s %s LIMIT ? OFFSET ?";
-        sql = String.format(sql, sortField, orderField);
+        sql += " ORDER BY " + sortField + " " + orderField + " LIMIT ? OFFSET ?";
 		
         try (Connection conn = ds.getConnection();
-        	PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery(sql)) {
+        	PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            while (rs.next()) {
-                orders.add(mapResultSetToOrderDAO(rs));
+            int paramIndex = 1;
+            if (hasKeyword) {
+            	String searchPattern = "%" + keyword + "%";
+            	pstmt.setString(paramIndex++, searchPattern);
+            	pstmt.setString(paramIndex++, searchPattern);
+            }
+            pstmt.setInt(paramIndex++, pageSize);
+            pstmt.setInt(paramIndex++, offset);
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    orders.add(mapResultSetToOrderDAO(rs));
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();

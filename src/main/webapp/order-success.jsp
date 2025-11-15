@@ -91,7 +91,7 @@
 
     <!-- Action Buttons -->
     <div class="mt-8 flex flex-col sm:flex-row gap-4">
-      <a href="order_history" 
+      <a href="order-history" 
          class="flex-1 bg-blue-600 text-white text-center py-3 px-6 rounded-lg hover:bg-blue-700 transition font-medium">
         Xem lịch sử đơn hàng
       </a>

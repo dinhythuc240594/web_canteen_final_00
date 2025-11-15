@@ -128,17 +128,24 @@
                           <h4 class="font-semibold text-gray-800 mb-3">Chi tiết món ăn:</h4>
                           <div class="space-y-2">
                               <% for (Order_FoodDAO item : items) { %>
-                              <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
+                              <div class="flex items-center gap-4 bg-gray-50 p-3 rounded-lg">
+                                  <% if (item.getImage() != null && !item.getImage().isEmpty()) { %>
+                                  <img src="<%= item.getImage() %>" 
+                                       alt="<%= item.getName() != null ? item.getName() : "Món ăn" %>"
+                                       class="w-16 h-16 object-cover rounded-lg">
+                                  <% } %>
                                   <div class="flex-1">
-                                      <p class="font-medium text-gray-800">Món ăn ID: <%= item.getFoodId() %></p>
+                                      <p class="font-medium text-gray-800">
+                                          <%= item.getName() != null && !item.getName().isEmpty() ? item.getName() : "Món ăn ID: " + item.getFoodId() %>
+                                      </p>
                                       <p class="text-sm text-gray-600">Số lượng: <%= item.getQuantity() %></p>
                                   </div>
                                   <div class="text-right">
                                       <p class="text-blue-600 font-semibold">
-                                          <%= String.format("%,.0f", item.getPriceAtOrder()) %>đ
+                                          <%= String.format("%,.0f", item.getPriceAtOrder() != null ? item.getPriceAtOrder() : 0.0) %>đ
                                       </p>
                                       <p class="text-xs text-gray-500">
-                                          Tổng: <%= String.format("%,.0f", item.getPriceAtOrder() * item.getQuantity()) %>đ
+                                          Tổng: <%= String.format("%,.0f", (item.getPriceAtOrder() != null ? item.getPriceAtOrder() : 0.0) * item.getQuantity()) %>đ
                                       </p>
                                   </div>
                               </div>

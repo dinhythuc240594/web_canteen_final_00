@@ -19,6 +19,9 @@ import repositoryimpl.Order_FoodRepositoryImpl;
 import repositoryimpl.StallRepositoryImpl;
 import serviceimpl.OrderServiceImpl;
 import serviceimpl.StallServiceImpl;
+import serviceimpl.FoodServiceImpl;
+import service.FoodService;
+import dto.FoodDTO;
 import utils.DataSourceUtil;
 import utils.RequestUtil;
 
@@ -29,8 +32,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
-
-import dto.FoodDTO;
 
 /**
  * Servlet implementation class OrderHistoryServerlet
@@ -49,6 +50,7 @@ public class OrderHistoryServerlet extends HttpServlet {
     private OrderServiceImpl orderService;
     private StallServiceImpl stallService;
     private Order_FoodRepository orderFoodRepository;
+    private FoodService foodService;
 
     @Override
     public void init() throws ServletException {
@@ -56,6 +58,7 @@ public class OrderHistoryServerlet extends HttpServlet {
         orderService = new OrderServiceImpl(ds);
         stallService = new StallServiceImpl(ds);
         orderFoodRepository = new Order_FoodRepositoryImpl(ds);
+        foodService = new FoodServiceImpl(ds);
     }
 
     
@@ -107,9 +110,17 @@ public class OrderHistoryServerlet extends HttpServlet {
             orders = orderService.findByUserId(userId);
         }
         
-        // Get order details (food items) for each order
+        // Get order details (food items) for each order and load food information
         for (OrderDAO order : orders) {
             List<Order_FoodDAO> items = orderFoodRepository.findByOrderId(order.getId());
+            // Load food name and image for each item
+            for (Order_FoodDAO item : items) {
+                FoodDTO food = foodService.findById(item.getFoodId());
+                if (food != null) {
+                    item.setName(food.getNameFood());
+                    item.setImage(food.getImage());
+                }
+            }
             orderFoodMap.put(order.getId(), items);
         }
         
