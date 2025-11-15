@@ -31,6 +31,9 @@
 	// Chỉ hiển thị các button quản lý món khi người dùng là chủ quầy và có quầy
 	boolean isStallOwner = isStallRole && userStallId != null;
 	
+	// Chỉ hiển thị nút tạo món khi đang xem quầy của chính user hoặc không có quầy nào được chọn
+	boolean canCreateFood = isStallOwner && (selectedStallId == null || selectedStallId.equals(userStallId));
+	
 	java.util.List<model.StallDAO> stalls = (java.util.List<model.StallDAO>) request.getAttribute("stalls");
 %>
 
@@ -52,16 +55,16 @@
   </div>
 </section>
 
-<%--<!-- Action Buttons (Chỉ hiển thị cho chủ quầy) -->--%>
-<%--<% if (isStallOwner) { %>--%>
-<%--<section class="py-4 bg-white">--%>
-<%--  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">--%>
-<%--    <a href="foods?action=create" class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">--%>
-<%--      <i data-lucide="plus"></i> Thêm món ăn mới--%>
-<%--    </a>--%>
-<%--  </div>--%>
-<%--</section>--%>
-<%--<% } %>--%>
+<!-- Action Buttons (Chỉ hiển thị cho chủ quầy khi xem quầy của chính họ) -->
+<% if (canCreateFood) { %>
+<section class="py-4 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <a href="foods?action=create" class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+      <i data-lucide="plus"></i> Thêm món ăn mới
+    </a>
+  </div>
+</section>
+<% } %>
 
 <!-- 🥗 Danh sách món ăn -->
 <section class="py-8 bg-gradient-to-b from-gray-50 to-blue-50">
@@ -84,7 +87,7 @@
           </h3>
           <p class="text-blue-600 font-bold text-sm"><%= String.format("%,.0f", food.getPriceFood()) %>đ</p>
           <div class="flex items-center justify-between mt-2">
-            <span class="text-xs <%= food.getInventoryFood() > 0 ? "text-green-600" : "text-red-600" %>">
+              <span class="text-xs <%= food.getInventoryFood() > 0 ? "text-green-600" : "text-red-600" %>">
               Tồn kho: <%= food.getInventoryFood() %>
             </span>
             <% 

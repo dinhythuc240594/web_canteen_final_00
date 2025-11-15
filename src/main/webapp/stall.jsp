@@ -96,8 +96,13 @@
                         </div>
                     </div>
                 </div>
-                <div class="ml-6 pl-6 border-l border-gray-200 flex flex-col items-end">
-                    <form method="POST" action="<%=contextPath%>/stall" class="mb-4">
+                <div class="ml-6 pl-6 border-l border-gray-200 flex flex-col items-end gap-3">
+                    <a href="<%=contextPath%>/foods?action=list&stallId=<%= stall != null ? stall.getId() : "" %>" 
+                       class="px-4 py-2 rounded-md text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2">
+                        <i data-lucide="utensils-crossed" class="w-4 h-4"></i>
+                        Quản lý menu
+                    </a>
+                    <form method="POST" action="<%=contextPath%>/stall" class="mb-0">
                         <input type="hidden" name="action" value="toggleStatus">
                         <button type="submit" 
                                 class="px-4 py-2 rounded-md text-sm font-medium <%= stall != null && stall.getIsOpen() ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700" %> text-white">
