@@ -92,7 +92,12 @@ public class LoginServerlet extends HttpServlet {
 	            response.addCookie(rememberCookie);
 			}
 			
-			response.sendRedirect(request.getContextPath()+"/foods?action=list");
+			// Check if there's a saved URL to redirect to after login
+			String redirectUrl = (String) session.getAttribute("redirectAfterLogin");
+			if (redirectUrl != null && !redirectUrl.isEmpty()) {
+				session.removeAttribute("redirectAfterLogin");
+				response.sendRedirect(redirectUrl);
+			}
 		}
 		else {
 			String msg_error = "";
