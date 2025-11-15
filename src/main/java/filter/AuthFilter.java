@@ -163,10 +163,23 @@ public class AuthFilter extends HttpFilter implements Filter {
         String[] protectedPaths = {"/cart", "/order", "/profile", "/admin", "/food"};
         boolean isProtectedPath = false;
         
-        for (String protectedPathItem : protectedPaths) {
-            if (path.startsWith(protectedPathItem)) {
+        // Kiểm tra nếu là /foods, cho phép list và detail không cần đăng nhập
+        if (path.startsWith("/foods")) {
+            String action = req.getParameter("action");
+            // Nếu action là list, detail hoặc không có (mặc định là list), không yêu cầu đăng nhập
+            if (action == null || action.equals("list") || action.equals("detail")) {
+                isProtectedPath = false;
+            } else {
+                // Các action khác (create, update, delete) vẫn yêu cầu đăng nhập
                 isProtectedPath = true;
-                break;
+            }
+        } else {
+            // Kiểm tra các path khác
+            for (String protectedPathItem : protectedPaths) {
+                if (path.startsWith(protectedPathItem)) {
+                    isProtectedPath = true;
+                    break;
+                }
             }
         }
         
