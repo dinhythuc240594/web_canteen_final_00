@@ -118,7 +118,8 @@ public class FoodRepositoryImpl implements FoodRepository{
         List<Object> params = new ArrayList<>();
         
         if(keyword != null && !keyword.trim().isEmpty()) {
-        	conditions.add("name LIKE ?");
+        	conditions.add("(name LIKE ? OR CAST(price AS CHAR) LIKE ?)");
+        	params.add("%" + keyword + "%");
         	params.add("%" + keyword + "%");
         }
         
@@ -177,7 +178,8 @@ public class FoodRepositoryImpl implements FoodRepository{
         boolean hasKeywords = keyword != null && !keyword.trim().isEmpty();
         
         if (hasKeywords) {
-            conditions.add("name LIKE ?");
+            conditions.add("(name LIKE ? OR CAST(price AS CHAR) LIKE ?)");
+            params.add("%" + keyword + "%");
             params.add("%" + keyword + "%");
         }
         

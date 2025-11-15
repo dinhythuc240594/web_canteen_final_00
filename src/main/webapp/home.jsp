@@ -13,11 +13,14 @@
 
 <%
     model.Page<dto.FoodDTO> pageFood = (model.Page<dto.FoodDTO>) request.getAttribute("pageFood");
-    java.util.List<dto.FoodDTO> foods = (java.util.List<dto.FoodDTO>) pageFood.getData();
-
+    java.util.List<dto.FoodDTO> foods = null;
+    if (pageFood != null) {
+        foods = pageFood.getData();
+    }
+    
     model.PageRequest pageReq = (model.PageRequest) request.getAttribute("pageReq");
-    String keyword = pageReq.getKeyword();
-    int totalPage = pageFood.getTotalPage();
+    String keyword = pageReq != null ? pageReq.getKeyword() : "";
+    int totalPage = pageFood != null ? pageFood.getTotalPage() : 1;
 %>
 
 <!-- 🔍 Tìm kiếm -->
@@ -25,17 +28,8 @@
   <div class="max-w-5xl mx-auto text-center px-4">
     <form action="home" method="get" class="flex flex-col sm:flex-row items-center gap-3 justify-center">
       <input type="text" name="keyword" value="<%= keyword != null ? keyword : "" %>"
-             placeholder="Tìm món ăn bạn muốn..." 
+             placeholder="Tìm theo tên hoặc giá món ăn..." 
              class="w-full sm:w-2/3 rounded-full border border-gray-300 px-5 py-2 focus:ring-2 focus:ring-blue-400 outline-none transition-all" />
-
-      <select name="sortfield" class="rounded-full border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-400">
-        <option value="nameFood">Tên món</option>
-        <option value="priceFood">Giá</option>
-      </select>
-      <select name="orderfield" class="rounded-full border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-400">
-        <option value="ASC">Tăng dần</option>
-        <option value="DESC">Giảm dần</option>
-      </select>
 
       <button type="submit"
               class="bg-blue-600 text-white rounded-full px-3 py-2 focus:ring-2 focus:ring-blue-400" style="width:150px;">
@@ -50,34 +44,92 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <!-- <h2 class="text-xl font-bold text-gray-800 mb-4 text-center">Tất cả món ăn</h2> -->
 
+    <% if (foods != null && !foods.isEmpty()) { %>
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       <%
-        if (foods != null) {
-          for (FoodDTO food : foods) {
+        for (FoodDTO food : foods) {
       %>
       <div class="bg-white rounded-xl shadow hover:shadow-md border border-gray-200 overflow-hidden transition">
-        <img src="<%= food.getImage() %>" alt="<%= food.getNameFood() %>"
+        <img src="<%= food.getImage() != null && !food.getImage().isEmpty() ? food.getImage() : "/images/default-food.jpg" %>" 
+             alt="<%= food.getNameFood() %>"
              class="w-full h-32 object-cover">
         <div class="p-3">
           <h3 class="font-medium text-gray-800 text-sm truncate"><%= food.getNameFood() %></h3>
-          <p class="text-blue-600 font-bold text-sm"><%= food.getPriceFood() %>đ</p>
-          <button onclick="addToCart(<%= food.getStallId() %>, <%= food.getId() %>, '<%= food.getNameFood() %>', <%= food.getPriceFood() %>, '<%= food.getImage() %>')"
-                  class="mt-2 w-full bg-blue-600 text-white py-1.5 rounded text-sm hover:bg-blue-700 transition">
+          <p class="text-blue-600 font-bold text-sm"><%= String.format("%,.0f", food.getPriceFood()) %>đ</p>
+          <button class="add-to-cart-btn mt-2 w-full bg-blue-600 text-white py-1.5 rounded text-sm hover:bg-blue-700 transition"
+                  data-stall-id="<%= food.getStallId() %>"
+                  data-food-id="<%= food.getId() %>"
+                  data-food-name="<%= food.getNameFood().replace("\"", "&quot;").replace("'", "&#39;") %>"
+                  data-food-price="<%= food.getPriceFood() %>"
+                  data-food-image="<%= (food.getImage() != null && !food.getImage().isEmpty() ? food.getImage() : "/images/default-food.jpg").replace("\"", "&quot;").replace("'", "&#39;") %>">
             Thêm vào giỏ
           </button>
         </div>
       </div>
-      <% } } %>
-    </div>
-
-    <div class="flex justify-center mt-6 space-x-2">
-      <% for (int i = 1; i <= totalPage; i++) { %>
-        <a href="home?action=list&page=<%= i %>&keyword=<%= keyword %>"
-           class="px-3 py-1 rounded-full border text-sm <%= (i == pageReq.getPage()) ? "bg-blue-600 text-white" : "bg-white hover:bg-blue-100" %>">
-          <%= i %>
-        </a>
       <% } %>
     </div>
+    <% } else { %>
+    <div class="text-center py-12">
+      <i data-lucide="info" class="w-12 h-12 text-gray-400 mx-auto mb-4"></i>
+      <p class="text-gray-600">Không tìm thấy món ăn nào.</p>
+    </div>
+    <% } %>
+
+    <% if (totalPage > 1 && pageFood != null) { %>
+    <div class="flex justify-center mt-6 space-x-2">
+      <% 
+        String keywordParam = keyword != null ? keyword : "";
+        int currentPage = pageFood.getCurrentPage();
+        
+        // Previous button
+        if (currentPage > 1) {
+      %>
+      <a href="home?page=<%= currentPage - 1 %>&keyword=<%= keywordParam %>"
+         class="px-3 py-1 rounded-full border text-sm bg-white hover:bg-blue-100">
+        <i data-lucide="chevron-left" class="w-4 h-4 inline"></i> Trước
+      </a>
+      <% } %>
+      
+      <% 
+        int startPage = Math.max(1, currentPage - 2);
+        int endPage = Math.min(totalPage, currentPage + 2);
+        
+        if (startPage > 1) {
+      %>
+      <a href="home?page=1&keyword=<%= keywordParam %>"
+         class="px-3 py-1 rounded-full border text-sm bg-white hover:bg-blue-100">
+        1
+      </a>
+      <% if (startPage > 2) { %>
+      <span class="px-3 py-1 text-sm">...</span>
+      <% } %>
+      <% } %>
+      
+      <% for (int i = startPage; i <= endPage; i++) { %>
+      <a href="home?page=<%= i %>&keyword=<%= keywordParam %>"
+         class="px-3 py-1 rounded-full border text-sm <%= (i == currentPage) ? "bg-blue-600 text-white" : "bg-white hover:bg-blue-100" %>">
+        <%= i %>
+      </a>
+      <% } %>
+      
+      <% if (endPage < totalPage) { %>
+      <% if (endPage < totalPage - 1) { %>
+      <span class="px-3 py-1 text-sm">...</span>
+      <% } %>
+      <a href="home?page=<%= totalPage %>&keyword=<%= keywordParam %>"
+         class="px-3 py-1 rounded-full border text-sm bg-white hover:bg-blue-100">
+        <%= totalPage %>
+      </a>
+      <% } %>
+      
+      <% if (currentPage < totalPage) { %>
+      <a href="home?page=<%= currentPage + 1 %>&keyword=<%= keywordParam %>"
+         class="px-3 py-1 rounded-full border text-sm bg-white hover:bg-blue-100">
+        Sau <i data-lucide="chevron-right" class="w-4 h-4 inline"></i>
+      </a>
+      <% } %>
+    </div>
+    <% } %>
   </div>
 </section>
 
@@ -91,6 +143,18 @@
     lucide.createIcons();
     updateCartCount();
     renderCart();
+    
+    // Add event listeners to all add-to-cart buttons
+    document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const stallId = parseInt(this.getAttribute('data-stall-id'));
+        const id = parseInt(this.getAttribute('data-food-id'));
+        const name = this.getAttribute('data-food-name');
+        const price = parseFloat(this.getAttribute('data-food-price'));
+        const image = this.getAttribute('data-food-image');
+        addToCart(stallId, id, name, price, image);
+      });
+    });
   });
 
   function addToCart(stall_id, id, name, price, image) {
@@ -144,7 +208,7 @@
 	    	html += '<span class="w-6 text-center">' + item.quantity + '</span>';
 	    	html += '<button onclick="updateQuantity(' + item.id + ',' + (item.quantity + 1) + ')" class="p-1 bg-gray-200 rounded-full">+</button>';
 	    	html += '</div>';
-	    	html += '<button onclick="removeFromCart("\'' + item.id + '\')" class="text-red-600">✕</button>';
+	    	html += '<button onclick="removeFromCart(' + item.id + ')" class="text-red-600">✕</button>';
 	    	html += '</div>';
 
 	      return html;
