@@ -34,13 +34,13 @@ public class FoodServiceImpl implements FoodService {
 	}
 
 	@Override
-	public boolean create(String nameFood, double priceFood, int inventoryFood, int stallId) {
-		return this.foodRepository.create(nameFood, priceFood, inventoryFood, stallId);
+	public boolean create(String nameFood, double priceFood, int inventoryFood, int stallId, Integer categoryId, String image, String description, Double promotion, Boolean isAvailable) {
+		return this.foodRepository.create(nameFood, priceFood, inventoryFood, stallId, categoryId, image, description, promotion, isAvailable);
 	}
 
 	@Override
-	public boolean update(int id, String nameFood, double priceFood, int inventoryFood) {
-		return this.foodRepository.update(id, nameFood, priceFood, inventoryFood);
+	public boolean update(int id, String nameFood, double priceFood, int inventoryFood, Integer categoryId, String image, String description, Double promotion, Boolean isAvailable) {
+		return this.foodRepository.update(id, nameFood, priceFood, inventoryFood, categoryId, image, description, promotion, isAvailable);
 	}
 
 	@Override

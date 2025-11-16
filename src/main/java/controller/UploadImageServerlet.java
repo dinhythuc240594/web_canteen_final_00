@@ -70,15 +70,21 @@ public class UploadImageServerlet extends HttpServlet {
         String ext = submitted.contains(".") ? submitted.substring(submitted.lastIndexOf(".")) : "";
         String safeName = UUID.randomUUID().toString().replace("-", "") + ext.toLowerCase();
 
-        // Lưu ngoài webapp (đừng để trong war)
-        Path root = Paths.get(System.getProperty("uploads.dir", "C:/uploads"), "ck4");
+        // Lưu vào thư mục uploads trong webapp để có thể truy cập qua public URL
+        String appRealPath = request.getServletContext().getRealPath("");
+        if (appRealPath == null) {
+            // Fallback nếu không có real path (chạy từ WAR)
+            appRealPath = System.getProperty("user.home") + "/uploads";
+        }
+        
+        Path root = Paths.get(appRealPath, "uploads", "ck4");
         Files.createDirectories(root);
         try (InputStream in = filePart.getInputStream()) {
             Files.copy(in, root.resolve(safeName), StandardCopyOption.REPLACE_EXISTING);
         }
 
-        // URL public—bạn cần có servlet tĩnh /static/* hoặc map qua Nginx
-        String publicUrl = request.getContextPath() + "/static/ck4/" + URLEncoder.encode(safeName, "UTF-8");
+        // URL public - sử dụng đường dẫn tương đối từ webapp
+        String publicUrl = request.getContextPath() + "/uploads/ck4/" + URLEncoder.encode(safeName, "UTF-8");
 
         if (funcNum != null) {
             // ===== Kiểu B: callback cho file dialog =====

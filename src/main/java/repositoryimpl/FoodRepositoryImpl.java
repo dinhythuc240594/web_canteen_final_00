@@ -39,10 +39,15 @@ public class FoodRepositoryImpl implements FoodRepository{
                 int inventoryFood  = rs.getInt("inventory");
                 String imageFood = rs.getString("image");
                 String descriptionFood = rs.getString("description");
+                int category_id = rs.getInt("category_id");
                 double promotion = rs.getDouble("promotion");
                 int stall_id = rs.getInt("stall_id");
 
-                foundFood = FoodDTO.toDto(new FoodDAO(idFood, nameFood, priceFood, inventoryFood), promotion, stall_id);
+                FoodDAO foodDAO = new FoodDAO(idFood, nameFood, priceFood, inventoryFood);
+                foodDAO.setImage(imageFood);
+                foodDAO.setDescription(descriptionFood);
+                foodDAO.setCategory_id(category_id);
+                foundFood = FoodDTO.toDto(foodDAO, promotion, stall_id);
                 break;
             }
 
@@ -53,8 +58,8 @@ public class FoodRepositoryImpl implements FoodRepository{
 	}
 
 	@Override
-	public boolean create(String nameFood, double priceFood, int inventoryFood, int stallId) {
-        String sql = "INSERT INTO foods (name, price, inventory, stall_id) VALUES (?,?,?,?)";
+	public boolean create(String nameFood, double priceFood, int inventoryFood, int stallId, Integer categoryId, String image, String description, Double promotion, Boolean isAvailable) {
+        String sql = "INSERT INTO foods (name, price, inventory, stall_id, category_id, image, description, promotion, is_available) VALUES (?,?,?,?,?,?,?,?,?)";
         try (
         	Connection conn = ds.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);) {
@@ -62,29 +67,94 @@ public class FoodRepositoryImpl implements FoodRepository{
             ps.setDouble(2, priceFood);
             ps.setInt(3, inventoryFood);
             ps.setInt(4, stallId);
+            if (categoryId != null && categoryId > 0) {
+                ps.setInt(5, categoryId);
+            } else {
+                ps.setNull(5, java.sql.Types.INTEGER);
+            }
+            ps.setString(6, image);
+            ps.setString(7, description);
+            if (promotion != null) {
+                ps.setDouble(8, promotion);
+            } else {
+                ps.setDouble(8, 0.0);
+            }
+            ps.setBoolean(9, isAvailable != null ? isAvailable : true);
             ps.executeUpdate();
             return true;
 	    } catch (Exception e) {
 	    	System.err.println("Lỗi create: " + e.getMessage());
+	    	e.printStackTrace();
 	    	return false;
 	    }
 	}
 
 	@Override
-	public boolean update(int id, String nameFood, double priceFood, int inventoryFood) {
-        String sql = "UPDATE foods SET name = ?, price = ?, inventory = ? WHERE id = ?";
-      try (
+	public boolean update(int id, String nameFood, double priceFood, int inventoryFood, Integer categoryId, String image, String description, Double promotion, Boolean isAvailable) {
+        // Build dynamic SQL based on which fields are provided
+        StringBuilder sql = new StringBuilder("UPDATE foods SET name = ?, price = ?, inventory = ?");
+        List<Object> params = new ArrayList<>();
+        params.add(nameFood);
+        params.add(priceFood);
+        params.add(inventoryFood);
+        
+        int paramIndex = 4;
+        
+        if (categoryId != null) {
+            sql.append(", category_id = ?");
+            params.add(categoryId);
+            paramIndex++;
+        }
+        
+        if (image != null && !image.trim().isEmpty()) {
+            sql.append(", image = ?");
+            params.add(image);
+            paramIndex++;
+        }
+        
+        if (description != null) {
+            sql.append(", description = ?");
+            params.add(description);
+            paramIndex++;
+        }
+        
+        if (promotion != null) {
+            sql.append(", promotion = ?");
+            params.add(promotion);
+            paramIndex++;
+        }
+        
+        if (isAvailable != null) {
+            sql.append(", is_available = ?");
+            params.add(isAvailable);
+            paramIndex++;
+        }
+        
+        sql.append(" WHERE id = ?");
+        params.add(id);
+        
+        try (
       	Connection conn = ds.getConnection();
-          PreparedStatement ps = conn.prepareStatement(sql);) {
+          PreparedStatement ps = conn.prepareStatement(sql.toString());) {
 
-          ps.setString(1, nameFood);
-          ps.setDouble(2, priceFood);
-          ps.setInt(3, inventoryFood);
-          ps.setInt(4, id); 
+          for (int i = 0; i < params.size(); i++) {
+              Object param = params.get(i);
+              if (param instanceof String) {
+                  ps.setString(i + 1, (String) param);
+              } else if (param instanceof Integer) {
+                  ps.setInt(i + 1, (Integer) param);
+              } else if (param instanceof Double) {
+                  ps.setDouble(i + 1, (Double) param);
+              } else if (param instanceof Boolean) {
+                  ps.setBoolean(i + 1, (Boolean) param);
+              }
+          }
+          
           ps.executeUpdate();
           return true;
 	  } catch (Exception e) {
 		  System.err.println("Lỗi update: " + e.getMessage());
+		  e.printStackTrace();
 		  return false;
 	  }
 	}
