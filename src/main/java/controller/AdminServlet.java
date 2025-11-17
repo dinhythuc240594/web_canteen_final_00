@@ -432,12 +432,12 @@ public class AdminServlet extends HttpServlet {
 	private List<Map<String, Object>> getBestSellingFoods() {
 		List<Map<String, Object>> bestSelling = new ArrayList<>();
 		
-		String sql = "SELECT of.food_id, f.name, SUM(of.quantity) as total_quantity, SUM(of.quantity * of.price_at_order) as total_revenue " +
-					 "FROM order_foods of " +
-					 "INNER JOIN orders o ON of.order_id = o.id " +
-					 "INNER JOIN foods f ON of.food_id = f.id " +
+		String sql = "SELECT ofd.food_id, f.name, SUM(ofd.quantity) as total_quantity, SUM(ofd.quantity * ofd.price_at_order) as total_revenue " +
+					 "FROM order_foods ofd " +
+					 "INNER JOIN orders o ON ofd.order_id = o.id " +
+					 "INNER JOIN foods f ON ofd.food_id = f.id " +
 					 "WHERE o.status = 'delivered' " +
-					 "GROUP BY of.food_id, f.name " +
+					 "GROUP BY ofd.food_id, f.name " +
 					 "ORDER BY total_quantity DESC " +
 					 "LIMIT 10";
 		

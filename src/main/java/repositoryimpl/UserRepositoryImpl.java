@@ -208,6 +208,22 @@ public class UserRepositoryImpl implements UserRepository {
 	}
 
 	@Override
+	public boolean updatePassword(int id, String hashedPassword) {
+		String sql = "UPDATE users SET password=? WHERE id=?";
+		try (Connection conn = ds.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)){
+    		ps.setString(1, hashedPassword);
+    		ps.setInt(2, id);
+
+            int affectedRows = ps.executeUpdate();
+            return affectedRows > 0;
+       } catch (Exception e) {
+           e.printStackTrace();
+       }
+    	return false;
+	}
+
+	@Override
 	public boolean deleteById(int id) {
 		String sql = "DELETE FROM users WHERE id=?";
 		try (Connection conn = ds.getConnection();

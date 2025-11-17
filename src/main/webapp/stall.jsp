@@ -56,10 +56,16 @@
                         <p class="text-gray-600 mt-2">Xin chào, <%= user != null ? user.getFull_name() : username %>!</p>
                     </div>
                 </div>
-                <a href="<%= contextPath %>/stall-profile" class="inline-flex items-center justify-center rounded-md border border-blue-600 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50">
-                    <i data-lucide="edit" class="w-4 h-4 mr-2"></i>
-                    Chỉnh sửa thông tin
-                </a>
+                <div class="flex flex-wrap gap-2">
+                    <a href="<%= contextPath %>/stall-profile" class="inline-flex items-center justify-center rounded-md border border-blue-600 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50">
+                        <i data-lucide="edit" class="w-4 h-4 mr-2"></i>
+                        Chỉnh sửa thông tin
+                    </a>
+                    <a href="<%= contextPath %>/change-password" class="inline-flex items-center justify-center rounded-md border border-amber-500 px-4 py-2 text-sm font-medium text-amber-600 hover:bg-amber-50">
+                        <i data-lucide="key" class="w-4 h-4 mr-2"></i>
+                        Đổi mật khẩu
+                    </a>
+                </div>
             </div>
             <% if (profileSuccess != null) { %>
                 <div class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">

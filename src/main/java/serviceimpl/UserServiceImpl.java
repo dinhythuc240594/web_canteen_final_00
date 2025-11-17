@@ -8,6 +8,7 @@ import model.UserDAO;
 import repository.UserRepository;
 import repositoryimpl.UserRepositoryImpl;
 import service.UserService;
+import utils.MD5Generator;
 
 public class UserServiceImpl implements UserService{
 	private UserRepository userRepository;
@@ -59,6 +60,12 @@ public class UserServiceImpl implements UserService{
 	@Override
 	public boolean updateStatus(int id, boolean status) {
 		return this.userRepository.updateStatus(id, status);
+	}
+	
+	@Override
+	public boolean updatePassword(int id, String rawPassword) {
+		String hashedPassword = MD5Generator.generateMD5(rawPassword);
+		return this.userRepository.updatePassword(id, hashedPassword);
 	}
 
 	@Override

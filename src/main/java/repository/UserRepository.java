@@ -13,6 +13,7 @@ public interface UserRepository {
 	boolean update(UserDAO user);
 	boolean updateProfile(UserDAO user);
 	boolean updateStatus(int id, boolean status);
+	boolean updatePassword(int id, String hashedPassword);
 	boolean deleteById(int id);
 	int count();
 	boolean existsByUsername(String username);

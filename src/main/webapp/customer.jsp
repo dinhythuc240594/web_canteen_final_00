@@ -101,10 +101,16 @@
                     <h2 class="text-xl font-bold text-gray-800">Thông tin tài khoản</h2>
 <%--                    <p class="text-gray-500 text-sm mt-1">Thông tin cá nhân và liên hệ của bạn</p>--%>
                 </div>
-                <a href="<%= contextPath %>/customer?view=edit" class="inline-flex items-center justify-center rounded-md border border-blue-600 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50">
-                    <i data-lucide="edit" class="w-4 h-4 mr-2"></i>
-                    Chỉnh sửa thông tin
-                </a>
+                <div class="flex flex-wrap gap-2">
+                    <a href="<%= contextPath %>/customer?view=edit" class="inline-flex items-center justify-center rounded-md border border-blue-600 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50">
+                        <i data-lucide="edit" class="w-4 h-4 mr-2"></i>
+                        Chỉnh sửa thông tin
+                    </a>
+                    <a href="<%= contextPath %>/change-password" class="inline-flex items-center justify-center rounded-md border border-amber-500 px-4 py-2 text-sm font-medium text-amber-600 hover:bg-amber-50">
+                        <i data-lucide="key" class="w-4 h-4 mr-2"></i>
+                        Đổi mật khẩu
+                    </a>
+                </div>
             </div>
             <div class="flex items-center gap-4 mb-6">
                 <img src="<%= avatarUrl %>" alt="Ảnh đại diện" class="w-20 h-20 rounded-full object-cover border border-gray-200 shadow-sm" />

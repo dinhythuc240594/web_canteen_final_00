@@ -51,7 +51,7 @@
     <title>Quản trị - Canteen ĐH</title>
     <jsp:include page="/WEB-INF/jsp/common/head.jsp" />
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50" data-current-user-id="<%= currentUserId != null ? currentUserId : "" %>">
 <jsp:include page="/WEB-INF/jsp/common/header.jsp" />
 
 <main class="min-h-screen">
@@ -71,7 +71,7 @@
                     <a href="#foods" class="block px-3 py-2 rounded text-gray-700 hover:bg-gray-100">Món ăn</a>
                     <a href="#orders" class="block px-3 py-2 rounded text-gray-700 hover:bg-gray-100">Đơn hàng</a>
                     <a href="#stalls" class="block px-3 py-2 rounded text-gray-700 hover:bg-gray-100">Quầy ăn</a>
-                    <a href="#reports" class="block px-3 py-2 rounded text-gray-700 hover:bg-gray-100">Báo cáo</a>
+                    <!-- <a href="#reports" class="block px-3 py-2 rounded text-gray-700 hover:bg-gray-100">Báo cáo</a> -->
                 </nav>
             </aside>
 
@@ -131,6 +131,36 @@
                                     <p class="text-2xl font-bold text-orange-600"><%= totalStalls %></p>
                                 </div>
                                 <i data-lucide="store" class="text-orange-600"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div class="bg-white p-4 rounded-lg shadow-sm border">
+                            <div class="flex items-center justify-between mb-3 gap-3">
+                                <div>
+                                    <h3 class="text-lg font-semibold">Biểu đồ doanh thu theo ngày</h3>
+                                    <p class="text-sm text-gray-500">Theo dõi doanh thu gần đây</p>
+                                </div>
+                                <select id="revenue-chart-range" class="px-3 py-2 border rounded-md text-sm">
+                                    <option value="7">7 ngày qua</option>
+                                    <option value="30">30 ngày qua</option>
+                                </select>
+                            </div>
+                            <div class="h-64">
+                                <canvas id="revenue-chart" class="w-full h-full"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm border">
+                            <div class="flex items-center justify-between mb-3">
+                                <div>
+                                    <h3 class="text-lg font-semibold">Món bán chạy</h3>
+                                    <p class="text-sm text-gray-500">Top 5 món có doanh thu cao nhất</p>
+                                </div>
+                                <button id="refresh-best-seller" class="text-sm text-blue-600 hover:text-blue-800">Làm mới</button>
+                            </div>
+                            <div id="best-seller-list" class="space-y-2 text-sm text-gray-700">
+                                <div class="text-gray-400 text-center py-8 text-sm">Đang tải dữ liệu...</div>
                             </div>
                         </div>
                     </div>
@@ -269,13 +299,16 @@
                             <h1 class="text-2xl font-bold text-gray-800">Quản lý người dùng</h1>
                             <p class="text-gray-600">Danh sách khách hàng và đơn hàng đã đặt</p>
                         </div>
-                        <div class="flex gap-2">
+                        <div class="flex flex-wrap gap-2 justify-end w-full md:w-auto">
                             <button onclick="loadUsers('customer')" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center space-x-2">
                                 <i data-lucide="users"></i><span>Khách hàng</span>
                             </button>
                             <button onclick="loadUsers('stall')" class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 flex items-center space-x-2">
                                 <i data-lucide="store"></i><span>Quầy ăn</span>
                             </button>
+                            <a href="<%=contextPath%>/admin-create-user.jsp" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center space-x-2">
+                                <i data-lucide="plus-circle"></i><span>Tạo tài khoản</span>
+                            </a>
                         </div>
                     </div>
 
@@ -429,9 +462,9 @@
                             <h1 class="text-2xl font-bold text-gray-800">Quản lý quầy ăn</h1>
                             <p class="text-gray-600">Tất cả quầy</p>
                         </div>
-                        <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center space-x-2">
+                        <a href="<%=contextPath%>/admin-create-stall.jsp" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center space-x-2">
                             <i data-lucide="plus-circle"></i><span>Thêm quầy</span>
-                        </button>
+                        </a>
                     </div>
 
                     <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
@@ -523,10 +556,18 @@
 </main>
 
 <jsp:include page="/WEB-INF/jsp/common/footer.jsp" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js" integrity="sha256-kPZArYrusS4x+h0/pk3jfbQfVIAtF+wNCz7r+G2kZZg=" crossorigin="anonymous"></script>
 
 <script>
     // Set current user ID for JavaScript
-    var currentUserId = <% if (currentUserId != null) { %><%= currentUserId %><% } else { %>null<% } %>;
+    var adminContextPath = '<%=contextPath%>';
+    var currentUserIdAttr = document.body.getAttribute('data-current-user-id');
+    var currentUserId = currentUserIdAttr ? parseInt(currentUserIdAttr, 10) : null;
+    var revenueChartInstance = null;
+    var allUsersData = [];
+    var allFoodsData = [];
+    var allOrdersData = [];
+    var currentUserType = 'customer';
     
     // Active state cho menu + chuyển view theo hash
     function setActiveView(hash) {
@@ -590,11 +631,6 @@
         loadReports();
     }
     
-    // Global variables to store original data
-    let allUsersData = [];
-    let allFoodsData = [];
-    let allOrdersData = [];
-    let currentUserType = 'customer';
     
     // Load users data - loads customers or stall users with orders
     function loadUsers(type) {
@@ -766,8 +802,8 @@
             html += '<tr class="border-b hover:bg-gray-50">';
             html += '<td class="py-3 px-4">'
             html += '<div class="flex items-center space-x-3">'
-            html += '<img src="' + imageUrl + '"';
-            html += 'class="w-10 h-10 rounded object-cover" alt="' + (food.name || 'N/A') +'"/>';
+            // html += '<img src="' + imageUrl + '"';
+            // html += 'class="w-10 h-10 rounded object-cover" alt="' + (food.name || 'N/A') +'"/>';
             html += '<span>' + (food.name || "N/A") + '</span>';
             html += '</div>';
             html += '</td>';
@@ -963,7 +999,7 @@
                             '<div class="flex justify-between border-b py-2">' +
                                 '<div class="flex items-center space-x-3">' +
                                     '<span class="text-sm font-medium text-gray-500">#'+ (index + 1) + '</span>' +
-                                    '<span>'+ food.getNameFood() + '</span>' +
+                                    '<span>'+ (food.foodName || 'N/A') + '</span>' +
                                 '</div>' +
                                 '<span class="font-semibold text-green-600">'+ (food.totalQuantity || 0) +' đơn</span>'+
                             '</div>'
@@ -976,6 +1012,7 @@
                         }
                     }
                 }
+                renderDashboardBestSellers(report.bestSellingFoods || []);
             })
             .catch(error => console.error('Error loading reports:', error));
     }
@@ -1009,6 +1046,126 @@
         document.getElementById('reports-period').value = 'custom';
     }
     
+    // ---------- Dashboard revenue chart & best sellers ----------
+    function getDateString(date) {
+        return date.toISOString().split('T')[0];
+    }
+
+    function fetchRevenueStatistics(days) {
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(endDate.getDate() - (parseInt(days, 10) - 1));
+        const params = new URLSearchParams({
+            action: 'statistics',
+            startDate: getDateString(startDate),
+            endDate: getDateString(endDate)
+        });
+        return fetch(adminContextPath + '/admin?' + params.toString())
+            .then(res => res.json())
+            .catch(() => []);
+    }
+
+    function prepareRevenueData(stats, days) {
+        const map = new Map();
+        (stats || []).forEach(stat => {
+            const date = stat.statDate ? stat.statDate.split('T')[0] : '';
+            if (!date) return;
+            const revenue = stat.revenue || 0;
+            map.set(date, (map.get(date) || 0) + revenue);
+        });
+        const dataPoints = [];
+        const end = new Date();
+        const start = new Date();
+        start.setDate(end.getDate() - (parseInt(days, 10) - 1));
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+            const key = getDateString(d);
+            dataPoints.push({
+                date: new Date(key).toLocaleDateString('vi-VN'),
+                revenue: map.get(key) || 0
+            });
+        }
+        return dataPoints;
+    }
+
+    function renderRevenueChart(dataPoints) {
+        const canvas = document.getElementById('revenue-chart');
+        if (!canvas) return;
+        if (revenueChartInstance) {
+            revenueChartInstance.destroy();
+        }
+        revenueChartInstance = new Chart(canvas, {
+            type: 'line',
+            data: {
+                labels: dataPoints.map(d => d.date),
+                datasets: [{
+                    label: 'Doanh thu (đ)',
+                    data: dataPoints.map(d => d.revenue),
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.15)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        ticks: {
+                            callback: value => value.toLocaleString('vi-VN') + 'đ'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function loadRevenueChart(days) {
+        fetchRevenueStatistics(days).then(stats => {
+            const dataPoints = prepareRevenueData(stats, days);
+            renderRevenueChart(dataPoints);
+        });
+    }
+
+    function renderDashboardBestSellers(foods) {
+        const container = document.getElementById('best-seller-list');
+        if (!container) return;
+        if (!foods || foods.length === 0) {
+            container.innerHTML = '<div class="text-gray-500 text-center py-4">Chưa có dữ liệu</div>';
+            return;
+        }
+        container.innerHTML = foods.slice(0, 5).map(function(food, index) {
+            return '' +
+                '<div class="flex items-center justify-between border-b pb-2">' +
+                    '<div class="flex items-center gap-3">' +
+                        '<span class="text-sm font-semibold text-gray-500">#' + (index + 1) + '</span>' +
+                        '<div>' +
+                            '<p class="font-medium">' + (food.foodName || 'N/A') + '</p>' +
+                            '<p class="text-xs text-gray-500">' + ((food.totalQuantity || 0).toLocaleString('vi-VN')) + ' món</p>' +
+                        '</div>' +
+                    '</div>' +
+                    '<span class="text-sm font-semibold text-green-600">' + ((food.totalRevenue || 0).toLocaleString('vi-VN')) + 'đ</span>' +
+                '</div>';
+        }).join('');
+    }
+
+    const bestSellerRefreshBtn = document.getElementById('refresh-best-seller');
+    if (bestSellerRefreshBtn) {
+        bestSellerRefreshBtn.addEventListener('click', () => {
+            renderDashboardBestSellers([]);
+            fetch(adminContextPath + '/admin?action=revenue-report')
+                .then(res => res.json())
+                .then(report => renderDashboardBestSellers(report.bestSellingFoods || []))
+                .catch(() => alert('Không thể tải dữ liệu món bán chạy'));
+        });
+    }
+
+    const chartRangeSelect = document.getElementById('revenue-chart-range');
+    if (chartRangeSelect) {
+        chartRangeSelect.addEventListener('change', () => loadRevenueChart(chartRangeSelect.value));
+    }
+
     // Load stalls data
     function loadStalls() {
         fetch('<%=contextPath%>/admin?action=stalls')
@@ -1084,6 +1241,15 @@
             alert('Có lỗi xảy ra');
         });
     }
+
+    // Initial loads for dashboard widgets
+    loadUsers('customer');
+    loadStalls();
+    const defaultRange = chartRangeSelect ? chartRangeSelect.value : 7;
+    loadRevenueChart(defaultRange);
+    fetch(adminContextPath + '/admin?action=revenue-report')
+        .then(res => res.json())
+        .then(report => renderDashboardBestSellers(report.bestSellingFoods || []));
 </script>
 </body>
 </html>
