@@ -80,7 +80,7 @@
                 <tr class="hover:bg-gray-50">
                   <td class="px-4 py-3">
                     <div class="flex items-center space-x-3">
-                      <img src="<%= item.getImage() != null ? item.getImage() : "/images/default-food.jpg" %>" 
+                      <img src="<%= item.getImage() != null ? item.getImage() : "'+${pageContext.request.contextPath}/image/food-thumbnail.png +'" %>"
                            alt="<%= item.getName() %>" 
                            class="w-16 h-16 object-cover rounded">
                       <span class="font-medium text-gray-800"><%= item.getName() %></span>

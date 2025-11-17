@@ -57,7 +57,7 @@
 	                <div class="mb-4">
 	                    <label for="image" class="block text-sm font-medium text-gray-700 mb-2">Hình Ảnh</label>
 	                	<div id="imagePreview" class="mb-3 w-full h-48 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center overflow-hidden bg-gray-50">
-                        	<img src="${pageContext.request.contextPath}/image/food-thumbnail.png" alt="Xem trước ảnh" id="previewImg" class="max-w-full max-h-full object-contain">
+                        	<img src="${pageContext.request.contextPath}/static/img/food-thumbnail.png" alt="Xem trước ảnh" id="previewImg" class="max-w-full max-h-full object-contain">
                     	</div>
 	                    <input type="file" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" id="image" name="image" accept="image/*">
 	                </div>

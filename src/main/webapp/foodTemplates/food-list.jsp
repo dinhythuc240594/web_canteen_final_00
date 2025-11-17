@@ -35,6 +35,8 @@
 	boolean canCreateFood = isStallOwner && (selectedStallId == null || selectedStallId.equals(userStallId));
 	
 	java.util.List<model.StallDAO> stalls = (java.util.List<model.StallDAO>) request.getAttribute("stalls");
+	String contextPath = request.getContextPath();
+	String defaultFoodImage = contextPath + "/image/food-thumbnail.png";
 %>
 
 <!-- 🔍 Tìm kiếm -->
@@ -76,8 +78,24 @@
       <%
         for (dto.FoodDTO food : foods) {
       %>
+      <%
+        String rawImage = food.getImage();
+        String imageUrl = defaultFoodImage;
+        if (rawImage != null && !rawImage.trim().isEmpty()) {
+          String trimmedImage = rawImage.trim();
+          if (trimmedImage.startsWith("http://") || trimmedImage.startsWith("https://")) {
+            imageUrl = trimmedImage;
+          } else if (trimmedImage.startsWith(contextPath)) {
+            imageUrl = trimmedImage;
+          } else if (trimmedImage.startsWith("/")) {
+            imageUrl = contextPath + trimmedImage;
+          } else {
+            imageUrl = contextPath + "/" + trimmedImage;
+          }
+        }
+      %>
       <div class="bg-white rounded-xl shadow hover:shadow-md border border-gray-200 overflow-hidden transition">
-        <img src="<%= food.getImage() != null && !food.getImage().isEmpty() ? food.getImage() : "/images/default-food.jpg" %>" 
+        <img src="<%= imageUrl %>" 
              alt="<%= food.getNameFood() %>"
              class="w-full h-32 object-cover">
         <div class="p-3">
@@ -188,6 +206,7 @@
 
 <script>
   let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const defaultFoodImage = '<%= contextPath %>/image/food-thumbnail.png';
 
   document.addEventListener('DOMContentLoaded', function() {
     lucide.createIcons();
@@ -225,7 +244,8 @@
 
       var html = "";
       html += '<div class="flex items-center space-x-3 bg-gray-50 p-2 rounded mb-2">';
-      html += '<img src="'+ (item.image || "/images/default-food.jpg") +'" class="w-12 h-12 object-cover rounded">';
+      const resolvedImage = item.image ? item.image : defaultFoodImage;
+      html += '<img src="'+ resolvedImage +'" class="w-12 h-12 object-cover rounded">';
       html += '<div class="flex-1">';
       html += '<h3 class="text-sm font-medium text-gray-800 truncate">' + (item.name || "Không rõ món") + '</h3>';
       html += '<p class="text-blue-600 text-sm font-semibold">' + price.toLocaleString('vi-VN') + 'đ</p>';

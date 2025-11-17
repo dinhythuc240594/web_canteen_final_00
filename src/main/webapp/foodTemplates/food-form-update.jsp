@@ -75,7 +75,7 @@
                         <label for="image" class="block text-sm font-medium text-gray-700 mb-2">Hình Ảnh</label>
                         <div id="imagePreview" class="mb-3 w-full h-48 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center overflow-hidden bg-gray-50">
                           <% if(previewImg == "") { %>
-                            <img src="${pageContext.request.contextPath}/image/food-thumbnail.png" alt="Xem trước ảnh" id="previewImg" class="max-w-full max-h-full object-contain">
+                            <img src="${pageContext.request.contextPath}/static/img/food-thumbnail.png" alt="Xem trước ảnh" id="previewImg" class="max-w-full max-h-full object-contain">
                           <% } else { %>
                             <img src="<%= previewImg  %>" alt="Xem trước ảnh" id="previewImg" class="max-w-full max-h-full object-contain">
                             <% } %>
