@@ -160,7 +160,7 @@
     if (!container) return;
 
     if (cart.length === 0) {
-      container.innerHTML = `<div class="text-center py-6 text-gray-500">Giỏ hàng trống</div>`;
+      container.innerHTML = '<div class="text-center py-6 text-gray-500">Giỏ hàng trống</div>';
       if (footer) footer.classList.add('hidden');
       return;
     }

@@ -15,6 +15,8 @@ public interface OrderRepository {
     List<OrderDAO> findByUserId(int userId);
     List<OrderDAO> findByStallId(int stallId);
     List<OrderDAO> findByStallIdAndStatus(int stallId, String status);
+    List<OrderDAO> findByStatus(String status);
+    double getTotalRevenueFromCompletedOrders();
     boolean updateStatus(int id, String newStatus);
 	
 }

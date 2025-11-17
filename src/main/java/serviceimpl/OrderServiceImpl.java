@@ -57,6 +57,16 @@ public class OrderServiceImpl implements OrderService{
 	}
 
 	@Override
+	public List<OrderDAO> findByStatus(String status) {
+		return this.orderRepository.findByStatus(status);
+	}
+
+	@Override
+	public double getTotalRevenueFromCompletedOrders() {
+		return this.orderRepository.getTotalRevenueFromCompletedOrders();
+	}
+
+	@Override
 	public boolean updateStatus(int id, String newStatus) {
 		return this.orderRepository.updateStatus(id, newStatus);
 	}

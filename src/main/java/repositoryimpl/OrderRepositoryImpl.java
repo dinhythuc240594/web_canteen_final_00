@@ -191,6 +191,50 @@ public class OrderRepositoryImpl implements OrderRepository{
 	}
 
 	@Override
+	public List<OrderDAO> findByStatus(String status) {
+		List<OrderDAO> orders = new ArrayList<>();
+        String sql = 
+            "SELECT id, user_id, stall_id, total_price, status, created_at, delivery_location, payment_method " +
+            "FROM orders WHERE status = ? ORDER BY created_at DESC";
+
+        try (Connection conn = ds.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, status);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    orders.add(mapResultSetToOrderDAO(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi tìm đơn hàng theo Status: " + status, e);
+        }
+        return orders;
+	}
+
+	@Override
+	public double getTotalRevenueFromCompletedOrders() {
+		String sql = "SELECT COALESCE(SUM(total_price), 0) as total_revenue FROM orders WHERE status = 'delivered'";
+		
+		try (Connection conn = ds.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next()) {
+					return rs.getDouble("total_revenue");
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Lỗi khi tính tổng doanh thu từ đơn đã hoàn thành", e);
+		}
+		
+		return 0.0;
+	}
+
+	@Override
 	public boolean updateStatus(int id, String newStatus) {
 		String sql = "UPDATE orders SET status = ?, created_at = CURRENT_TIMESTAMP WHERE id = ?"; 
 

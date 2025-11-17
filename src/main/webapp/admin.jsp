@@ -21,11 +21,19 @@
         return;
     }
     
-    // Get data from servlet
-    int totalUsers = (int) request.getAttribute("totalUsers");
-    int totalStalls = (int) request.getAttribute("totalStalls");
-    Double totalRevenue = (Double) request.getAttribute("totalRevenue");
-    int totalOrders = (int) request.getAttribute("totalOrders");
+    // Get data from servlet with null safety
+    Object totalUsersObj = request.getAttribute("totalUsers");
+    int totalUsers = (totalUsersObj != null) ? (Integer) totalUsersObj : 0;
+    
+    Object totalStallsObj = request.getAttribute("totalStalls");
+    int totalStalls = (totalStallsObj != null) ? (Integer) totalStallsObj : 0;
+    
+    Object totalRevenueObj = request.getAttribute("totalRevenue");
+    Double totalRevenue = (totalRevenueObj != null) ? (Double) totalRevenueObj : 0.0;
+    
+    Object totalOrdersObj = request.getAttribute("totalOrders");
+    int totalOrders = (totalOrdersObj != null) ? (Integer) totalOrdersObj : 0;
+    
     java.util.List<model.OrderDAO> recentOrders = (java.util.List<model.OrderDAO>) request.getAttribute("recentOrders");
     java.util.Map<Integer, String> userNames = (java.util.Map<Integer, String>) request.getAttribute("userNames");
     java.util.Map<Integer, String> stallNames = (java.util.Map<Integer, String>) request.getAttribute("stallNames");
@@ -93,7 +101,7 @@
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-sm text-gray-600">Doanh thu hôm nay</p>
-                                    <p class="text-2xl font-bold text-green-600"><%= String.format("%,.0f", totalRevenue) %>đ</p>
+                                    <p class="text-2xl font-bold text-green-600"><%= totalRevenue != null ? String.format("%,.0f", totalRevenue) : "0" %>đ</p>
                                 </div>
                                 <i data-lucide="dollar-sign" class="text-green-600"></i>
                             </div>
@@ -131,25 +139,25 @@
                         <div class="bg-white p-4 rounded-lg shadow-sm border">
                             <h3 class="text-lg font-semibold mb-3">Liên kết nhanh</h3>
                             <div class="space-y-2">
-                                <a href="<%=contextPath%>/statistics" class="block p-3 border rounded hover:bg-gray-50 transition-colors">
+                                <a href="#reports" onclick="setActiveView('reports'); loadReports(); return false;" class="block p-3 border rounded hover:bg-gray-50 transition-colors cursor-pointer">
                                     <div class="flex items-center justify-between">
                                         <span class="font-medium">Xem báo cáo thống kê</span>
                                         <i data-lucide="arrow-right" class="w-4 h-4"></i>
                                     </div>
                                 </a>
-                                <a href="<%=contextPath%>/stall-orders" class="block p-3 border rounded hover:bg-gray-50 transition-colors">
+                                <a href="#orders" onclick="setActiveView('orders'); loadOrders(); return false;" class="block p-3 border rounded hover:bg-gray-50 transition-colors cursor-pointer">
                                     <div class="flex items-center justify-between">
                                         <span class="font-medium">Quản lý đơn hàng</span>
                                         <i data-lucide="arrow-right" class="w-4 h-4"></i>
                                     </div>
                                 </a>
-                                <a href="<%=contextPath%>/foods?action=list" class="block p-3 border rounded hover:bg-gray-50 transition-colors">
+                                <a href="#foods" onclick="setActiveView('foods'); loadFoods(); return false;" class="block p-3 border rounded hover:bg-gray-50 transition-colors cursor-pointer">
                                     <div class="flex items-center justify-between">
                                         <span class="font-medium">Quản lý món ăn</span>
                                         <i data-lucide="arrow-right" class="w-4 h-4"></i>
                                     </div>
                                 </a>
-                                <a href="<%=contextPath%>/store" class="block p-3 border rounded hover:bg-gray-50 transition-colors">
+                                <a href="#stalls" onclick="setActiveView('stalls'); loadStalls(); return false;" class="block p-3 border rounded hover:bg-gray-50 transition-colors cursor-pointer">
                                     <div class="flex items-center justify-between">
                                         <span class="font-medium">Quản lý quầy ăn</span>
                                         <i data-lucide="arrow-right" class="w-4 h-4"></i>
@@ -174,7 +182,7 @@
                                 </div>
                                 <div class="flex justify-between">
                                     <span>Doanh thu hôm nay</span>
-                                    <span class="font-semibold text-green-600"><%= String.format("%,.0f", totalRevenue) %>đ</span>
+                                    <span class="font-semibold text-green-600"><%= totalRevenue != null ? String.format("%,.0f", totalRevenue) : "0" %>đ</span>
                                 </div>
                             </div>
                         </div>
@@ -259,19 +267,32 @@
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
                             <h1 class="text-2xl font-bold text-gray-800">Quản lý người dùng</h1>
-                            <p class="text-gray-600">Tất cả tài khoản người dùng (mock)</p>
+                            <p class="text-gray-600">Danh sách khách hàng và đơn hàng đã đặt</p>
                         </div>
-                        <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center space-x-2">
-                            <i data-lucide="plus-circle"></i><span>Thêm người dùng</span>
-                        </button>
+                        <div class="flex gap-2">
+                            <button onclick="loadUsers('customer')" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center space-x-2">
+                                <i data-lucide="users"></i><span>Khách hàng</span>
+                            </button>
+                            <button onclick="loadUsers('stall')" class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 flex items-center space-x-2">
+                                <i data-lucide="store"></i><span>Quầy ăn</span>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="bg-white p-4 rounded-lg shadow-sm border">
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <input type="text" class="px-3 py-2 border rounded text-sm" placeholder="Tìm kiếm (tên/email)"/>
-                            <select class="px-3 py-2 border rounded text-sm"><option>Tất cả vai trò</option><option>Người dùng</option><option>Nhân viên</option><option>Quản trị viên</option></select>
-                            <select class="px-3 py-2 border rounded text-sm"><option>Tất cả trạng thái</option><option>Hoạt động</option><option>Khóa</option></select>
-                            <button class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 text-sm">Xóa bộ lọc</button>
+                            <input type="text" id="users-search" class="px-3 py-2 border rounded text-sm" placeholder="Tìm kiếm (tên/email/SĐT)" onkeyup="filterUsers()"/>
+                            <select id="users-status-filter" class="px-3 py-2 border rounded text-sm" onchange="filterUsers()">
+                                <option value="all">Tất cả trạng thái</option>
+                                <option value="true">Hoạt động</option>
+                                <option value="false">Khóa</option>
+                            </select>
+                            <select id="users-type-filter" class="px-3 py-2 border rounded text-sm" onchange="filterUsers()">
+                                <option value="all">Tất cả loại</option>
+                                <option value="customer">Khách hàng</option>
+                                <option value="stall">Quầy ăn</option>
+                            </select>
+                            <button onclick="clearUsersFilter()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 text-sm">Xóa bộ lọc</button>
                         </div>
                     </div>
 
@@ -286,30 +307,13 @@
                                     <th class="text-left py-3 px-4">SĐT</th>
                                     <th class="text-left py-3 px-4">Vai trò</th>
                                     <th class="text-left py-3 px-4">Trạng thái</th>
-                                    <th class="text-left py-3 px-4">Số dư</th>
+                                    <th class="text-left py-3 px-4">Số dư/Doanh thu</th>
                                     <th class="text-left py-3 px-4">Ngày tham gia</th>
                                     <th class="text-left py-3 px-4">Hành động</th>
                                 </tr>
                                 </thead>
-                                <tbody>
-                                <tr class="border-b hover:bg-gray-50">
-                                    <td class="py-3 px-4">#1</td>
-                                    <td class="py-3 px-4">nguyenvana</td>
-                                    <td class="py-3 px-4">a@example.com</td>
-                                    <td class="py-3 px-4">0123456789</td>
-                                    <td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs bg-blue-100 text-blue-800">Người dùng</span></td>
-                                    <td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs bg-green-100 text-green-800">Hoạt động</span></td>
-                                    <td class="py-3 px-4">500,000đ</td>
-                                    <td class="py-3 px-4">2024-01-15</td>
-                                    <td class="py-3 px-4">
-                                        <div class="flex space-x-2">
-                                            <button class="p-1 text-blue-600 hover:text-blue-800"><i data-lucide="edit" class="w-4 h-4"></i></button>
-                                            <button class="p-1 text-red-600 hover:text-red-800"><i data-lucide="user-x" class="w-4 h-4"></i></button>
-                                            <button class="p-1 text-red-600 hover:text-red-800"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <!-- thêm vài dòng mock khác nếu muốn -->
+                                <tbody id="users-table-body">
+                                <!-- Data will be loaded here -->
                                 </tbody>
                             </table>
                         </div>
@@ -321,7 +325,7 @@
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
                             <h1 class="text-2xl font-bold text-gray-800">Quản lý món ăn</h1>
-                            <p class="text-gray-600">Tất cả món ăn (mock)</p>
+                            <p class="text-gray-600">Danh sách các món ăn của các quầy</p>
                         </div>
                         <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center space-x-2">
                             <i data-lucide="plus-circle"></i><span>Thêm món ăn</span>
@@ -330,11 +334,19 @@
 
                     <div class="bg-white p-4 rounded-lg shadow-sm border">
                         <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                            <input type="text" class="px-3 py-2 border rounded text-sm" placeholder="Tìm món..."/>
-                            <select class="px-3 py-2 border rounded text-sm"><option>Tất cả danh mục</option></select>
-                            <select class="px-3 py-2 border rounded text-sm"><option>Tất cả quầy</option></select>
-                            <select class="px-3 py-2 border rounded text-sm"><option>Tất cả trạng thái</option><option>Hoạt động</option><option>Ngừng</option></select>
-                            <button class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 text-sm">Xóa bộ lọc</button>
+                            <input type="text" id="foods-search" class="px-3 py-2 border rounded text-sm" placeholder="Tìm món..." onkeyup="filterFoods()"/>
+                            <select id="foods-category-filter" class="px-3 py-2 border rounded text-sm" onchange="filterFoods()">
+                                <option value="all">Tất cả danh mục</option>
+                            </select>
+                            <select id="foods-stall-filter" class="px-3 py-2 border rounded text-sm" onchange="filterFoods()">
+                                <option value="all">Tất cả quầy</option>
+                            </select>
+                            <select id="foods-status-filter" class="px-3 py-2 border rounded text-sm" onchange="filterFoods()">
+                                <option value="all">Tất cả trạng thái</option>
+                                <option value="active">Hoạt động</option>
+                                <option value="inactive">Ngừng</option>
+                            </select>
+                            <button onclick="clearFoodsFilter()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 text-sm">Xóa bộ lọc</button>
                         </div>
                     </div>
 
@@ -352,27 +364,8 @@
                                     <th class="text-left py-3 px-4">Hành động</th>
                                 </tr>
                                 </thead>
-                                <tbody>
-                                <tr class="border-b hover:bg-gray-50">
-                                    <td class="py-3 px-4">
-                                        <div class="flex items-center space-x-3">
-                                            <img src="https://placehold.co/40x40/3498db/white?text=PB" class="w-10 h-10 rounded object-cover" alt="Phở bò"/>
-                                            <span>Phở bò</span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3 px-4">30,000đ</td>
-                                    <td class="py-3 px-4">Món nước</td>
-                                    <td class="py-3 px-4">Quầy món nước</td>
-                                    <td class="py-3 px-4">Không</td>
-                                    <td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs bg-green-100 text-green-800">Hoạt động</span></td>
-                                    <td class="py-3 px-4">
-                                        <div class="flex space-x-2">
-                                            <button class="p-1 text-blue-600 hover:text-blue-800"><i data-lucide="edit" class="w-4 h-4"></i></button>
-                                            <button class="p-1 text-red-600 hover:text-red-800"><i data-lucide="x-circle" class="w-4 h-4"></i></button>
-                                            <button class="p-1 text-red-600 hover:text-red-800"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                <tbody id="foods-table-body">
+                                <!-- Data will be loaded here -->
                                 </tbody>
                             </table>
                         </div>
@@ -383,15 +376,26 @@
                 <div data-view="orders" class="space-y-6 admin-view hidden">
                     <div>
                         <h1 class="text-2xl font-bold text-gray-800">Quản lý đơn hàng</h1>
-                        <p class="text-gray-600">Tất cả đơn hàng (mock)</p>
+                        <p class="text-gray-600">Danh sách các hóa đơn</p>
                     </div>
 
                     <div class="bg-white p-4 rounded-lg shadow-sm border">
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <input type="text" class="px-3 py-2 border rounded text-sm" placeholder="Khách hàng, món..."/>
-                            <select class="px-3 py-2 border rounded text-sm"><option>Tất cả trạng thái</option><option>Chờ xử lý</option><option>Đang chuẩn bị</option><option>Hoàn thành</option><option>Đã hủy</option></select>
-                            <select class="px-3 py-2 border rounded text-sm"><option>Tất cả quầy</option></select>
-                            <input type="date" class="px-3 py-2 border rounded text-sm"/>
+                            <input type="text" id="orders-search" class="px-3 py-2 border rounded text-sm" placeholder="Tìm kiếm (ID, khách hàng, quầy)" onkeyup="filterOrders()"/>
+                            <select id="orders-status-filter" class="px-3 py-2 border rounded text-sm" onchange="filterOrders()">
+                                <option value="all">Tất cả trạng thái</option>
+                                <option value="new_order">Chờ xử lý</option>
+                                <option value="confirmed">Đã xác nhận</option>
+                                <option value="in_delivery">Đang giao</option>
+                                <option value="delivered">Hoàn thành</option>
+                            </select>
+                            <select id="orders-stall-filter" class="px-3 py-2 border rounded text-sm" onchange="filterOrders()">
+                                <option value="all">Tất cả quầy</option>
+                            </select>
+                            <input type="date" id="orders-date-filter" class="px-3 py-2 border rounded text-sm" onchange="filterOrders()"/>
+                        </div>
+                        <div class="mt-2">
+                            <button onclick="clearOrdersFilter()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 text-sm">Xóa bộ lọc</button>
                         </div>
                     </div>
 
@@ -402,7 +406,6 @@
                                 <tr>
                                     <th class="text-left py-3 px-4">ID</th>
                                     <th class="text-left py-3 px-4">Khách hàng</th>
-                                    <th class="text-left py-3 px-4">Món ăn</th>
                                     <th class="text-left py-3 px-4">Tổng tiền</th>
                                     <th class="text-left py-3 px-4">Quầy</th>
                                     <th class="text-left py-3 px-4">Trạng thái</th>
@@ -411,29 +414,8 @@
                                     <th class="text-left py-3 px-4">Hành động</th>
                                 </tr>
                                 </thead>
-                                <tbody>
-                                <tr class="border-b hover:bg-gray-50">
-                                    <td class="py-3 px-4">#1001</td>
-                                    <td class="py-3 px-4">Phạm Thị D</td>
-                                    <td class="py-3 px-4">
-                                        <div class="space-y-1">
-                                            <div class="text-sm">Cơm chay thập cẩm</div>
-                                            <div class="text-sm">Salad rau củ</div>
-                                        </div>
-                                    </td>
-                                    <td class="py-3 px-4">48,000đ</td>
-                                    <td class="py-3 px-4">Quầy món chay</td>
-                                    <td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs bg-green-100 text-green-800">Hoàn thành</span></td>
-                                    <td class="py-3 px-4"><span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">Ví điện tử</span></td>
-                                    <td class="py-3 px-4">2025-11-10 11:30</td>
-                                    <td class="py-3 px-4">
-                                        <div class="flex space-x-2">
-                                            <button class="p-1 text-blue-600 hover:text-blue-800"><i data-lucide="eye" class="w-4 h-4"></i></button>
-                                            <button class="p-1 text-green-600 hover:text-green-800"><i data-lucide="check" class="w-4 h-4"></i></button>
-                                            <button class="p-1 text-red-600 hover:text-red-800"><i data-lucide="x-circle" class="w-4 h-4"></i></button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                <tbody id="orders-table-body">
+                                <!-- Data will be loaded here -->
                                 </tbody>
                             </table>
                         </div>
@@ -477,17 +459,20 @@
                 <div data-view="reports" class="space-y-6 admin-view hidden">
                     <div>
                         <h1 class="text-2xl font-bold text-gray-800">Báo cáo & Thống kê</h1>
-                        <p class="text-gray-600">Thống kê hoạt động căn tin (mock)</p>
+                        <p class="text-gray-600">Báo cáo doanh thu và món bán chạy</p>
                     </div>
 
                     <div class="bg-white p-4 rounded-lg shadow-sm border">
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                            <select class="px-3 py-2 border rounded text-sm">
-                                <option>Theo ngày</option><option>Theo tuần</option><option>Theo tháng</option><option>Tùy chọn</option>
+                            <select id="reports-period" class="px-3 py-2 border rounded text-sm" onchange="updateReportDates()">
+                                <option value="today">Hôm nay</option>
+                                <option value="week">7 ngày qua</option>
+                                <option value="month">30 ngày qua</option>
+                                <option value="custom">Tùy chọn</option>
                             </select>
-                            <input type="date" class="px-3 py-2 border rounded text-sm"/>
-                            <input type="date" class="px-3 py-2 border rounded text-sm"/>
-                            <button class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm">Tạo báo cáo</button>
+                            <input type="date" id="reports-start-date" class="px-3 py-2 border rounded text-sm" onchange="updateReportPeriod()"/>
+                            <input type="date" id="reports-end-date" class="px-3 py-2 border rounded text-sm" onchange="updateReportPeriod()"/>
+                            <button onclick="loadReports()" class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm">Tải báo cáo</button>
                         </div>
                     </div>
 
@@ -516,19 +501,19 @@
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
                         <div class="bg-white p-4 rounded-lg shadow-sm border">
-                            <h4 class="font-semibold mb-2">Doanh thu hôm nay</h4>
-                            <p class="text-2xl font-bold text-green-600">2,450,000đ</p>
-                            <p class="text-sm text-gray-500 mt-1">124 đơn</p>
+                            <h4 class="font-semibold mb-2">Tổng doanh thu (đơn đã hoàn thành)</h4>
+                            <p class="text-2xl font-bold text-green-600" id="total-revenue">0đ</p>
+                            <p class="text-sm text-gray-500 mt-1">Từ tất cả các quầy</p>
                         </div>
                         <div class="bg-white p-4 rounded-lg shadow-sm border">
-                            <h4 class="font-semibold mb-2">Doanh thu tuần này</h4>
-                            <p class="text-2xl font-bold text-blue-600">18,750,000đ</p>
-                            <p class="text-sm text-gray-500 mt-1">892 đơn</p>
+                            <h4 class="font-semibold mb-2">Tổng đơn hàng</h4>
+                            <p class="text-2xl font-bold text-blue-600" id="total-orders">0</p>
+                            <p class="text-sm text-gray-500 mt-1">Tất cả đơn hàng</p>
                         </div>
                         <div class="bg-white p-4 rounded-lg shadow-sm border">
-                            <h4 class="font-semibold mb-2">Doanh thu tháng này</h4>
-                            <p class="text-2xl font-bold text-purple-600">78,250,000đ</p>
-                            <p class="text-sm text-gray-500 mt-1">3,654 đơn</p>
+                            <h4 class="font-semibold mb-2">Món bán chạy nhất</h4>
+                            <p class="text-2xl font-bold text-purple-600" id="top-food">-</p>
+                            <p class="text-sm text-gray-500 mt-1">Top 1 món ăn</p>
                         </div>
                     </div>
                 </div>
@@ -541,11 +526,7 @@
 
 <script>
     // Set current user ID for JavaScript
-    <% if (currentUserId != null) { %>
-    const currentUserId = <%= currentUserId %>;
-    <% } else { %>
-    const currentUserId = null;
-    <% } %>
+    var currentUserId = <% if (currentUserId != null) { %><%= currentUserId %><% } else { %>null<% } %>;
     
     // Active state cho menu + chuyển view theo hash
     function setActiveView(hash) {
@@ -577,6 +558,9 @@
         location.hash = e.target.value;
     });
 
+    // Initialize report dates
+    updateReportDates();
+    
     // Lần đầu vào trang
     setActiveView(location.hash.replace('#', '') || 'dashboard');
     
@@ -584,51 +568,445 @@
     window.addEventListener('hashchange', function() {
         const hash = location.hash.replace('#', '');
         if (hash === 'users') {
-            loadUsers();
+            loadUsers('customer');
         } else if (hash === 'stalls') {
             loadStalls();
+        } else if (hash === 'foods') {
+            loadFoods();
+        } else if (hash === 'orders') {
+            loadOrders();
+        } else if (hash === 'reports') {
+            loadReports();
         }
     });
     
-    // Load users data
-    function loadUsers() {
-        fetch('<%=contextPath%>/admin?action=users')
+    // Load on initial page load if hash is set
+    const initialHash = location.hash.replace('#', '');
+    if (initialHash === 'foods') {
+        loadFoods();
+    } else if (initialHash === 'orders') {
+        loadOrders();
+    } else if (initialHash === 'reports') {
+        loadReports();
+    }
+    
+    // Global variables to store original data
+    let allUsersData = [];
+    let allFoodsData = [];
+    let allOrdersData = [];
+    let currentUserType = 'customer';
+    
+    // Load users data - loads customers or stall users with orders
+    function loadUsers(type) {
+        type = type || 'customer';
+        currentUserType = type;
+        const action = type === 'customer' ? 'customers' : 'stalls-users';
+        
+        fetch('<%=contextPath%>/admin?action=' + action)
             .then(response => response.json())
             .then(users => {
-                const tbody = document.querySelector('[data-view="users"] tbody');
-                if (tbody && users.length > 0) {
-                    tbody.innerHTML = users.map(user => {
-                        const roleClass = user.role === 'admin' ? 'bg-red-100 text-red-800' : 
-                                         user.role === 'stall' ? 'bg-purple-100 text-purple-800' : 
-                                         'bg-blue-100 text-blue-800';
-                        const statusClass = user.status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
-                        const statusText = user.status ? 'Hoạt động' : 'Khóa';
-                        // Format date to avoid JSP EL parsing issue
-                        const formattedDate = user.createDate ? new Date(user.createDate).toLocaleDateString('vi-VN') : 'N/A';
-                        
-                        return `
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="py-3 px-4">#${user.id}</td>
-                                <td class="py-3 px-4">${user.username}</td>
-                                <td class="py-3 px-4">${user.email || 'N/A'}</td>
-                                <td class="py-3 px-4">${user.phone || 'N/A'}</td>
-                                <td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs ${roleClass}">${user.role}</span></td>
-                                <td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs ${statusClass}">${statusText}</span></td>
-                                <td class="py-3 px-4">${formattedDate}</td>
-                                <td class="py-3 px-4">
-                                    <div class="flex space-x-2">
-                                        <button onclick="toggleUserStatus(${user.id}, ${!user.status})" class="p-1 text-blue-600 hover:text-blue-800" title="${user.status ? 'Khóa' : 'Mở khóa'}">
-                                            <i data-lucide="${user.status ? 'user-x' : 'user-check'}" class="w-4 h-4"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        `;
-                    }).join('');
-                    lucide.createIcons();
+                allUsersData = users;
+                const tbody = document.getElementById('users-table-body');
+                if (tbody) {
+                    if (users.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="9" class="py-4 px-3 text-center text-gray-500">Chưa có người dùng nào</td></tr>';
+                    } else {
+                        renderUsers(users);
+                    }
                 }
             })
             .catch(error => console.error('Error loading users:', error));
+    }
+    
+    function renderUsers(users) {
+        const tbody = document.getElementById('users-table-body');
+        if (!tbody) return;
+        
+        if (users.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" class="py-4 px-3 text-center text-gray-500">Không tìm thấy kết quả</td></tr>';
+            return;
+        }
+        
+        if (currentUserType === 'customer') {
+            tbody.innerHTML = users.map(customer => {
+                const statusClass = customer.status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+                const statusText = customer.status ? 'Hoạt động' : 'Khóa';
+                const formattedDate = customer.createDate ? new Date(customer.createDate).toLocaleDateString('vi-VN') : 'N/A';
+                const totalSpent = customer.totalSpent ? customer.totalSpent.toLocaleString('vi-VN') : '0';
+                
+                return '<tr class="border-b hover:bg-gray-50">'
+                    + '<td class="py-3 px-4">#' + customer.id + '</td>'
+                    + '<td class="py-3 px-4">' + (customer.username || 'N/A') + '</td>'
+                    + '<td class="py-3 px-4">' + (customer.email || 'N/A') + '</td>'
+                    + '<td class="py-3 px-4">' + (customer.phone || 'N/A') + '</td>'
+                    + '<td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs bg-blue-100 text-blue-800">Khách hàng</span></td>'
+                    + '<td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs' + statusClass + '">'+ statusText +'</span></td>'
+                    + '<td class="py-3 px-4">' + totalSpent + 'đ</td>'
+                    + '<td class="py-3 px-4">' + formattedDate + '</td>'
+                    + '<td class="py-3 px-4">'
+                    + '<div class="flex space-x-2">'
+                    +            '<button onclick="toggleUserStatus(\''+ customer.id +'\',' + (customer.status ? 'false' : 'true') + '\')" class="p-1 text-blue-600 hover:text-blue-800" title="' + (customer.status ? 'Khóa' : 'Mở khóa') + '">'
+                    +                '<i data-lucide="'+ (customer.status ? 'user-x' : 'user-check') +'" class="w-4 h-4"></i>'
+                    +            '</button>'
+                    +        '</div>'
+                    +    '</td>'
+                    + '</tr>';
+            }).join('');
+        } else {
+            tbody.innerHTML = users.map(stallUser => {
+                const statusClass = stallUser.status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+                const statusText = stallUser.status ? 'Hoạt động' : 'Khóa';
+                const formattedDate = stallUser.createDate ? new Date(stallUser.createDate).toLocaleDateString('vi-VN') : 'N/A';
+                const totalRevenue = stallUser.totalRevenue ? stallUser.totalRevenue.toLocaleString('vi-VN') : '0';
+                
+                return '<tr class="border-b hover:bg-gray-50">'
+                        + '<td class="py-3 px-4">#'+ stallUser.id +'</td>'
+                        + '<td class="py-3 px-4">' + (stallUser.username || 'N/A') + '</td>'
+                        + '<td class="py-3 px-4">' + (stallUser.email || 'N/A') + '</td>'
+                        + '<td class="py-3 px-4">' + (stallUser.phone || 'N/A') + '</td>'
+                        + '<td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs bg-purple-100 text-purple-800">Quầy:' + (stallUser.stallName || 'Chưa có quầy') + '</span></td>'
+                        + '<td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs '+ statusClass + '">' + statusText + '</span></td>'
+                        + '<td class="py-3 px-4">'+ totalRevenue + 'đ</td>'
+                        + '<td class="py-3 px-4">' + formattedDate + '</td>'
+                        + '<td class="py-3 px-4">'
+                        + '<div class="flex space-x-2">'
+                                + '<button onclick="toggleUserStatus(\'' + stallUser.id +',\'' + (stallUser.status ? 'false' : 'true') + '\')" class="p-1 text-blue-600 hover:text-blue-800" title="' + (stallUser.status ? 'Khóa' : 'Mở khóa') +'">'
+                                + '<i data-lucide="'+ (stallUser.status ? 'user-x' : 'user-check') + '" class="w-4 h-4"></i>'
+                                + '</button>'
+                            + '</div>'
+                    +    '</td>'
+                    + '</tr>';
+            }).join('');
+        }
+        lucide.createIcons();
+    }
+    
+    // Filter users
+    function filterUsers() {
+        const searchTerm = document.getElementById('users-search').value.toLowerCase();
+        const statusFilter = document.getElementById('users-status-filter').value;
+        const typeFilter = document.getElementById('users-type-filter').value;
+        
+        let filtered = allUsersData.filter(user => {
+            // Search filter
+            const matchesSearch = !searchTerm || 
+                (user.username && user.username.toLowerCase().includes(searchTerm)) ||
+                (user.email && user.email.toLowerCase().includes(searchTerm)) ||
+                (user.phone && user.phone.toLowerCase().includes(searchTerm)) ||
+                (user.fullName && user.fullName.toLowerCase().includes(searchTerm));
+            
+            // Status filter
+            const matchesStatus = statusFilter === 'all' || 
+                (statusFilter === 'true' && user.status === true) ||
+                (statusFilter === 'false' && user.status === false);
+            
+            // Type filter
+            const matchesType = typeFilter === 'all' ||
+                (typeFilter === 'customer' && currentUserType === 'customer') ||
+                (typeFilter === 'stall' && currentUserType === 'stall');
+            
+            return matchesSearch && matchesStatus && matchesType;
+        });
+        
+        renderUsers(filtered);
+    }
+    
+    function clearUsersFilter() {
+        document.getElementById('users-search').value = '';
+        document.getElementById('users-status-filter').value = 'all';
+        document.getElementById('users-type-filter').value = 'all';
+        renderUsers(allUsersData);
+    }
+    
+    // Load foods data
+    function loadFoods() {
+        fetch('<%=contextPath%>/admin?action=foods')
+            .then(response => response.json())
+            .then(foods => {
+                allFoodsData = foods;
+                const tbody = document.getElementById('foods-table-body');
+                if (tbody) {
+                    if (foods.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="7" class="py-4 px-3 text-center text-gray-500">Chưa có món ăn nào</td></tr>';
+                    } else {
+                        // Populate stall filter
+                        const stallFilter = document.getElementById('foods-stall-filter');
+                        // Clear existing options except "Tất cả quầy"
+                        while (stallFilter.children.length > 1) {
+                            stallFilter.removeChild(stallFilter.lastChild);
+                        }
+                        const uniqueStalls = [...new Set(foods.map(f => f.stallName).filter(Boolean))];
+                        uniqueStalls.forEach(stallName => {
+                            const option = document.createElement('option');
+                            option.value = stallName;
+                            option.textContent = stallName;
+                            stallFilter.appendChild(option);
+                        });
+                        
+                        renderFoods(foods);
+                    }
+                }
+            })
+            .catch(error => console.error('Error loading foods:', error));
+    }
+    
+    function renderFoods(foods) {
+        const tbody = document.getElementById('foods-table-body');
+        if (!tbody) return;
+        
+        if (foods.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="py-4 px-3 text-center text-gray-500">Không tìm thấy kết quả</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = foods.map(food => {
+            const imageUrl = food.image ? '<%=contextPath%>/uploads/' + food.image : 'https://placehold.co/40x40/3498db/white?text=' + encodeURIComponent((food.name || 'NA').substring(0, 2));
+            // const promotionText = food.promotion && food.promotion > 0 ? food.promotion + '%' : 'Không';
+            var html = '';
+            html += '<tr class="border-b hover:bg-gray-50">';
+            html += '<td class="py-3 px-4">'
+            html += '<div class="flex items-center space-x-3">'
+            html += '<img src="' + imageUrl + '"';
+            html += 'class="w-10 h-10 rounded object-cover" alt="' + (food.name || 'N/A') +'"/>';
+            html += '<span>' + (food.name || "N/A") + '</span>';
+            html += '</div>';
+            html += '</td>';
+            html += '<td class="py-3 px-4">' + (food.price ? food.price.toLocaleString('vi-VN') : '0') +'đ</td>';
+            // html += '<td class="py-3 px-4">-</td>'
+            // html += '<td class="py-3 px-4">' + (food.stallName || 'N/A') +'</td>';
+            // html += '<td class="py-3 px-4">' + promotionText + '</td>';
+            html += '<td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs bg-green-100 text-green-800">Hoạt động</span></td>';
+            html += '<td class="py-3 px-4">'
+            html +=     '<div class="flex space-x-2">'
+            html +=     '<button class="p-1 text-blue-600 hover:text-blue-800"><i data-lucide="edit" class="w-4 h-4"></i></button>';
+            html +=     '<button class="p-1 text-red-600 hover:text-red-800"><i data-lucide="trash-2" class="w-4 h-4"></i></button>';
+            html += '</div>';
+            html += '</td>';
+            html += '</tr>';
+            return html;
+        }).join('');
+        lucide.createIcons();
+    }
+    
+    // Filter foods
+    function filterFoods() {
+        const searchTerm = document.getElementById('foods-search').value.toLowerCase();
+        const categoryFilter = document.getElementById('foods-category-filter').value;
+        const stallFilter = document.getElementById('foods-stall-filter').value;
+        const statusFilter = document.getElementById('foods-status-filter').value;
+        
+        let filtered = allFoodsData.filter(food => {
+            const matchesSearch = !searchTerm || 
+                (food.name && food.name.toLowerCase().includes(searchTerm));
+            const matchesCategory = categoryFilter === 'all' || food.categoryId == categoryFilter;
+            const matchesStall = stallFilter === 'all' || food.stallName === stallFilter;
+            const matchesStatus = statusFilter === 'all' || 
+                (statusFilter === 'active') || 
+                (statusFilter === 'inactive');
+            
+            return matchesSearch && matchesCategory && matchesStall && matchesStatus;
+        });
+        
+        renderFoods(filtered);
+    }
+    
+    function clearFoodsFilter() {
+        document.getElementById('foods-search').value = '';
+        document.getElementById('foods-category-filter').value = 'all';
+        document.getElementById('foods-stall-filter').value = 'all';
+        document.getElementById('foods-status-filter').value = 'all';
+        renderFoods(allFoodsData);
+    }
+    
+    // Load orders data
+    function loadOrders() {
+        fetch('<%=contextPath%>/admin?action=orders')
+            .then(response => response.json())
+            .then(orders => {
+                allOrdersData = orders;
+                const tbody = document.getElementById('orders-table-body');
+                if (tbody) {
+                    if (orders.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="8" class="py-4 px-3 text-center text-gray-500">Chưa có đơn hàng nào</td></tr>';
+                    } else {
+                        // Populate stall filter
+                        const stallFilter = document.getElementById('orders-stall-filter');
+                        // Clear existing options except "Tất cả quầy"
+                        while (stallFilter.children.length > 1) {
+                            stallFilter.removeChild(stallFilter.lastChild);
+                        }
+                        const uniqueStalls = [...new Set(orders.map(o => o.stallName).filter(Boolean))];
+                        uniqueStalls.forEach(stallName => {
+                            const option = document.createElement('option');
+                            option.value = stallName;
+                            option.textContent = stallName;
+                            stallFilter.appendChild(option);
+                        });
+                        
+                        renderOrders(orders);
+                    }
+                }
+            })
+            .catch(error => console.error('Error loading orders:', error));
+    }
+    
+    function renderOrders(orders) {
+        const tbody = document.getElementById('orders-table-body');
+        if (!tbody) return;
+        
+        if (orders.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" class="py-4 px-3 text-center text-gray-500">Không tìm thấy kết quả</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = orders.map(order => {
+            let statusText = 'N/A';
+            let statusClass = 'bg-gray-100 text-gray-800';
+            if (order.status) {
+                switch(order.status) {
+                    case 'new_order':
+                        statusText = 'Chờ xử lý';
+                        statusClass = 'bg-yellow-100 text-yellow-800';
+                        break;
+                    case 'confirmed':
+                        statusText = 'Đã xác nhận';
+                        statusClass = 'bg-blue-100 text-blue-800';
+                        break;
+                    case 'in_delivery':
+                        statusText = 'Đang giao';
+                        statusClass = 'bg-purple-100 text-purple-800';
+                        break;
+                    case 'delivered':
+                        statusText = 'Hoàn thành';
+                        statusClass = 'bg-green-100 text-green-800';
+                        break;
+                }
+            }
+            const formattedDate = order.createdAt ? new Date(order.createdAt).toLocaleString('vi-VN') : 'N/A';
+            
+            var html = '';
+                html += '<tr class="border-b hover:bg-gray-50">';
+                html += '<td class="py-3 px-4">#'+ order.id +'</td>';
+                html += '<td class="py-3 px-4">' + (order.userName || 'N/A') +'</td>';
+                html += '<td class="py-3 px-4">-</td>'
+                html += '<td class="py-3 px-4">' + (order.totalPrice ? order.totalPrice.toLocaleString('vi-VN') : '0') + 'đ</td>';
+                html += '<td class="py-3 px-4">' + (order.stallName || 'N/A') + '</td>';
+                html += '<td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs' + statusClass + '">' + statusText + '</span></td>';
+                html += '<td class="py-3 px-4">' + (order.paymentMethod || 'N/A') + '</td>';
+                html += '<td class="py-3 px-4">' + formattedDate + '</td>';
+                html += '<td class="py-3 px-4">';
+                html += '<div class="flex space-x-2">';
+                html += '<button class="p-1 text-blue-600 hover:text-blue-800"><i data-lucide="eye" class="w-4 h-4"></i></button>';
+                html += '</div>';
+                html += '</td>';
+                html += '</tr>';
+
+            return html;
+        }).join('');
+        lucide.createIcons();
+    }
+    
+    // Filter orders
+    function filterOrders() {
+        const searchTerm = document.getElementById('orders-search').value.toLowerCase();
+        const statusFilter = document.getElementById('orders-status-filter').value;
+        const stallFilter = document.getElementById('orders-stall-filter').value;
+        const dateFilter = document.getElementById('orders-date-filter').value;
+        
+        let filtered = allOrdersData.filter(order => {
+            const matchesSearch = !searchTerm || 
+                (order.id && order.id.toString().includes(searchTerm)) ||
+                (order.userName && order.userName.toLowerCase().includes(searchTerm)) ||
+                (order.stallName && order.stallName.toLowerCase().includes(searchTerm));
+            
+            const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+            const matchesStall = stallFilter === 'all' || order.stallName === stallFilter;
+            
+            let matchesDate = true;
+            if (dateFilter) {
+                const orderDate = order.createdAt ? new Date(order.createdAt).toISOString().split('T')[0] : '';
+                matchesDate = orderDate === dateFilter;
+            }
+            
+            return matchesSearch && matchesStatus && matchesStall && matchesDate;
+        });
+        
+        renderOrders(filtered);
+    }
+    
+    function clearOrdersFilter() {
+        document.getElementById('orders-search').value = '';
+        document.getElementById('orders-status-filter').value = 'all';
+        document.getElementById('orders-stall-filter').value = 'all';
+        document.getElementById('orders-date-filter').value = '';
+        renderOrders(allOrdersData);
+    }
+    
+    // Load reports data
+    function loadReports() {
+        fetch('<%=contextPath%>/admin?action=revenue-report')
+            .then(response => response.json())
+            .then(report => {
+                // Update total revenue
+                const totalRevenueEl = document.getElementById('total-revenue');
+                if (totalRevenueEl && report.totalRevenue !== undefined) {
+                    totalRevenueEl.textContent = report.totalRevenue.toLocaleString('vi-VN') + 'đ';
+                }
+
+                // Update best selling foods
+                const bestSellingContainer = document.querySelector('[data-view="reports"] .space-y-2');
+                if (bestSellingContainer && report.bestSellingFoods) {
+                    if (report.bestSellingFoods.length === 0) {
+                        bestSellingContainer.innerHTML = '<div class="text-gray-500 text-center py-4">Chưa có dữ liệu món bán chạy</div>';
+                    } else {
+                        bestSellingContainer.innerHTML = report.bestSellingFoods.map((food, index) =>
+                            '<div class="flex justify-between border-b py-2">' +
+                                '<div class="flex items-center space-x-3">' +
+                                    '<span class="text-sm font-medium text-gray-500">#'+ (index + 1) + '</span>' +
+                                    '<span>'+ food.getNameFood() + '</span>' +
+                                '</div>' +
+                                '<span class="font-semibold text-green-600">'+ (food.totalQuantity || 0) +' đơn</span>'+
+                            '</div>'
+                        ).join('');
+                        
+                        // Update top food
+                        const topFoodEl = document.getElementById('top-food');
+                        if (topFoodEl && report.bestSellingFoods.length > 0) {
+                            topFoodEl.textContent = report.bestSellingFoods[0].foodName || '-';
+                        }
+                    }
+                }
+            })
+            .catch(error => console.error('Error loading reports:', error));
+    }
+    
+    // Update report dates based on period selection
+    function updateReportDates() {
+        const period = document.getElementById('reports-period').value;
+        const startDate = document.getElementById('reports-start-date');
+        const endDate = document.getElementById('reports-end-date');
+        const today = new Date();
+        
+        if (period === 'today') {
+            startDate.value = today.toISOString().split('T')[0];
+            endDate.value = today.toISOString().split('T')[0];
+        } else if (period === 'week') {
+            const weekAgo = new Date(today);
+            weekAgo.setDate(today.getDate() - 7);
+            startDate.value = weekAgo.toISOString().split('T')[0];
+            endDate.value = today.toISOString().split('T')[0];
+        } else if (period === 'month') {
+            const monthAgo = new Date(today);
+            monthAgo.setDate(today.getDate() - 30);
+            startDate.value = monthAgo.toISOString().split('T')[0];
+            endDate.value = today.toISOString().split('T')[0];
+        }
+        // For 'custom', user can manually select dates
+    }
+    
+    function updateReportPeriod() {
+        // When user manually changes dates, set period to 'custom'
+        document.getElementById('reports-period').value = 'custom';
     }
     
     // Load stalls data
@@ -637,36 +1015,38 @@
             .then(response => response.json())
             .then(stalls => {
                 const tbody = document.querySelector('[data-view="stalls"] tbody');
-                if (tbody && stalls.length > 0) {
-                    tbody.innerHTML = stalls.map(stall => {
-                        const statusClass = stall.isOpen ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
-                        const statusText = stall.isOpen ? 'Mở cửa' : 'Đóng cửa';
-                        const isMyStall = currentUserId !== null && currentUserId === stall.managerUserId;
-                        const myStallLabel = isMyStall ? '<span class="px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full font-medium ml-2">Quầy của tôi</span>' : '';
-                        
-                        return `
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="py-3 px-4">#${stall.id}</td>
-                                <td class="py-3 px-4">
-                                    <div class="flex items-center">
-                                        ${stall.name}
-                                        ${myStallLabel}
-                                    </div>
-                                </td>
-                                <td class="py-3 px-4">${stall.description || 'N/A'}</td>
-                                <td class="py-3 px-4">User #${stall.managerUserId}</td>
-                                <td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs ${statusClass}">${statusText}</span></td>
-                                <td class="py-3 px-4">
-                                    <div class="flex space-x-2">
-                                        <button class="p-1 text-blue-600 hover:text-blue-800" title="Sửa">
-                                            <i data-lucide="edit" class="w-4 h-4"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        `;
-                    }).join('');
-                    lucide.createIcons();
+                if (tbody) {
+                    if (stalls.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" class="py-4 px-3 text-center text-gray-500">Chưa có quầy nào</td></tr>';
+                    } else {
+                        tbody.innerHTML = stalls.map(stall => {
+                            const statusClass = stall.isOpen ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+                            const statusText = stall.isOpen ? 'Mở cửa' : 'Đóng cửa';
+                            const isMyStall = currentUserId !== null && currentUserId === stall.managerUserId;
+                            const myStallLabel = isMyStall ? '<span class="px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full font-medium ml-2">Quầy của tôi</span>' : '';
+                            
+                            var html = '';
+                            html += '<tr class="border-b hover:bg-gray-50">';
+                            html += '<td class="py-3 px-4">#'+ stall.id +'</td>';
+                            html += '<td class="py-3 px-4">'
+                            html += '<div class="flex items-center">'+ stall.name + myStallLabel
+                            html += '</div>';
+                            html += '</td>'
+                            html += '<td class="py-3 px-4">'+ (stall.description || 'N/A') +'</td>'
+                            html += '<td class="py-3 px-4">User #'+ stall.managerUserId +'</td>'
+                            html += '<td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs'+ statusClass + '">'+ statusText +'</span></td>'
+                            html += '<td class="py-3 px-4">'
+                                html +=     '<div class="flex space-x-2">'
+                                html +=     '<button class="p-1 text-blue-600 hover:text-blue-800" title="Sửa">'
+                                html +=         '<i data-lucide="edit" class="w-4 h-4"></i>'
+                                html +=     '</button>'
+                                html += '</div>'
+                                html += '</td>'
+                            html +='</tr>';
+                            return html;
+                        }).join('');
+                        lucide.createIcons();
+                    }
                 }
             })
             .catch(error => console.error('Error loading stalls:', error));
@@ -678,20 +1058,23 @@
             return;
         }
         
+        // Ensure boolean is converted to string "true" or "false"
+        const statusValue = newStatus === true || newStatus === 'true' || newStatus === 1 ? 'true' : 'false';
+        
         fetch('<%=contextPath%>/admin', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams({
                 action: 'toggleUserStatus',
-                id: userId,
-                status: newStatus
+                id: userId.toString(),
+                status: statusValue
             })
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 alert(data.message);
-                loadUsers();
+                loadUsers(currentUserType);
             } else {
                 alert('Lỗi: ' + data.message);
             }
