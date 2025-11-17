@@ -70,7 +70,7 @@
           <!-- Action Buttons -->
           <div class="flex flex-col sm:flex-row gap-3 mt-6">
             <% if (food.getInventoryFood() > 0) { %>
-            <button onclick="addToCart(<%= food.getStallId() %>, <%= food.getId() %>, '<%= food.getNameFood().replace("'", "\\'") %>', <%= food.getPriceFood() %>, '<%= food.getImage() != null ? food.getImage().replace("'", "\\'") : "${pageContext.request.contextPath}/image/food-thumbnail.png" %>')"
+            <button onclick="addToCart(<%= food.getStallId() %>, <%= food.getId() %>, '<%= food.getNameFood().replace("'", "\\'") %>', <%= food.getPriceFood() %>, '<%= food.getImage() != null ? food.getImage().replace("'", "\\'") : "static/img/food-thumbnail.png" %>')"
                     class="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition font-semibold text-center">
               <i data-lucide="shopping-cart" class="w-5 h-5 inline mr-2"></i>
               Thêm vào giỏ hàng
@@ -174,7 +174,7 @@
 
       var html = "";
       html += '<div class="flex items-center space-x-3 bg-gray-50 p-2 rounded mb-2">';
-      html += '<img src="'+ (item.image || "${pageContext.request.contextPath}/image/food-thumbnail.png") +'" class="w-12 h-12 object-cover rounded">';
+      html += '<img src="'+ (item.image || "static/img/food-thumbnail.png") +'" class="w-12 h-12 object-cover rounded">';
       html += '<div class="flex-1">';
       html += '<h3 class="text-sm font-medium text-gray-800 truncate">' + (item.name || "Không rõ món") + '</h3>';
       html += '<p class="text-blue-600 text-sm font-semibold">' + price.toLocaleString('vi-VN') + 'đ</p>';

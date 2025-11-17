@@ -50,7 +50,7 @@
         for (FoodDTO food : foods) {
       %>
       <div class="bg-white rounded-xl shadow hover:shadow-md border border-gray-200 overflow-hidden transition">
-        <img src="<%= food.getImage() != null && !food.getImage().isEmpty() ? food.getImage() : "${pageContext.request.contextPath}/image/food-thumbnail.png" %>"
+        <img src="<%= food.getImage() != null && !food.getImage().isEmpty() ? food.getImage() : "static/img/food-thumbnail.png" %>"
              alt="<%= food.getNameFood() %>"
              class="w-full h-32 object-cover">
         <div class="p-3">
@@ -61,7 +61,7 @@
                   data-food-id="<%= food.getId() %>"
                   data-food-name="<%= food.getNameFood().replace("\"", "&quot;").replace("'", "&#39;") %>"
                   data-food-price="<%= food.getPriceFood() %>"
-                  data-food-image="<%= (food.getImage() != null && !food.getImage().isEmpty() ? food.getImage() : "${pageContext.request.contextPath}/image/food-thumbnail.png").replace("\"", "&quot;").replace("'", "&#39;") %>">
+                  data-food-image="<%= (food.getImage() != null && !food.getImage().isEmpty() ? food.getImage() : "static/img/food-thumbnail.png").replace("\"", "&quot;").replace("'", "&#39;") %>">
             Thêm vào giỏ
           </button>
         </div>
@@ -198,7 +198,7 @@
 
 	    var html = "";
 	    	html += '<div class="flex items-center space-x-3 bg-gray-50 p-2 rounded mb-2">';
-	    	html += '<img src="'+ (item.image || "${pageContext.request.contextPath}/image/food-thumbnail.png") +'" class="w-12 h-12 object-cover rounded">';
+	    	html += '<img src="'+ (item.image || "static/img/food-thumbnail.png") +'" class="w-12 h-12 object-cover rounded">';
 	    	html += '<div class="flex-1">';
 	    	html += '<h3 class="text-sm font-medium text-gray-800 truncate">' + (item.name || "Không rõ món") + '</h3>';
 	    	html += '<p class="text-blue-600 text-sm font-semibold">' + price.toLocaleString('vi-VN') + 'đ</p>';
