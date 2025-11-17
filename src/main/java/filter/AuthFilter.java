@@ -149,12 +149,14 @@ public class AuthFilter extends HttpFilter implements Filter {
         String type_user = "";
         
         // Nếu session tồn tại và có thuộc tính is_login, lấy thông tin
+        String userAvatar = null;
         if (ses != null) {
             Object isLoginAttr = ses.getAttribute("is_login");
             if (isLoginAttr != null) {
                 is_login = (boolean) isLoginAttr;
                 username = (String) ses.getAttribute("username");
                 type_user = (String) ses.getAttribute("type_user");
+                userAvatar = (String) ses.getAttribute("userAvatar");
             }
         }
 
@@ -212,7 +214,8 @@ public class AuthFilter extends HttpFilter implements Filter {
         // Set attribute cho request để JSP có thể sử dụng
         request.setAttribute("is_login", is_login);
         request.setAttribute("username", username);
-        request.setAttribute("type_user", type_user);       
+        request.setAttribute("type_user", type_user);
+        request.setAttribute("userAvatar", userAvatar);
         System.out.println("AuthFilter: is_login=" + is_login + ", path=" + path);
         chain.doFilter(request, response);
      

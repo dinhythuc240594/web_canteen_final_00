@@ -80,6 +80,7 @@ public class LoginServerlet extends HttpServlet {
 			session.setAttribute("userId", user.getId());
 			session.setAttribute("username", user.getUsername());
 			session.setAttribute("type_user", user.getRole());
+			session.setAttribute("userAvatar", user.getAvatar());
 			
 			// ========== COMMENT: Chức năng Remember Me đã được tắt ==========
 			// if (rememberMe != null && rememberMe.equals("on")) {

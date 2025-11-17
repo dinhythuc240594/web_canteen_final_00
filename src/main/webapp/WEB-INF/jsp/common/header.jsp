@@ -5,6 +5,21 @@
 	String type_user = (String) request.getAttribute("type_user");
 	Boolean is_login = (Boolean) request.getAttribute("is_login");
 	if (is_login == null) is_login = false;
+	
+	String headerContextPath = request.getContextPath();
+	String userAvatar = (String) request.getAttribute("userAvatar");
+	boolean hasAvatar = userAvatar != null && !userAvatar.trim().isEmpty();
+	String avatarUrl = null;
+	if (hasAvatar) {
+		String trimmed = userAvatar.trim();
+		if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+			avatarUrl = trimmed;
+		} else {
+			avatarUrl = headerContextPath + "/" + trimmed;
+		}
+	} else {
+		avatarUrl = headerContextPath + "/static/img/default-avatar.svg";
+	}
 %>
 <header class="bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg sticky top-0 z-50">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -59,7 +74,11 @@
 							}
 						%>
 						<a href="<%= dashboardUrl %>" class="flex items-center space-x-2 text-sm font-medium text-white hover:text-white/80 transition-colors cursor-pointer">
-							<i data-lucide="user" class="w-6 h-6 text-white"></i>
+							<% if (hasAvatar) { %>
+								<img src="<%= avatarUrl %>" alt="Avatar" class="w-8 h-8 rounded-full object-cover border border-white/30" />
+							<% } else { %>
+								<i data-lucide="user" class="w-6 h-6 text-white"></i>
+							<% } %>
 							<span class="text-sm font-medium text-white">
 								<%= username != null ? username : "User" %>
 							</span>

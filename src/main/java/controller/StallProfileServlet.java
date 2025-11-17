@@ -8,42 +8,36 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
-import model.OrderDAO;
 import model.UserDAO;
-import serviceimpl.OrderServiceImpl;
 import serviceimpl.UserServiceImpl;
 import utils.DataSourceUtil;
 import utils.FileUpload;
 import utils.FileUpload.FileUploadException;
 
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.sql.DataSource;
-
-@WebServlet("/customer")
+@WebServlet("/stall-profile")
 @MultipartConfig(
 		fileSizeThreshold = 1024 * 1024,
 		maxFileSize = 5 * 1024 * 1024,
 		maxRequestSize = 6 * 1024 * 1024
 )
-public class CustomerServlet extends HttpServlet {
+public class StallProfileServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	
 	private UserServiceImpl userService;
-	private OrderServiceImpl orderService;
 	
 	@Override
 	public void init() throws ServletException {
 		DataSource ds = DataSourceUtil.getDataSource();
 		this.userService = new UserServiceImpl(ds);
-		this.orderService = new OrderServiceImpl(ds);
 	}
 	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// Security check: Only customer can access
 		HttpSession session = request.getSession(false);
 		String userRole = (String) (session != null ? session.getAttribute("type_user") : null);
 		String username = (String) (session != null ? session.getAttribute("username") : null);
@@ -54,59 +48,20 @@ public class CustomerServlet extends HttpServlet {
 			return;
 		}
 		
-		if (!"customer".equals(userRole)) {
+		if (!"stall".equals(userRole)) {
 			response.sendRedirect(request.getContextPath() + "/home");
 			return;
 		}
 		
-		// Get user information
 		UserDAO user = userService.getUserById(userId);
-		
-		// Get user's orders
-		List<OrderDAO> orders = orderService.findByUserId(userId);
-		
-		// Calculate statistics
-		int totalOrders = orders.size();
-		double totalSpent = 0.0;
-		int pendingOrders = 0;
-		int completedOrders = 0;
-		
-		for (OrderDAO order : orders) {
-			totalSpent += order.getTotalPrice();
-			if ("delivered".equals(order.getStatus())) {
-				completedOrders++;
-			} else {
-				pendingOrders++;
-			}
-		}
-		
-		// Get recent orders (last 5)
-		List<OrderDAO> recentOrders = orders.size() > 5 ? orders.subList(0, 5) : orders;
-		
-		request.setAttribute("user", user);
-		request.setAttribute("totalOrders", totalOrders);
-		request.setAttribute("totalSpent", totalSpent);
-		request.setAttribute("pendingOrders", pendingOrders);
-		request.setAttribute("completedOrders", completedOrders);
-		request.setAttribute("recentOrders", recentOrders);
-		request.setAttribute("allOrders", orders);
-		
-		if (session != null) {
-			String flashSuccess = (String) session.getAttribute("customerFlashSuccess");
-			if (flashSuccess != null) {
-				request.setAttribute("profileSuccess", flashSuccess);
-				session.removeAttribute("customerFlashSuccess");
-			}
-		}
-		
-		String view = request.getParameter("view");
-		if ("edit".equals(view)) {
-			prepareProfileFormDefaults(request, user);
-			request.getRequestDispatcher("/customer_edit.jsp").forward(request, response);
+		if (user == null) {
+			response.sendRedirect(request.getContextPath() + "/stall");
 			return;
 		}
 		
-		request.getRequestDispatcher("/customer.jsp").forward(request, response);
+		request.setAttribute("user", user);
+		prepareProfileFormDefaults(request, user);
+		request.getRequestDispatcher("/stall_profile.jsp").forward(request, response);
 	}
 	
 	@Override
@@ -121,14 +76,14 @@ public class CustomerServlet extends HttpServlet {
 			return;
 		}
 		
-		if (!"customer".equals(userRole)) {
+		if (!"stall".equals(userRole)) {
 			response.sendRedirect(request.getContextPath() + "/home");
 			return;
 		}
 		
 		UserDAO user = userService.getUserById(userId);
 		if (user == null) {
-			response.sendRedirect(request.getContextPath() + "/customer");
+			response.sendRedirect(request.getContextPath() + "/stall");
 			return;
 		}
 		
@@ -175,7 +130,7 @@ public class CustomerServlet extends HttpServlet {
 			request.setAttribute("profileFormEmail", email);
 			request.setAttribute("profileFormPhone", phone);
 			request.setAttribute("user", user);
-			request.getRequestDispatcher("/customer_edit.jsp").forward(request, response);
+			request.getRequestDispatcher("/stall_profile.jsp").forward(request, response);
 			return;
 		}
 		
@@ -194,10 +149,10 @@ public class CustomerServlet extends HttpServlet {
 				FileUpload.deleteFile(existingAvatarPath, appRealPath);
 			}
 			if (session != null) {
-				session.setAttribute("customerFlashSuccess", "Cập nhật thông tin thành công!");
+				session.setAttribute("stallFlashSuccess", "Cập nhật thông tin thành công!");
 				session.setAttribute("userAvatar", finalAvatarPath);
 			}
-			response.sendRedirect(request.getContextPath() + "/customer");
+			response.sendRedirect(request.getContextPath() + "/stall");
 			return;
 		} else {
 			if (hasNewAvatar && newAvatarPath != null) {
@@ -211,7 +166,7 @@ public class CustomerServlet extends HttpServlet {
 			request.setAttribute("profileFormEmail", email);
 			request.setAttribute("profileFormPhone", phone);
 			request.setAttribute("user", user);
-			request.getRequestDispatcher("/customer_edit.jsp").forward(request, response);
+			request.getRequestDispatcher("/stall_profile.jsp").forward(request, response);
 		}
 	}
 	

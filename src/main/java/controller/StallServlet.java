@@ -119,6 +119,14 @@ public class StallServlet extends HttpServlet {
 		request.setAttribute("recentOrders", recentOrders);
 		request.setAttribute("pendingOrders", pendingOrders);
 		
+		if (session != null) {
+			String flashSuccess = (String) session.getAttribute("stallFlashSuccess");
+			if (flashSuccess != null) {
+				request.setAttribute("profileSuccess", flashSuccess);
+				session.removeAttribute("stallFlashSuccess");
+			}
+		}
+		
 		request.getRequestDispatcher("/stall.jsp").forward(request, response);
 	}
 	

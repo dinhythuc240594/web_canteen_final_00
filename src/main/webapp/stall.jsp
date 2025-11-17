@@ -30,6 +30,11 @@
     if (pendingOrders == null) pendingOrders = new java.util.ArrayList<>();
     
     String contextPath = request.getContextPath();
+    String rawAvatarPath = (user != null && user.getAvatar() != null && !user.getAvatar().isBlank())
+            ? user.getAvatar()
+            : "static/img/default-avatar.svg";
+    String avatarUrl = rawAvatarPath.startsWith("http") ? rawAvatarPath : contextPath + "/" + rawAvatarPath;
+    String profileSuccess = (String) request.getAttribute("profileSuccess");
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -42,9 +47,25 @@
 
 <main class="min-h-screen">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div class="mb-6">
-            <h1 class="text-3xl font-bold text-gray-800">Quản lý quầy</h1>
-            <p class="text-gray-600 mt-2">Xin chào, <%= user != null ? user.getFull_name() : username %>!</p>
+        <div class="mb-6 space-y-3">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <img src="<%= avatarUrl %>" alt="Avatar" class="w-16 h-16 rounded-full object-cover border border-gray-200 shadow-sm" />
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-800">Quản lý quầy</h1>
+                        <p class="text-gray-600 mt-2">Xin chào, <%= user != null ? user.getFull_name() : username %>!</p>
+                    </div>
+                </div>
+                <a href="<%= contextPath %>/stall-profile" class="inline-flex items-center justify-center rounded-md border border-blue-600 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50">
+                    <i data-lucide="edit" class="w-4 h-4 mr-2"></i>
+                    Chỉnh sửa thông tin
+                </a>
+            </div>
+            <% if (profileSuccess != null) { %>
+                <div class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+                    <%= profileSuccess %>
+                </div>
+            <% } %>
         </div>
 
         <!-- Stall Information -->
@@ -77,9 +98,12 @@
                                 <span class="text-sm font-medium text-gray-600">Họ tên:</span>
                                 <span class="text-sm text-gray-800 ml-2"><%= user != null && user.getFull_name() != null ? user.getFull_name() : "N/A" %></span>
                             </div>
-                            <div>
+                            <div class="flex items-center gap-3">
                                 <span class="text-sm font-medium text-gray-600">Tên đăng nhập:</span>
-                                <span class="text-sm text-gray-800 ml-2"><%= user != null && user.getUsername() != null ? user.getUsername() : username %></span>
+                                <div class="flex items-center gap-2 text-sm text-gray-800">
+<%--                                    <img src="<%= avatarUrl %>" alt="Avatar" class="w-8 h-8 rounded-full object-cover border border-gray-200" />--%>
+                                    <span><%= user != null && user.getUsername() != null ? user.getUsername() : username %></span>
+                                </div>
                             </div>
                             <% if (user != null && user.getEmail() != null && !user.getEmail().isEmpty()) { %>
                             <div>
