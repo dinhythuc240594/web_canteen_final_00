@@ -27,6 +27,11 @@
     if (allOrders == null) allOrders = new java.util.ArrayList<>();
     
     String contextPath = request.getContextPath();
+    String rawAvatarPath = (user != null && user.getAvatar() != null && !user.getAvatar().isBlank())
+            ? user.getAvatar()
+            : "static/img/default-avatar.svg";
+    String avatarUrl = rawAvatarPath.startsWith("http") ? rawAvatarPath : contextPath + "/" + rawAvatarPath;
+    String profileSuccess = (String) request.getAttribute("profileSuccess");
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -39,9 +44,14 @@
 
 <main class="min-h-screen">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div class="mb-6">
+        <div class="mb-6 space-y-3">
             <h1 class="text-3xl font-bold text-gray-800">Trang cá nhân</h1>
             <p class="text-gray-600 mt-2">Xin chào, <%= user != null ? user.getFull_name() : username %>!</p>
+            <% if (profileSuccess != null) { %>
+                <div class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+                    <%= profileSuccess %>
+                </div>
+            <% } %>
         </div>
 
         <!-- Statistics Cards -->
@@ -86,7 +96,24 @@
 
         <!-- User Information -->
         <div class="bg-white p-6 rounded-lg shadow-sm border mb-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Thông tin tài khoản</h2>
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">Thông tin tài khoản</h2>
+<%--                    <p class="text-gray-500 text-sm mt-1">Thông tin cá nhân và liên hệ của bạn</p>--%>
+                </div>
+                <a href="<%= contextPath %>/customer?view=edit" class="inline-flex items-center justify-center rounded-md border border-blue-600 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50">
+                    <i data-lucide="edit" class="w-4 h-4 mr-2"></i>
+                    Chỉnh sửa thông tin
+                </a>
+            </div>
+            <div class="flex items-center gap-4 mb-6">
+                <img src="<%= avatarUrl %>" alt="Ảnh đại diện" class="w-20 h-20 rounded-full object-cover border border-gray-200 shadow-sm" />
+                <div>
+<%--                    <p class="text-sm text-gray-600">Ảnh đại diện hiện tại</p>--%>
+                    <p class="text-lg font-semibold text-gray-800"><%= user != null ? user.getFull_name() : username %></p>
+<%--                    <p class="text-sm text-gray-500">Nhấn “Chỉnh sửa thông tin” để cập nhật ảnh và thông tin cá nhân</p>--%>
+                </div>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <p class="text-sm text-gray-600">Tên đăng nhập</p>
@@ -106,7 +133,7 @@
                 </div>
             </div>
         </div>
-
+        
         <!-- Recent Orders -->
         <div class="bg-white p-6 rounded-lg shadow-sm border">
             <div class="flex justify-between items-center mb-4">

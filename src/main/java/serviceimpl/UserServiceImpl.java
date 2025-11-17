@@ -50,6 +50,11 @@ public class UserServiceImpl implements UserService{
 	public boolean update(UserDAO user) {
 		return this.userRepository.update(user);
 	}
+	
+	@Override
+	public boolean updateProfile(UserDAO user) {
+		return this.userRepository.updateProfile(user);
+	}
 
 	@Override
 	public boolean updateStatus(int id, boolean status) {

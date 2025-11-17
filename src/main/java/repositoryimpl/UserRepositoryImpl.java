@@ -171,6 +171,25 @@ public class UserRepositoryImpl implements UserRepository {
        }
     	return false;
 	}
+	
+	@Override
+	public boolean updateProfile(UserDAO user) {
+		String sql = "UPDATE users SET full_name=?, email=?, phone_number=?, photo=? WHERE id=?";
+		try (Connection conn = ds.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)){
+    		ps.setString(1, user.getFull_name());
+    		ps.setString(2, user.getEmail());
+    		ps.setString(3, user.getPhone());
+    		ps.setString(4, user.getAvatar());
+    		ps.setInt(5, user.getId());
+            
+            int affectedRows = ps.executeUpdate();
+            return affectedRows > 0;
+       } catch (Exception e) {
+           e.printStackTrace();
+       }
+    	return false;
+	}
 
 	@Override
 	public boolean updateStatus(int id, boolean status) {

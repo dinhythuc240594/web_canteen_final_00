@@ -11,6 +11,7 @@ public interface UserRepository {
 	List<UserDAO> findByRole(String role);
 	UserDAO save(UserDAO user);
 	boolean update(UserDAO user);
+	boolean updateProfile(UserDAO user);
 	boolean updateStatus(int id, boolean status);
 	boolean deleteById(int id);
 	int count();
