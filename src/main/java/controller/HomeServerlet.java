@@ -6,19 +6,20 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import model.FoodDAO;
-import model.Page;
 import model.PageRequest;
+import model.StallDAO;
 import serviceimpl.FoodServiceImpl;
+import serviceimpl.StallServiceImpl;
 import utils.DataSourceUtil;
 import utils.RequestUtil;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -40,12 +41,14 @@ public class HomeServerlet extends HttpServlet {
     }
 
 	private FoodServiceImpl foodServiceImpl;
+	private StallServiceImpl stallServiceImpl;
 	private int PAGE_SIZE = 25;
 	
 	@Override
 	public void init() throws ServletException {
 		DataSource ds = DataSourceUtil.getDataSource();
 		this.foodServiceImpl = new FoodServiceImpl(ds);
+		this.stallServiceImpl = new StallServiceImpl(ds);
 	}
     
 	/**
@@ -59,15 +62,31 @@ public class HomeServerlet extends HttpServlet {
 		int page = RequestUtil.getInt(request, "page", 1);
 		
 		PageRequest pageReq = new PageRequest(page, PAGE_SIZE, sortField, orderField, keyword);
-		Page<FoodDTO> pageFood = this.foodServiceImpl.findAll(pageReq);
 		
-		List<FoodDTO> newFoods = this.foodServiceImpl.newFoods();
-		List<FoodDTO> promotionFoods = this.foodServiceImpl.promotionFoods();
+		List<StallDAO> stalls = this.stallServiceImpl.findAll();
+		LocalDate today = LocalDate.now();
+		Date sqlToday = Date.valueOf(today);
+		List<FoodDTO> dailyMenuFoods = this.foodServiceImpl.findByUpdatedDate(sqlToday, null, keyword);
 		
-        request.setAttribute("pageFood", pageFood);
-        request.setAttribute("newFoods", newFoods);
-        request.setAttribute("promotionFoods", promotionFoods);
+		Map<Integer, List<FoodDTO>> dailyMenuByStall = new HashMap<>();
+		if (dailyMenuFoods != null) {
+			for (FoodDTO menuFood : dailyMenuFoods) {
+				if (menuFood == null) continue;
+				dailyMenuByStall.computeIfAbsent(menuFood.getStallId(), k -> new ArrayList<>()).add(menuFood);
+			}
+		}
+		
+		List<StallDAO> dailyMenuStalls = new ArrayList<>();
+		if (stalls != null) {
+			dailyMenuStalls.addAll(stalls);
+		}
+		
         request.setAttribute("pageReq", pageReq);
+        request.setAttribute("stalls", stalls);
+        request.setAttribute("dailyMenuDate", today);
+        request.setAttribute("dailyMenuByStall", dailyMenuByStall);
+        request.setAttribute("dailyMenuStalls", dailyMenuStalls);
+        request.setAttribute("dailyMenuFoods", dailyMenuFoods);
 		
         RequestDispatcher rd = request.getRequestDispatcher("home.jsp");
         rd.forward(request, response);

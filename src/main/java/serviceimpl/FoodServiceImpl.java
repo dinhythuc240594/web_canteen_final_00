@@ -1,5 +1,6 @@
 package serviceimpl;
 
+import java.sql.Date;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -61,6 +62,11 @@ public class FoodServiceImpl implements FoodService {
 	@Override
 	public List<FoodDTO> promotionFoods() {
 		return this.foodRepository.promotionFoods();
+	}
+	
+	@Override
+	public List<FoodDTO> findByUpdatedDate(Date targetDate, Integer stallId, String keyword) {
+		return this.foodRepository.findByUpdatedDate(targetDate, stallId, keyword);
 	}
 
 }

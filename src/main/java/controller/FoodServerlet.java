@@ -11,8 +11,8 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 import model.FoodDAO;
 import model.Food_CategoryDAO;
-import model.Page;
 import model.PageRequest;
+import model.StallDAO;
 import repositoryimpl.Food_CategoryRepositoryImpl;
 import serviceimpl.FoodServiceImpl;
 import serviceimpl.Food_CategoryServiceImpl;
@@ -28,13 +28,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.sql.DataSource;
 
 import dto.FoodDTO;
-import model.StallDAO;
 
 
 @WebServlet("/foods")
@@ -131,9 +135,7 @@ public class FoodServerlet extends HttpServlet {
 			case "list":
 				
 				PageRequest pageReq = new PageRequest(page, PAGE_SIZE, sortField, orderField, keyword, stallId);
-				Page<FoodDTO> pageFood = this.foodServiceImpl.findAll(pageReq);
 				List<StallDAO> stalls = this.stallServiceImpl.findAll();
-		        request.setAttribute("pageFood", pageFood);
 		        request.setAttribute("pageReq", pageReq);
 		        request.setAttribute("stalls", stalls);
 		        request.setAttribute("userRole", userRole);
@@ -147,6 +149,37 @@ public class FoodServerlet extends HttpServlet {
 		        	}
 		        }
 		        request.setAttribute("userStallId", userStallId);
+
+		        LocalDate today = LocalDate.now();
+		        Date sqlToday = Date.valueOf(today);
+		        List<FoodDTO> dailyMenuFoods = this.foodServiceImpl.findByUpdatedDate(sqlToday, stallId, keyword);
+
+		        Map<Integer, List<FoodDTO>> dailyMenuByStall = new HashMap<>();
+		        if (dailyMenuFoods != null) {
+		        	for (FoodDTO menuFood : dailyMenuFoods) {
+		        		if (menuFood == null) continue;
+		        		dailyMenuByStall.computeIfAbsent(menuFood.getStallId(), k -> new ArrayList<>()).add(menuFood);
+		        	}
+		        }
+
+		        List<StallDAO> dailyMenuStalls = new ArrayList<>();
+		        if (stalls != null) {
+		        	if (stallId != null && stallId > 0) {
+		        		for (StallDAO stall : stalls) {
+		        			if (stall.getId() == stallId) {
+		        				dailyMenuStalls.add(stall);
+		        				break;
+		        			}
+		        		}
+		        	} else {
+		        		dailyMenuStalls.addAll(stalls);
+		        	}
+		        }
+		        
+		        request.setAttribute("dailyMenuDate", today);
+		        request.setAttribute("dailyMenuByStall", dailyMenuByStall);
+		        request.setAttribute("dailyMenuStalls", dailyMenuStalls);
+		        request.setAttribute("dailyMenuFoods", dailyMenuFoods);
 		        
 		        rd = request.getRequestDispatcher("/foodTemplates/food-list.jsp");
 		        rd.forward(request, response);

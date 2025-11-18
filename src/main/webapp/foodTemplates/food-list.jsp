@@ -12,16 +12,8 @@
 <jsp:include page="/WEB-INF/jsp/common/header.jsp" />
 
 <%
-	model.Page<dto.FoodDTO> pageFood = (model.Page<dto.FoodDTO>) request.getAttribute("pageFood");
-	java.util.List<dto.FoodDTO> foods = null;
-	if (pageFood != null) {
-		foods = pageFood.getData();
-	}
-	
 	model.PageRequest pageReq = (model.PageRequest) request.getAttribute("pageReq");
 	String keyword = pageReq != null ? pageReq.getKeyword() : "";
-	int totalPage = pageFood != null ? pageFood.getTotalPage() : 1;
-	int currentPage = pageFood != null ? pageFood.getCurrentPage() : 1;
 	Integer selectedStallId = pageReq != null ? pageReq.getStallId() : null;
 	
 	String userRole = (String) request.getAttribute("userRole");
@@ -37,6 +29,12 @@
 	java.util.List<model.StallDAO> stalls = (java.util.List<model.StallDAO>) request.getAttribute("stalls");
 	String contextPath = request.getContextPath();
 	String defaultFoodImage = contextPath + "/image/food-thumbnail.png";
+	java.time.LocalDate dailyMenuDate = (java.time.LocalDate) request.getAttribute("dailyMenuDate");
+	java.time.format.DateTimeFormatter dailyMenuFormatter = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
+	String dailyMenuDateLabel = dailyMenuDate != null ? dailyMenuDate.format(dailyMenuFormatter) : null;
+	java.util.Map<Integer, java.util.List<dto.FoodDTO>> dailyMenuByStall = (java.util.Map<Integer, java.util.List<dto.FoodDTO>>) request.getAttribute("dailyMenuByStall");
+	java.util.List<model.StallDAO> dailyMenuStalls = (java.util.List<model.StallDAO>) request.getAttribute("dailyMenuStalls");
+	java.util.List<dto.FoodDTO> dailyMenuFoods = (java.util.List<dto.FoodDTO>) request.getAttribute("dailyMenuFoods");
 %>
 
 <!-- 🔍 Tìm kiếm -->
@@ -57,6 +55,57 @@
   </div>
 </section>
 
+<%--<!-- 📅 Menu theo ngày -->--%>
+<%--<section class="py-6 bg-gradient-to-r from-blue-50 to-indigo-50">--%>
+<%--  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">--%>
+<%--    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">--%>
+<%--      <div>--%>
+<%--        <h2 class="text-xl font-bold text-gray-800">Thực đơn theo ngày</h2>--%>
+<%--        <p class="text-sm text-gray-600">Ngày: <span class="font-semibold text-gray-900"><%= dailyMenuDateLabel != null ? dailyMenuDateLabel : "Chưa xác định" %></span></p>--%>
+<%--      </div>--%>
+<%--      <p class="text-sm text-gray-500">Danh sách món đã được quầy công bố cho ngày hiện tại.</p>--%>
+<%--    </div>--%>
+<%--    --%>
+<%--    <% if (dailyMenuStalls != null && !dailyMenuStalls.isEmpty()) { %>--%>
+<%--    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">--%>
+<%--      <% for (model.StallDAO stallItem : dailyMenuStalls) {--%>
+<%--           java.util.List<dto.FoodDTO> stallMenu = dailyMenuByStall != null ? dailyMenuByStall.get(stallItem.getId()) : null;--%>
+<%--      %>--%>
+<%--      <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">--%>
+<%--        <div class="flex items-start justify-between">--%>
+<%--          <div>--%>
+<%--            <h3 class="text-lg font-semibold text-gray-800"><%= stallItem.getName() %></h3>--%>
+<%--            <p class="text-sm text-gray-500"><%= stallItem.getDescription() != null ? stallItem.getDescription() : "Quầy ăn trong căng tin" %></p>--%>
+<%--          </div>--%>
+<%--          <span class="text-xs px-2 py-1 rounded-full <%= stallItem.getIsOpen() != null && stallItem.getIsOpen() ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700" %>">--%>
+<%--            <%= stallItem.getIsOpen() != null && stallItem.getIsOpen() ? "Đang mở" : "Tạm đóng" %>--%>
+<%--          </span>--%>
+<%--        </div>--%>
+<%--        <% if (stallMenu != null && !stallMenu.isEmpty()) { %>--%>
+<%--        <div class="mt-3 space-y-2 text-sm">--%>
+<%--          <% for (dto.FoodDTO menuFood : stallMenu) { --%>
+<%--               Double menuPrice = menuFood.getPriceFood() != null ? menuFood.getPriceFood() : 0.0;--%>
+<%--          %>--%>
+<%--          <div class="flex items-center justify-between border-b border-gray-100 pb-2 last:border-b-0 last:pb-0">--%>
+<%--            <span class="text-gray-700 truncate pr-3"><%= menuFood.getNameFood() %></span>--%>
+<%--            <span class="text-blue-600 font-semibold whitespace-nowrap"><%= String.format("%,.0f", menuPrice) %>đ</span>--%>
+<%--          </div>--%>
+<%--          <% } %>--%>
+<%--        </div>--%>
+<%--        <% } else { %>--%>
+<%--        <p class="text-sm text-gray-500 mt-3 italic">Chưa có món nào được đăng cho ngày này.</p>--%>
+<%--        <% } %>--%>
+<%--      </div>--%>
+<%--      <% } %>--%>
+<%--    </div>--%>
+<%--    <% } else { %>--%>
+<%--    <div class="text-center py-8 text-gray-600 bg-white rounded-xl border border-dashed border-gray-300">--%>
+<%--      Chưa có thực đơn nào được đăng cho ngày này.--%>
+<%--    </div>--%>
+<%--    <% } %>--%>
+<%--  </div>--%>
+<%--</section>--%>
+
 <!-- Action Buttons (Chỉ hiển thị cho chủ quầy khi xem quầy của chính họ) -->
 <% if (canCreateFood) { %>
 <section class="py-4 bg-white">
@@ -73,10 +122,10 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <h2 class="text-xl font-bold text-gray-800 mb-4 text-center">Danh sách món ăn</h2>
 
-    <% if (foods != null && !foods.isEmpty()) { %>
+    <% if (dailyMenuFoods != null && !dailyMenuFoods.isEmpty()) { %>
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       <%
-        for (dto.FoodDTO food : foods) {
+        for (dto.FoodDTO food : dailyMenuFoods) {
       %>
       <%
         String rawImage = food.getImage();
@@ -135,67 +184,10 @@
       <% } %>
     </div>
 
-    <!-- Pagination -->
-    <% if (totalPage > 1) { %>
-    <div class="flex justify-center mt-6 space-x-2">
-      <% 
-        String keywordParam = keyword != null ? keyword : "";
-        String stallIdParam = selectedStallId != null ? String.valueOf(selectedStallId) : "";
-        
-        // Previous button
-        if (currentPage > 1) {
-      %>
-      <a href="foods?action=list&page=<%= currentPage - 1 %>&keyword=<%= keywordParam %>&stallId=<%= stallIdParam %>"
-         class="px-3 py-1 rounded-full border text-sm bg-white hover:bg-blue-100">
-        <i data-lucide="chevron-left" class="w-4 h-4 inline"></i> Trước
-      </a>
-      <% } %>
-      
-      <% 
-        int startPage = Math.max(1, currentPage - 2);
-        int endPage = Math.min(totalPage, currentPage + 2);
-        
-        if (startPage > 1) {
-      %>
-      <a href="foods?action=list&page=1&keyword=<%= keywordParam %>&stallId=<%= stallIdParam %>"
-         class="px-3 py-1 rounded-full border text-sm bg-white hover:bg-blue-100">
-        1
-      </a>
-      <% if (startPage > 2) { %>
-      <span class="px-3 py-1 text-sm">...</span>
-      <% } %>
-      <% } %>
-      
-      <% for (int i = startPage; i <= endPage; i++) { %>
-      <a href="foods?action=list&page=<%= i %>&keyword=<%= keywordParam %>&stallId=<%= stallIdParam %>"
-         class="px-3 py-1 rounded-full border text-sm <%= (i == currentPage) ? "bg-blue-600 text-white" : "bg-white hover:bg-blue-100" %>">
-        <%= i %>
-      </a>
-      <% } %>
-      
-      <% if (endPage < totalPage) { %>
-      <% if (endPage < totalPage - 1) { %>
-      <span class="px-3 py-1 text-sm">...</span>
-      <% } %>
-      <a href="foods?action=list&page=<%= totalPage %>&keyword=<%= keywordParam %>&stallId=<%= stallIdParam %>"
-         class="px-3 py-1 rounded-full border text-sm bg-white hover:bg-blue-100">
-        <%= totalPage %>
-      </a>
-      <% } %>
-      
-      <% if (currentPage < totalPage) { %>
-      <a href="foods?action=list&page=<%= currentPage + 1 %>&keyword=<%= keywordParam %>&stallId=<%= stallIdParam %>"
-         class="px-3 py-1 rounded-full border text-sm bg-white hover:bg-blue-100">
-        Sau <i data-lucide="chevron-right" class="w-4 h-4 inline"></i>
-      </a>
-      <% } %>
-    </div>
-    <% } %>
-    
     <% } else { %>
     <div class="text-center py-12">
       <i data-lucide="info" class="w-12 h-12 text-gray-400 mx-auto mb-4"></i>
-      <p class="text-gray-600">Không tìm thấy món ăn nào.</p>
+      <p class="text-gray-600">Chưa có món ăn nào được lên thực đơn cho ngày này.</p>
     </div>
     <% } %>
   </div>

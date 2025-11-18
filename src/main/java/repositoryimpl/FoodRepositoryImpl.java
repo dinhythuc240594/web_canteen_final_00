@@ -1,6 +1,7 @@
 package repositoryimpl;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -355,5 +356,71 @@ public class FoodRepositoryImpl implements FoodRepository{
         	System.err.println("Lỗi promotionFoods: " + e.getMessage());
         }
         return foods;
+	}
+
+	@Override
+	public List<FoodDTO> findByUpdatedDate(Date targetDate, Integer stallId, String keyword) {
+		List<FoodDTO> foods = new ArrayList<>();
+		if (targetDate == null) {
+			return foods;
+		}
+		
+		StringBuilder sql = new StringBuilder("SELECT id, name, price, inventory, promotion, stall_id, category_id, image FROM foods WHERE DATE(updated_at) = ?");
+		List<Object> params = new ArrayList<>();
+		params.add(targetDate);
+		
+		if (stallId != null && stallId > 0) {
+			sql.append(" AND stall_id = ?");
+			params.add(stallId);
+		}
+		
+		if (keyword != null && !keyword.trim().isEmpty()) {
+			sql.append(" AND (name LIKE ? OR CAST(price AS CHAR) LIKE ?)");
+			String likeKeyword = "%" + keyword.trim() + "%";
+			params.add(likeKeyword);
+			params.add(likeKeyword);
+		}
+		
+		sql.append(" ORDER BY name ASC");
+		
+		try (Connection conn = ds.getConnection();
+			 PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+			
+			for (int i = 0; i < params.size(); i++) {
+				Object param = params.get(i);
+				if (param instanceof String) {
+					ps.setString(i + 1, (String) param);
+				} else if (param instanceof Integer) {
+					ps.setInt(i + 1, (Integer) param);
+				} else if (param instanceof Double) {
+					ps.setDouble(i + 1, (Double) param);
+				} else if (param instanceof Boolean) {
+					ps.setBoolean(i + 1, (Boolean) param);
+				} else if (param instanceof Date) {
+					ps.setDate(i + 1, (Date) param);
+				}
+			}
+			
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				int id = rs.getInt("id");
+				String name = rs.getString("name");
+				double price = rs.getDouble("price");
+				int inventory = rs.getInt("inventory");
+				double promotion = rs.getDouble("promotion");
+				int stall_id = rs.getInt("stall_id");
+				int category_id = rs.getInt("category_id");
+				String image = rs.getString("image");
+				
+				FoodDAO foodDAO = new FoodDAO(id, name, price, inventory);
+				foodDAO.setCategory_id(category_id);
+				foodDAO.setImage(image);
+				foods.add(FoodDTO.toDto(foodDAO, promotion, stall_id));
+			}
+		} catch (Exception e) {
+			System.err.println("Lỗi findByUpdatedDate: " + e.getMessage());
+		}
+		
+		return foods;
 	}
 }
