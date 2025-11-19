@@ -55,7 +55,7 @@
 <jsp:include page="/WEB-INF/jsp/common/header.jsp" />
 
 <main class="min-h-screen">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="flex">
             <!-- Sidebar -->
             <aside class="w-64 bg-white shadow-sm border rounded-lg admin-sidebar hidden md:block">
@@ -68,9 +68,9 @@
                 <nav class="p-3 space-y-1" id="admin-nav">
                     <a href="#dashboard" class="block px-3 py-2 rounded text-gray-700 hover:bg-gray-100">Tổng quan</a>
                     <a href="#users" class="block px-3 py-2 rounded text-gray-700 hover:bg-gray-100">Người dùng</a>
-                    <a href="#foods" class="block px-3 py-2 rounded text-gray-700 hover:bg-gray-100">Món ăn</a>
-                    <a href="#orders" class="block px-3 py-2 rounded text-gray-700 hover:bg-gray-100">Đơn hàng</a>
-                    <a href="#stalls" class="block px-3 py-2 rounded text-gray-700 hover:bg-gray-100">Quầy ăn</a>
+<%--                    <a href="#foods" class="block px-3 py-2 rounded text-gray-700 hover:bg-gray-100">Món ăn</a>--%>
+<%--                    <a href="#orders" class="block px-3 py-2 rounded text-gray-700 hover:bg-gray-100">Đơn hàng</a>--%>
+<%--                    <a href="#stalls" class="block px-3 py-2 rounded text-gray-700 hover:bg-gray-100">Quầy ăn</a>--%>
                     <!-- <a href="#reports" class="block px-3 py-2 rounded text-gray-700 hover:bg-gray-100">Báo cáo</a> -->
                 </nav>
             </aside>
@@ -165,58 +165,58 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        <div class="bg-white p-4 rounded-lg shadow-sm border">
-                            <h3 class="text-lg font-semibold mb-3">Liên kết nhanh</h3>
-                            <div class="space-y-2">
-                                <a href="#reports" onclick="setActiveView('reports'); loadReports(); return false;" class="block p-3 border rounded hover:bg-gray-50 transition-colors cursor-pointer">
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-medium">Xem báo cáo thống kê</span>
-                                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                                    </div>
-                                </a>
-                                <a href="#orders" onclick="setActiveView('orders'); loadOrders(); return false;" class="block p-3 border rounded hover:bg-gray-50 transition-colors cursor-pointer">
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-medium">Quản lý đơn hàng</span>
-                                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                                    </div>
-                                </a>
-                                <a href="#foods" onclick="setActiveView('foods'); loadFoods(); return false;" class="block p-3 border rounded hover:bg-gray-50 transition-colors cursor-pointer">
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-medium">Quản lý món ăn</span>
-                                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                                    </div>
-                                </a>
-                                <a href="#stalls" onclick="setActiveView('stalls'); loadStalls(); return false;" class="block p-3 border rounded hover:bg-gray-50 transition-colors cursor-pointer">
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-medium">Quản lý quầy ăn</span>
-                                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="bg-white p-4 rounded-lg shadow-sm border">
-                            <h3 class="text-lg font-semibold mb-3">Trạng thái hệ thống</h3>
-                            <div class="space-y-2">
-                                <div class="flex justify-between">
-                                    <span>Tổng quầy ăn</span>
-                                    <span class="font-semibold text-green-600"><%= totalStalls %></span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span>Tổng người dùng</span>
-                                    <span class="font-semibold text-green-600"><%= totalUsers %></span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span>Đơn hàng hôm nay</span>
-                                    <span class="font-semibold text-blue-600"><%= totalOrders %></span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span>Doanh thu hôm nay</span>
-                                    <span class="font-semibold text-green-600"><%= totalRevenue != null ? String.format("%,.0f", totalRevenue) : "0" %>đ</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+<%--                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">--%>
+<%--                        <div class="bg-white p-4 rounded-lg shadow-sm border">--%>
+<%--                            <h3 class="text-lg font-semibold mb-3">Liên kết nhanh</h3>--%>
+<%--                            <div class="space-y-2">--%>
+<%--                                <a href="#reports" onclick="setActiveView('reports'); loadReports(); return false;" class="block p-3 border rounded hover:bg-gray-50 transition-colors cursor-pointer">--%>
+<%--                                    <div class="flex items-center justify-between">--%>
+<%--                                        <span class="font-medium">Xem báo cáo thống kê</span>--%>
+<%--                                        <i data-lucide="arrow-right" class="w-4 h-4"></i>--%>
+<%--                                    </div>--%>
+<%--                                </a>--%>
+<%--                                <a href="#orders" onclick="setActiveView('orders'); loadOrders(); return false;" class="block p-3 border rounded hover:bg-gray-50 transition-colors cursor-pointer">--%>
+<%--                                    <div class="flex items-center justify-between">--%>
+<%--                                        <span class="font-medium">Quản lý đơn hàng</span>--%>
+<%--                                        <i data-lucide="arrow-right" class="w-4 h-4"></i>--%>
+<%--                                    </div>--%>
+<%--                                </a>--%>
+<%--                                <a href="#foods" onclick="setActiveView('foods'); loadFoods(); return false;" class="block p-3 border rounded hover:bg-gray-50 transition-colors cursor-pointer">--%>
+<%--                                    <div class="flex items-center justify-between">--%>
+<%--                                        <span class="font-medium">Quản lý món ăn</span>--%>
+<%--                                        <i data-lucide="arrow-right" class="w-4 h-4"></i>--%>
+<%--                                    </div>--%>
+<%--                                </a>--%>
+<%--                                <a href="#stalls" onclick="setActiveView('stalls'); loadStalls(); return false;" class="block p-3 border rounded hover:bg-gray-50 transition-colors cursor-pointer">--%>
+<%--                                    <div class="flex items-center justify-between">--%>
+<%--                                        <span class="font-medium">Quản lý quầy ăn</span>--%>
+<%--                                        <i data-lucide="arrow-right" class="w-4 h-4"></i>--%>
+<%--                                    </div>--%>
+<%--                                </a>--%>
+<%--                            </div>--%>
+<%--                        </div>--%>
+<%--                        <div class="bg-white p-4 rounded-lg shadow-sm border">--%>
+<%--                            <h3 class="text-lg font-semibold mb-3">Trạng thái hệ thống</h3>--%>
+<%--                            <div class="space-y-2">--%>
+<%--                                <div class="flex justify-between">--%>
+<%--                                    <span>Tổng quầy ăn</span>--%>
+<%--                                    <span class="font-semibold text-green-600"><%= totalStalls %></span>--%>
+<%--                                </div>--%>
+<%--                                <div class="flex justify-between">--%>
+<%--                                    <span>Tổng người dùng</span>--%>
+<%--                                    <span class="font-semibold text-green-600"><%= totalUsers %></span>--%>
+<%--                                </div>--%>
+<%--                                <div class="flex justify-between">--%>
+<%--                                    <span>Đơn hàng hôm nay</span>--%>
+<%--                                    <span class="font-semibold text-blue-600"><%= totalOrders %></span>--%>
+<%--                                </div>--%>
+<%--                                <div class="flex justify-between">--%>
+<%--                                    <span>Doanh thu hôm nay</span>--%>
+<%--                                    <span class="font-semibold text-green-600"><%= totalRevenue != null ? String.format("%,.0f", totalRevenue) : "0" %>đ</span>--%>
+<%--                                </div>--%>
+<%--                            </div>--%>
+<%--                        </div>--%>
+<%--                    </div>--%>
 
                     <div class="bg-white p-4 rounded-lg shadow-sm border">
                         <h3 class="text-lg font-semibold mb-3">Đơn hàng gần đây</h3>

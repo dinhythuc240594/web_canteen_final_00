@@ -58,14 +58,14 @@
 		<%= error %>
 		</div>
 		<% } %>
-		<div class="mt-4 text-center">
-			<p class="text-xs text-gray-600">
-				Chưa có tài khoản?
-				<a href="register" class="font-medium text-blue-600 hover:text-blue-500">
-					Đăng ký ngay
-				</a>
-			</p>
-		</div>
+<%--		<div class="mt-4 text-center">--%>
+<%--			<p class="text-xs text-gray-600">--%>
+<%--				Chưa có tài khoản?--%>
+<%--				<a href="register" class="font-medium text-blue-600 hover:text-blue-500">--%>
+<%--					Đăng ký ngay--%>
+<%--				</a>--%>
+<%--			</p>--%>
+<%--		</div>--%>
 	</div>
 </div>
 

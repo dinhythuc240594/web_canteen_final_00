@@ -35,11 +35,11 @@
                               ${requestScope.currentPage == 'home' ? 'text-white bg-white/20' : 'text-white/80 hover:text-white'}">
 						Đồ ăn
 					</a>
-					<a href="category"
-					   class="px-3 py-2 rounded-md text-sm font-medium transition-colors
-                              ${requestScope.currentPage == 'categories' ? 'text-white bg-white/20' : 'text-white/80 hover:text-white'}">
-						Danh mục
-					</a>
+<%--					<a href="category"--%>
+<%--					   class="px-3 py-2 rounded-md text-sm font-medium transition-colors--%>
+<%--                              ${requestScope.currentPage == 'categories' ? 'text-white bg-white/20' : 'text-white/80 hover:text-white'}">--%>
+<%--						Danh mục--%>
+<%--					</a>--%>
 					<a href="store"
 					   class="px-3 py-2 rounded-md text-sm font-medium transition-colors
                               ${requestScope.currentPage == 'stalls' ? 'text-white bg-white/20' : 'text-white/80 hover:text-white'}">
@@ -119,10 +119,10 @@
 				   class="px-3 py-2 rounded-md text-sm font-medium text-left text-white/80 hover:text-white hover:bg-white/20">
 					Đồ ăn
 				</a>
-				<a href="category"
-				   class="px-3 py-2 rounded-md text-sm font-medium text-left text-white/80 hover:text-white hover:bg-white/20">
-					Danh mục
-				</a>
+<%--				<a href="category"--%>
+<%--				   class="px-3 py-2 rounded-md text-sm font-medium text-left text-white/80 hover:text-white hover:bg-white/20">--%>
+<%--					Danh mục--%>
+<%--				</a>--%>
 				<a href="store"
 				   class="px-3 py-2 rounded-md text-sm font-medium text-left text-white/80 hover:text-white hover:bg-white/20">
 					Quầy
