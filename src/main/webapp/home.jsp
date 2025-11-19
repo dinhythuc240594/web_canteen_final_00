@@ -126,6 +126,9 @@
         <div class="p-3">
           <h3 class="font-medium text-gray-800 text-sm truncate"><%= food.getNameFood() %></h3>
           <p class="text-blue-600 font-bold text-sm"><%= String.format("%,.0f", food.getPriceFood()) %>đ</p>
+          <!-- <span class="text-xs <%= food.getInventoryFood() > 0 ? "text-green-600" : "text-red-600" %>">
+            Tồn kho: <%= food.getInventoryFood() %>
+          </span> -->
           <button class="add-to-cart-btn mt-2 w-full bg-blue-600 text-white py-1.5 rounded text-sm hover:bg-blue-700 transition"
                   data-stall-id="<%= food.getStallId() %>"
                   data-food-id="<%= food.getId() %>"

@@ -38,12 +38,12 @@
               <label class="text-sm font-semibold text-gray-600">Giá:</label>
               <p class="text-2xl font-bold text-blue-600">
                 <%= String.format("%,.0f", food.getPriceFood()) %>đ
-                <% if (food.getPromotion() != null && food.getPromotion() > 0) { %>
+                <!-- <% if (food.getPromotion() != null && food.getPromotion() > 0) { %>
                   <span class="text-lg text-gray-500 line-through ml-2">
                     <%= String.format("%,.0f", food.getPriceAfterPromotion()) %>đ
                   </span>
                   <span class="text-sm text-red-600 ml-2">(-<%= food.getPromotion() %>% khuyến mãi)</span>
-                <% } %>
+                <% } %> -->
               </p>
             </div>
             
@@ -60,11 +60,6 @@
               <p class="text-gray-700 mt-1"><%= food.getDescription() %></p>
             </div>
             <% } %>
-            
-            <div>
-              <label class="text-sm font-semibold text-gray-600">Quầy ID:</label>
-              <p class="text-gray-700"><%= food.getStallId() %></p>
-            </div>
           </div>
           
           <!-- Action Buttons -->

@@ -154,9 +154,9 @@
           </h3>
           <p class="text-blue-600 font-bold text-sm"><%= String.format("%,.0f", food.getPriceFood()) %>đ</p>
           <div class="flex items-center justify-between mt-2">
-              <span class="text-xs <%= food.getInventoryFood() > 0 ? "text-green-600" : "text-red-600" %>">
+              <!-- <span class="text-xs <%= food.getInventoryFood() > 0 ? "text-green-600" : "text-red-600" %>">
               Tồn kho: <%= food.getInventoryFood() %>
-            </span>
+            </span> -->
             <% 
               // Chỉ hiển thị button sửa/xóa nếu người dùng là chủ quầy và món ăn thuộc về quầy của họ
               boolean canEdit = isStallOwner && food.getStallId() == userStallId;
