@@ -47,12 +47,12 @@
               </p>
             </div>
             
-            <div>
+            <!-- <div>
               <label class="text-sm font-semibold text-gray-600">Tồn kho:</label>
               <p class="text-lg <%= food.getInventoryFood() > 0 ? "text-green-600 font-semibold" : "text-red-600 font-semibold" %>">
                 <%= food.getInventoryFood() %> món
               </p>
-            </div>
+            </div> -->
             
             <% if (food.getDescription() != null && !food.getDescription().isEmpty()) { %>
             <div>
