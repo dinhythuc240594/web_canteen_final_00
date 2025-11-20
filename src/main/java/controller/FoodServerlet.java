@@ -151,8 +151,8 @@ public class FoodServerlet extends HttpServlet {
 		        request.setAttribute("userStallId", userStallId);
 
 		        LocalDate today = LocalDate.now();
-		        Date sqlToday = Date.valueOf(today);
-		        List<FoodDTO> dailyMenuFoods = this.foodServiceImpl.findByUpdatedDate(sqlToday, stallId, keyword);
+		        Date _today = Date.valueOf(today);
+		        List<FoodDTO> dailyMenuFoods = this.foodServiceImpl.findByUpdatedDate(_today, stallId, keyword);
 
 		        Map<Integer, List<FoodDTO>> dailyMenuByStall = new HashMap<>();
 		        if (dailyMenuFoods != null) {
@@ -268,63 +268,41 @@ public class FoodServerlet extends HttpServlet {
 		}
 		int userStallId = userStalls.get(0).getId();
 		
-		String action = request.getParameter("action");
-		
+		String action = RequestUtil.getString(request, "action", null);
+		System.out.println(action);
 		// Handle JSON response for AJAX requests
 		response.setContentType("application/json; charset=UTF-8");
 		PrintWriter out = response.getWriter();
 		
 		try {
-			String nameFood = request.getParameter("nameFood");
-			double priceFood = Double.parseDouble(request.getParameter("priceFood"));
-			int inventoryFood = Integer.parseInt(request.getParameter("inventoryFood"));
-			
-			// Get optional fields
-			String categoryIdStr = request.getParameter("category_id");
-			Integer categoryId = (categoryIdStr != null && !categoryIdStr.trim().isEmpty()) 
-				? Integer.parseInt(categoryIdStr) : null;
-			
-			String description = request.getParameter("description");
-			if (description == null) description = "";
-			
-			String promotionStr = request.getParameter("promotion");
-			Double promotion = (promotionStr != null && !promotionStr.trim().isEmpty()) 
-				? Double.parseDouble(promotionStr) : 0.0;
-			
-			String isAvailableStr = request.getParameter("is_available");
-			Boolean isAvailable = (isAvailableStr != null && "1".equals(isAvailableStr));
-			
-			// Handle image upload
-			String imageUrl = null;
-			Part imagePart = request.getPart("image");
-			if (imagePart != null && imagePart.getSize() > 0) {
-				String contentType = imagePart.getContentType();
-				if (contentType != null && contentType.startsWith("image/")) {
-					// Generate safe filename
-					String submitted = Paths.get(imagePart.getSubmittedFileName()).getFileName().toString();
-					String ext = submitted.contains(".") ? submitted.substring(submitted.lastIndexOf(".")) : ".jpg";
-					String safeName = UUID.randomUUID().toString().replace("-", "") + ext.toLowerCase();
-					
-					// Save to uploads/foods directory
-					String appRealPath = request.getServletContext().getRealPath("");
-					if (appRealPath == null) {
-						appRealPath = System.getProperty("user.home") + "/uploads";
-					}
-					
-					Path uploadDir = Paths.get(appRealPath, "uploads", "foods");
-					Files.createDirectories(uploadDir);
-					
-					try (InputStream in = imagePart.getInputStream()) {
-						Files.copy(in, uploadDir.resolve(safeName), StandardCopyOption.REPLACE_EXISTING);
-					}
-					
-					// Generate public URL
-					imageUrl = request.getContextPath() + "/uploads/foods/" + URLEncoder.encode(safeName, "UTF-8");
-				}
+			if (action == null || action.isBlank()) {
+				out.print("{\"success\":false,\"message\":\"Thiếu tham số action\"}");
+				return;
 			}
 			
 			switch (action) {
-				case "create":
+				case "create": {
+					String nameFood = request.getParameter("nameFood");
+					double priceFood = Double.parseDouble(request.getParameter("priceFood"));
+					int inventoryFood = Integer.parseInt(request.getParameter("inventoryFood"));
+					
+					// Get optional fields
+					String categoryIdStr = request.getParameter("category_id");
+					Integer categoryId = (categoryIdStr != null && !categoryIdStr.trim().isEmpty()) 
+						? Integer.parseInt(categoryIdStr) : null;
+					
+					String description = request.getParameter("description");
+					if (description == null) description = "";
+					
+					String promotionStr = request.getParameter("promotion");
+					Double promotion = (promotionStr != null && !promotionStr.trim().isEmpty()) 
+						? Double.parseDouble(promotionStr) : 0.0;
+					
+					String isAvailableStr = request.getParameter("is_available");
+					Boolean isAvailable = (isAvailableStr != null && "1".equals(isAvailableStr));
+					
+					String imageUrl = handleImageUpload(request);
+					
 					boolean isCreate = this.foodServiceImpl.create(
 						nameFood, priceFood, inventoryFood, userStallId, 
 						categoryId, imageUrl, description, promotion, isAvailable
@@ -335,9 +313,30 @@ public class FoodServerlet extends HttpServlet {
 						out.print("{\"success\":false,\"message\":\"Lỗi khi tạo món ăn\"}");
 					}
 					break;
+				}
 				
-				case "update":
+				case "update": {
 					int id = Integer.parseInt(request.getParameter("id"));
+					String nameFood = request.getParameter("nameFood");
+					double priceFood = Double.parseDouble(request.getParameter("priceFood"));
+					int inventoryFood = Integer.parseInt(request.getParameter("inventoryFood"));
+					
+					String categoryIdStr = request.getParameter("category_id");
+					Integer categoryId = (categoryIdStr != null && !categoryIdStr.trim().isEmpty()) 
+						? Integer.parseInt(categoryIdStr) : null;
+					
+					String description = request.getParameter("description");
+					if (description == null) description = "";
+					
+					String promotionStr = request.getParameter("promotion");
+					Double promotion = (promotionStr != null && !promotionStr.trim().isEmpty()) 
+						? Double.parseDouble(promotionStr) : 0.0;
+					
+					String isAvailableStr = request.getParameter("is_available");
+					Boolean isAvailable = (isAvailableStr != null && "1".equals(isAvailableStr));
+					
+					String imageUrl = handleImageUpload(request);
+					
 					// Verify ownership before updating
 					FoodDTO food = this.foodServiceImpl.findById(id);
 					if (food == null) {
@@ -364,6 +363,28 @@ public class FoodServerlet extends HttpServlet {
 						out.print("{\"success\":false,\"message\":\"Lỗi khi cập nhật món ăn\"}");
 					}
 					break;
+				}
+				
+				case "delete": {
+					int id = Integer.parseInt(request.getParameter("id"));
+					FoodDTO food = this.foodServiceImpl.findById(id);
+					if (food == null) {
+						out.print("{\"success\":false,\"message\":\"Không tìm thấy món ăn\"}");
+						return;
+					}
+					if (food.getStallId() != userStallId) {
+						out.print("{\"success\":false,\"message\":\"Bạn không có quyền xóa món này\"}");
+						return;
+					}
+					
+					boolean isDelete = this.foodServiceImpl.delete(id);
+					if (isDelete) {
+						out.print("{\"success\":true,\"message\":\"Đã xóa món ăn\"}");
+					} else {
+						out.print("{\"success\":false,\"message\":\"Lỗi khi xóa món ăn\"}");
+					}
+					break;
+				}
 					
 				default:
 					out.print("{\"success\":false,\"message\":\"Action không hợp lệ\"}");
@@ -374,6 +395,33 @@ public class FoodServerlet extends HttpServlet {
 		} finally {
 			out.close();
 		}
+	}
+	
+	private String handleImageUpload(HttpServletRequest request) throws IOException, ServletException {
+		Part imagePart = request.getPart("image");
+		if (imagePart != null && imagePart.getSize() > 0) {
+			String contentType = imagePart.getContentType();
+			if (contentType != null && contentType.startsWith("image/")) {
+				String submitted = Paths.get(imagePart.getSubmittedFileName()).getFileName().toString();
+				String ext = submitted.contains(".") ? submitted.substring(submitted.lastIndexOf(".")) : ".jpg";
+				String safeName = UUID.randomUUID().toString().replace("-", "") + ext.toLowerCase();
+				
+				String appRealPath = request.getServletContext().getRealPath("");
+				if (appRealPath == null) {
+					appRealPath = System.getProperty("user.home") + "/uploads";
+				}
+				
+				Path uploadDir = Paths.get(appRealPath, "uploads", "foods");
+				Files.createDirectories(uploadDir);
+				
+				try (InputStream in = imagePart.getInputStream()) {
+					Files.copy(in, uploadDir.resolve(safeName), StandardCopyOption.REPLACE_EXISTING);
+				}
+				
+				return request.getContextPath() + "/uploads/foods/" + URLEncoder.encode(safeName, "UTF-8");
+			}
+		}
+		return null;
 	}
 
 }
