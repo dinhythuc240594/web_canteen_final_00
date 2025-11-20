@@ -7,11 +7,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.*;
-import serviceimpl.FoodServiceImpl;
-import serviceimpl.OrderServiceImpl;
-import serviceimpl.StallServiceImpl;
-import serviceimpl.StatisticServiceImpl;
-import serviceimpl.UserServiceImpl;
+import repository.AdminRepository;
+import serviceimpl.*;
 import utils.DataSourceUtil;
 import dto.FoodDTO;
 
@@ -30,6 +27,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import com.google.gson.Gson;
+import utils.RequestUtil;
 
 @WebServlet("/admin")
 public class AdminServlet extends HttpServlet {
@@ -40,6 +38,7 @@ public class AdminServlet extends HttpServlet {
 	private OrderServiceImpl orderServiceImpl;
 	private StatisticServiceImpl statisticServiceImpl;
 	private FoodServiceImpl foodServiceImpl;
+    private AdminServiceImpl adminServiceImpl;
 	private DataSource ds;
 	
 	@Override
@@ -50,6 +49,7 @@ public class AdminServlet extends HttpServlet {
 		this.orderServiceImpl = new OrderServiceImpl(ds);
 		this.statisticServiceImpl = new StatisticServiceImpl(ds);
 		this.foodServiceImpl = new FoodServiceImpl(ds);
+        this.adminServiceImpl = new AdminServiceImpl(ds);
 	}
 	
 	@Override
@@ -181,21 +181,21 @@ public class AdminServlet extends HttpServlet {
 		
 		// Get today's statistics
 		LocalDate today = LocalDate.now();
-		Date sqlToday = Date.valueOf(today);
+		Date _today = Date.valueOf(today);
 		
 		// Calculate total revenue from completed orders (all time)
 		double totalRevenue = this.orderServiceImpl.getTotalRevenueFromCompletedOrders();
 		
 		// Get today's orders count
 		int totalOrders = 0;
-		List<StatisticDAO> todayStats = this.statisticServiceImpl.findByDateRange(sqlToday, sqlToday);
+		List<StatisticDAO> todayStats = this.statisticServiceImpl.findByDateRange(_today, _today);
 		for (StatisticDAO stat : todayStats) {
 			totalOrders += stat.getOrdersCount();
 		}
 		
 		// Get recent orders (last 10)
 		PageRequest pageReq = new PageRequest(1, 10, "created_at", "DESC", "");
-        Page<OrderDAO> pageOrders = this.orderServiceImpl.findAll(pageReq);
+		Page<OrderDAO> pageOrders = this.orderServiceImpl.findAll(pageReq);
 		List<OrderDAO> recentOrders = pageOrders.getData();
 		
 		// Load user and stall names for each order
@@ -415,7 +415,7 @@ public class AdminServlet extends HttpServlet {
 		double totalRevenue = this.orderServiceImpl.getTotalRevenueFromCompletedOrders();
 		
 		// Get best selling foods from order_foods
-		List<Map<String, Object>> bestSellingFoods = getBestSellingFoods();
+		List<Map<String, Object>> bestSellingFoods = this.adminServiceImpl.getBestSellingFoods();
 		
 		Map<String, Object> report = new HashMap<>();
 		report.put("totalRevenue", totalRevenue);
@@ -428,49 +428,18 @@ public class AdminServlet extends HttpServlet {
 		String json = gson.toJson(report);
 		response.getWriter().write(json);
 	}
-	
-	private List<Map<String, Object>> getBestSellingFoods() {
-		List<Map<String, Object>> bestSelling = new ArrayList<>();
-		
-		String sql = "SELECT ofd.food_id, f.name, SUM(ofd.quantity) as total_quantity, SUM(ofd.quantity * ofd.price_at_order) as total_revenue " +
-					 "FROM order_foods ofd " +
-					 "INNER JOIN orders o ON ofd.order_id = o.id " +
-					 "INNER JOIN foods f ON ofd.food_id = f.id " +
-					 "WHERE o.status = 'delivered' " +
-					 "GROUP BY ofd.food_id, f.name " +
-					 "ORDER BY total_quantity DESC " +
-					 "LIMIT 10";
-		
-		try (Connection conn = ds.getConnection();
-			 PreparedStatement pstmt = conn.prepareStatement(sql);
-			 ResultSet rs = pstmt.executeQuery()) {
-			
-			while (rs.next()) {
-				Map<String, Object> foodData = new HashMap<>();
-				foodData.put("foodId", rs.getInt("food_id"));
-				foodData.put("foodName", rs.getString("name"));
-				foodData.put("totalQuantity", rs.getInt("total_quantity"));
-				foodData.put("totalRevenue", rs.getDouble("total_revenue"));
-				bestSelling.add(foodData);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
-		return bestSelling;
-	}
-	
+    
 	private void handleStatistics(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String startDateStr = request.getParameter("startDate");
-		String endDateStr = request.getParameter("endDate");
+		String startDateStr = RequestUtil.getString(request, "startDate", "");
+		String endDateStr = RequestUtil.getString(request, "endDate", "");
 		
 		LocalDate startDate = startDateStr != null ? LocalDate.parse(startDateStr) : LocalDate.now().minusDays(7);
 		LocalDate endDate = endDateStr != null ? LocalDate.parse(endDateStr) : LocalDate.now();
 		
-		Date sqlStartDate = Date.valueOf(startDate);
-		Date sqlEndDate = Date.valueOf(endDate);
+		Date _startDate = Date.valueOf(startDate);
+		Date _endDate = Date.valueOf(endDate);
 		
-		List<StatisticDAO> statistics = this.statisticServiceImpl.findByDateRange(sqlStartDate, sqlEndDate);
+		List<StatisticDAO> statistics = this.statisticServiceImpl.findByDateRange(_startDate, _endDate);
 		
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");

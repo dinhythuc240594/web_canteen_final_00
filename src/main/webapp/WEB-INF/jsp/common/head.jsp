@@ -12,3 +12,4 @@
 		lucide.createIcons();
 	});
 </script>
+<jsp:include page="/WEB-INF/jsp/common/cart-sidebar.jsp" />

@@ -20,8 +20,8 @@
     java.time.LocalDate dailyMenuDate = (java.time.LocalDate) request.getAttribute("dailyMenuDate");
     java.time.format.DateTimeFormatter dailyMenuFormatter = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
     String dailyMenuDateLabel = dailyMenuDate != null ? dailyMenuDate.format(dailyMenuFormatter) : null;
-    java.util.Map<Integer, java.util.List<dto.FoodDTO>> dailyMenuByStall = (java.util.Map<Integer, java.util.List<dto.FoodDTO>>) request.getAttribute("dailyMenuByStall");
-    java.util.List<model.StallDAO> dailyMenuStalls = (java.util.List<model.StallDAO>) request.getAttribute("dailyMenuStalls");
+//    java.util.Map<Integer, java.util.List<dto.FoodDTO>> dailyMenuByStall = (java.util.Map<Integer, java.util.List<dto.FoodDTO>>) request.getAttribute("dailyMenuByStall");
+//    java.util.List<model.StallDAO> dailyMenuStalls = (java.util.List<model.StallDAO>) request.getAttribute("dailyMenuStalls");
     java.util.List<dto.FoodDTO> dailyMenuFoods = (java.util.List<dto.FoodDTO>) request.getAttribute("dailyMenuFoods");
 %>
 
@@ -129,14 +129,11 @@
           <!-- <span class="text-xs <%= food.getInventoryFood() > 0 ? "text-green-600" : "text-red-600" %>">
             Tồn kho: <%= food.getInventoryFood() %>
           </span> -->
-          <button class="add-to-cart-btn mt-2 w-full bg-blue-600 text-white py-1.5 rounded text-sm hover:bg-blue-700 transition"
-                  data-stall-id="<%= food.getStallId() %>"
-                  data-food-id="<%= food.getId() %>"
-                  data-food-name="<%= food.getNameFood().replace("\"", "&quot;").replace("'", "&#39;") %>"
-                  data-food-price="<%= food.getPriceFood() %>"
-                  data-food-image="<%= imageUrl.replace("\"", "&quot;").replace("'", "&#39;") %>">
-            Thêm vào giỏ
-          </button>
+            <button onclick="addToCart(<%= food.getStallId() %>, <%= food.getId() %>, '<%= food.getNameFood().replace("'", "\\'") %>', <%= food.getPriceFood() %>, '<%= food.getImage() != null ? food.getImage().replace("'", "\\'") : "static/img/food-thumbnail.png" %>')"
+                    class="add-to-cart-btn mt-2 w-full bg-blue-600 text-white py-1.5 rounded text-sm hover:bg-blue-700 transitio">
+                <i data-lucide="shopping-cart" class="w-5 h-5 inline mr-2"></i>
+                Thêm vào giỏ hàng
+            </button>
         </div>
       </div>
       <% } %>
@@ -151,134 +148,5 @@
 </section>
 
 <jsp:include page="/WEB-INF/jsp/common/footer.jsp" />
-<jsp:include page="/WEB-INF/jsp/common/cart-sidebar.jsp" />
-
-<script>
-  let cart = JSON.parse(localStorage.getItem('cart')) || [];
-
-  const defaultFoodImage = '<%= contextPath %>/image/food-thumbnail.png';
-
-  document.addEventListener('DOMContentLoaded', () => {
-    lucide.createIcons();
-    updateCartCount();
-    renderCart();
-    
-    // Add event listeners to all add-to-cart buttons
-    document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
-        const stallId = parseInt(this.getAttribute('data-stall-id'));
-        const id = parseInt(this.getAttribute('data-food-id'));
-        const name = this.getAttribute('data-food-name');
-        const price = parseFloat(this.getAttribute('data-food-price'));
-        const image = this.getAttribute('data-food-image');
-        addToCart(stallId, id, name, price, image);
-      });
-    });
-  });
-
-  function addToCart(stall_id, id, name, price, image) {
-    const existing = cart.find(item => item.id === id);
-    if (existing) existing.quantity += 1;
-    else cart.push({stall_id, id, name, price, image, quantity: 1 });
-
-    localStorage.setItem('cart', JSON.stringify(cart));
-    updateCartCount();
-    renderCart();
-    alert('Đã thêm ' + name + ' vào giỏ hàng!');
-  }
-
-  function updateCartCount() {
-    const count = cart.reduce((sum, i) => sum + i.quantity, 0);
-    const el = document.getElementById('cart-count');
-    if (el) {
-      el.textContent = count;
-      el.classList.toggle('hidden', count === 0);
-    }
-  }
-
-  function renderCart() {
-	  const container = document.getElementById('cart-items');
-	  const footer = document.getElementById('cart-footer');
-	  let cart = JSON.parse(localStorage.getItem('cart')) || [];
-	  let total = 0;
-
-	  if (!container) return;
-
-	  if (cart.length === 0) {
-	    container.innerHTML = '<div class="text-center py-6 text-gray-500">Giỏ hàng trống</div>';
-	    footer.classList.add('hidden');
-	    return;
-	  }
-
-	  container.innerHTML = cart.map(item => {
-	    const price = Number(item.price) || 0;
-	    const quantity = Number(item.quantity) || 0;
-	    total += price * quantity;
-
-	    var html = "";
-	    	html += '<div class="flex items-center space-x-3 bg-gray-50 p-2 rounded mb-2">';
-	    	html += '<img src="'+ (item.image || defaultFoodImage) +'" class="w-12 h-12 object-cover rounded">';
-	    	html += '<div class="flex-1">';
-	    	html += '<h3 class="text-sm font-medium text-gray-800 truncate">' + (item.name || "Không rõ món") + '</h3>';
-	    	html += '<p class="text-blue-600 text-sm font-semibold">' + price.toLocaleString('vi-VN') + 'đ</p>';
-	    	html += '</div>';
-	    	html += '<div class="flex items-center space-x-1">';
-	    	html += '<button onclick="updateQuantity(' + item.id + ',' + (item.quantity - 1) + ')" class="p-1 bg-gray-200 rounded-full">-</button>';
-	    	html += '<span class="w-6 text-center">' + item.quantity + '</span>';
-	    	html += '<button onclick="updateQuantity(' + item.id + ',' + (item.quantity + 1) + ')" class="p-1 bg-gray-200 rounded-full">+</button>';
-	    	html += '</div>';
-	    	html += '<button onclick="removeFromCart(' + item.id + ')" class="text-red-600">✕</button>';
-	    	html += '</div>';
-
-	      return html;
-	  }).join('');
-
-	  document.getElementById('cart-total').textContent = total.toLocaleString('vi-VN') + 'đ';
-	  footer.classList.remove('hidden');
-	}
-
-
-  function updateQuantity(id, newQty) {
-    if (newQty <= 0) return removeFromCart(id);
-    const item = cart.find(i => i.id === id);
-    if (item) item.quantity = newQty;
-    localStorage.setItem('cart', JSON.stringify(cart));
-    updateCartCount();
-    renderCart();
-  }
-
-  function removeFromCart(id) {
-    cart = cart.filter(i => i.id !== id);
-    localStorage.setItem('cart', JSON.stringify(cart));
-    updateCartCount();
-    renderCart();
-  }
-
-  function checkout() {
-    if (cart.length === 0) {
-      alert('Giỏ hàng trống!');
-      return;
-    }
-    
-    // Send cart data to server via POST
-    $.ajax({
-      type: "POST",
-      url: "cart",
-      data: {
-        'orders': JSON.stringify(cart),
-        'action': 'add'
-      },
-      success: function(response) {
-        console.log("Cart saved successfully");
-        // Redirect to cart page
-        window.location.href = 'cart';
-      },
-      error: function(xhr, status, error) {
-        console.error("Error saving cart:", status, error);
-        alert("Có lỗi xảy ra khi lưu giỏ hàng. Vui lòng thử lại!");
-      }
-    });
-  }
-</script>
 </body>
 </html>

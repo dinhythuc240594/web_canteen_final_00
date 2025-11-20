@@ -93,10 +93,10 @@ public class StatisticsServlet extends HttpServlet {
 		LocalDate startDate = startDateStr != null ? LocalDate.parse(startDateStr) : LocalDate.now().minusDays(7);
 		LocalDate endDate = endDateStr != null ? LocalDate.parse(endDateStr) : LocalDate.now();
 		
-		Date sqlStartDate = Date.valueOf(startDate);
-		Date sqlEndDate = Date.valueOf(endDate);
+		Date _startDate = Date.valueOf(startDate);
+		Date _endDate = Date.valueOf(endDate);
 		
-		List<StatisticDAO> statistics = statisticService.findByDateRange(sqlStartDate, sqlEndDate);
+		List<StatisticDAO> statistics = statisticService.findByDateRange(_startDate, _endDate);
 		
 		// Calculate totals
 		double totalRevenue = 0.0;
@@ -127,11 +127,11 @@ public class StatisticsServlet extends HttpServlet {
 		
 		LocalDate startDate = startDateStr != null ? LocalDate.parse(startDateStr) : LocalDate.now().minusDays(30);
 		LocalDate endDate = endDateStr != null ? LocalDate.parse(endDateStr) : LocalDate.now();
-		
-		Date sqlStartDate = Date.valueOf(startDate);
-		Date sqlEndDate = Date.valueOf(endDate);
-		
-		List<StatisticDAO> statistics = statisticService.findByStallIdAndDateRange(stallId, sqlStartDate, sqlEndDate);
+
+		Date _startDate = Date.valueOf(startDate);
+		Date _endDate = Date.valueOf(endDate);
+
+		List<StatisticDAO> statistics = statisticService.findByStallIdAndDateRange(stallId, _startDate, _endDate);
 		
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
@@ -148,10 +148,10 @@ public class StatisticsServlet extends HttpServlet {
 		LocalDate startDate = startDateStr != null ? LocalDate.parse(startDateStr) : LocalDate.now().minusDays(30);
 		LocalDate endDate = endDateStr != null ? LocalDate.parse(endDateStr) : LocalDate.now();
 		
-		Date sqlStartDate = Date.valueOf(startDate);
-		Date sqlEndDate = Date.valueOf(endDate);
+		Date _startDate = Date.valueOf(startDate);
+		Date _endDate = Date.valueOf(endDate);
 		
-		List<StatisticDAO> statistics = statisticService.findByDateRange(sqlStartDate, sqlEndDate);
+		List<StatisticDAO> statistics = statisticService.findByDateRange(_startDate, _endDate);
 		
 		// Group by food and sum quantities
 		Map<Integer, Map<String, Object>> foodStats = new HashMap<>();
@@ -193,10 +193,10 @@ public class StatisticsServlet extends HttpServlet {
 		LocalDate startDate = startDateStr != null ? LocalDate.parse(startDateStr) : LocalDate.now().minusDays(30);
 		LocalDate endDate = endDateStr != null ? LocalDate.parse(endDateStr) : LocalDate.now();
 		
-		Date sqlStartDate = Date.valueOf(startDate);
-		Date sqlEndDate = Date.valueOf(endDate);
+		Date _startDate = Date.valueOf(startDate);
+		Date _endDate = Date.valueOf(endDate);
 		
-		List<StatisticDAO> statistics = statisticService.findByDateRange(sqlStartDate, sqlEndDate);
+		List<StatisticDAO> statistics = statisticService.findByDateRange(_startDate, _endDate);
 		
 		// Group by date
 		Map<String, Map<String, Object>> dailyStats = new HashMap<>();
@@ -237,10 +237,10 @@ public class StatisticsServlet extends HttpServlet {
 		LocalDate startDate = startDateStr != null ? LocalDate.parse(startDateStr) : LocalDate.now().minusDays(30);
 		LocalDate endDate = endDateStr != null ? LocalDate.parse(endDateStr) : LocalDate.now();
 		
-		Date sqlStartDate = Date.valueOf(startDate);
-		Date sqlEndDate = Date.valueOf(endDate);
+		Date _startDate = Date.valueOf(startDate);
+		Date _endDate = Date.valueOf(endDate);
 		
-		List<StatisticDAO> statistics = statisticService.findByDateRange(sqlStartDate, sqlEndDate);
+		List<StatisticDAO> statistics = statisticService.findByDateRange(_startDate, _endDate);
 		List<StallDAO> stalls = stallService.findAll();
 		
 		// Group by stall

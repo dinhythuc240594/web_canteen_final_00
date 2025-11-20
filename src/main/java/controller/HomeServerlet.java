@@ -65,8 +65,8 @@ public class HomeServerlet extends HttpServlet {
 		
 		List<StallDAO> stalls = this.stallServiceImpl.findAll();
 		LocalDate today = LocalDate.now();
-		Date sqlToday = Date.valueOf(today);
-		List<FoodDTO> dailyMenuFoods = this.foodServiceImpl.findByUpdatedDate(sqlToday, null, keyword);
+		Date _today = Date.valueOf(today);
+		List<FoodDTO> dailyMenuFoods = this.foodServiceImpl.findByUpdatedDate(_today, null, keyword);
 		
 		Map<Integer, List<FoodDTO>> dailyMenuByStall = new HashMap<>();
 		if (dailyMenuFoods != null) {

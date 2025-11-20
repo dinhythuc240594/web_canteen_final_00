@@ -56,3 +56,120 @@
     };
   }
 </script>
+<script>
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+        lucide.createIcons();
+        updateCartCount();
+        renderCart();
+    });
+
+    function addToCart(stall_id, id, name, price, image) {
+        const existing = cart.find(item => item.id === id);
+        if (existing) {
+            existing.quantity += 1;
+        } else {
+            cart.push({stall_id, id, name, price, image, quantity: 1 });
+        }
+
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartCount();
+        renderCart();
+        alert('Đã thêm ' + name + ' vào giỏ hàng!');
+    }
+
+    function updateCartCount() {
+        const count = cart.reduce((sum, i) => sum + i.quantity, 0);
+        const el = document.getElementById('cart-count');
+        if (el) {
+            el.textContent = count;
+            el.classList.toggle('hidden', count === 0);
+        }
+    }
+
+    function renderCart() {
+        const container = document.getElementById('cart-items');
+        const footer = document.getElementById('cart-footer');
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let total = 0;
+
+        if (!container) return;
+
+        if (cart.length === 0) {
+            container.innerHTML = '<div class="text-center py-6 text-gray-500">Giỏ hàng trống</div>';
+            if (footer) footer.classList.add('hidden');
+            return;
+        }
+
+        container.innerHTML = cart.map(item => {
+            const price = Number(item.price) || 0;
+            const quantity = Number(item.quantity) || 0;
+            total += price * quantity;
+
+            var html = "";
+            html += '<div class="flex items-center space-x-3 bg-gray-50 p-2 rounded mb-2">';
+            html += '<img src="'+ (item.image || "static/img/food-thumbnail.png") +'" class="w-12 h-12 object-cover rounded">';
+            html += '<div class="flex-1">';
+            html += '<h3 class="text-sm font-medium text-gray-800 truncate">' + (item.name || "Không rõ món") + '</h3>';
+            html += '<p class="text-blue-600 text-sm font-semibold">' + price.toLocaleString('vi-VN') + 'đ</p>';
+            html += '</div>';
+            html += '<div class="flex items-center space-x-1">';
+            html += '<button onclick="updateQuantity(' + item.id + ',' + (item.quantity - 1) + ')" class="p-1 bg-gray-200 rounded-full">-</button>';
+            html += '<span class="w-6 text-center">' + item.quantity + '</span>';
+            html += '<button onclick="updateQuantity(' + item.id + ',' + (item.quantity + 1) + ')" class="p-1 bg-gray-200 rounded-full">+</button>';
+            html += '</div>';
+            html += '<button onclick="removeFromCart(' + item.id + ')" class="text-red-600">✕</button>';
+            html += '</div>';
+
+            return html;
+        }).join('');
+
+        if (footer) {
+            document.getElementById('cart-total').textContent = total.toLocaleString('vi-VN') + 'đ';
+            footer.classList.remove('hidden');
+        }
+    }
+
+    function updateQuantity(id, newQty) {
+        if (newQty <= 0) return removeFromCart(id);
+        const item = cart.find(i => i.id === id);
+        if (item) item.quantity = newQty;
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartCount();
+        renderCart();
+    }
+
+    function removeFromCart(id) {
+        cart = cart.filter(i => i.id !== id);
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartCount();
+        renderCart();
+    }
+
+    function checkout() {
+        if (cart.length === 0) {
+            alert('Giỏ hàng trống!');
+            return;
+        }
+
+        // Send cart data to server via POST
+        $.ajax({
+            type: "POST",
+            url: "cart",
+            data: {
+                'orders': JSON.stringify(cart),
+                'action': 'add'
+            },
+            success: function(response) {
+                console.log("Cart saved successfully");
+                // Redirect to cart page
+                window.location.href = 'cart';
+            },
+            error: function(xhr, status, error) {
+                console.error("Error saving cart:", status, error);
+                alert("Có lỗi xảy ra khi lưu giỏ hàng. Vui lòng thử lại!");
+            }
+        });
+    }
+</script>

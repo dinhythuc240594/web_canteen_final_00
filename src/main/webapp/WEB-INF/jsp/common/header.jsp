@@ -105,10 +105,10 @@
 				</div>
 				<% } %>
 
-				<button onclick="toggleMobileMenu()"
-						class="md:hidden p-2 text-white">
-					<i data-lucide="menu" id="menu-icon" class="w-6 h-6"></i>
-				</button>
+<%--				<button onclick="toggleMobileMenu()"--%>
+<%--						class="md:hidden p-2 text-white">--%>
+<%--					<i data-lucide="menu" id="menu-icon" class="w-6 h-6"></i>--%>
+<%--				</button>--%>
 			</div>
 		</div>
 
@@ -139,18 +139,18 @@
 </header>
 
 <script>
-	function toggleMobileMenu() {
-		const menu = document.getElementById('mobile-menu');
-		const icon = document.getElementById('menu-icon');
-		if (menu.classList.contains('hidden')) {
-			menu.classList.remove('hidden');
-			icon.setAttribute('data-lucide', 'x');
-		} else {
-			menu.classList.add('hidden');
-			icon.setAttribute('data-lucide', 'menu');
-		}
-		lucide.createIcons();
-	}
+	// function toggleMobileMenu() {
+	// 	const menu = document.getElementById('mobile-menu');
+	// 	const icon = document.getElementById('menu-icon');
+	// 	if (menu.classList.contains('hidden')) {
+	// 		menu.classList.remove('hidden');
+	// 		icon.setAttribute('data-lucide', 'x');
+	// 	} else {
+	// 		menu.classList.add('hidden');
+	// 		icon.setAttribute('data-lucide', 'menu');
+	// 	}
+	// 	lucide.createIcons();
+	// }
 
 	function toggleCart() {
 		const cartSidebar = document.getElementById('cart-sidebar');

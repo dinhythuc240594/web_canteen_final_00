@@ -14,10 +14,10 @@
     dto.FoodDTO food = (dto.FoodDTO) request.getAttribute("food");
     String previewImg = food != null && food.getImage() != null && !food.getImage().isEmpty() ? food.getImage():"";
     java.util.List<Food_CategoryDAO> categories = (java.util.List<Food_CategoryDAO>) request.getAttribute("categories");
-    if (categories == null) {
-        // Load categories if not provided
-        // This should ideally be done in the controller
-    }
+//    if (categories == null) {
+//        // Load categories if not provided
+//        // This should ideally be done in the controller
+//    }
 %>
 
 <% if (food != null) { %>

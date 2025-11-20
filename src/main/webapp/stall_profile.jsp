@@ -1,37 +1,4 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%
-    String username = (String) session.getAttribute("username");
-    String userRole = (String) session.getAttribute("type_user");
-    
-    if (username == null) {
-        response.sendRedirect(request.getContextPath() + "/login");
-        return;
-    }
-    
-    if (!"stall".equals(userRole)) {
-        response.sendRedirect(request.getContextPath() + "/home");
-        return;
-    }
-    
-    model.UserDAO user = (model.UserDAO) request.getAttribute("user");
-    String contextPath = request.getContextPath();
-    
-    String formFullName = (String) request.getAttribute("profileFormFullName");
-    if (formFullName == null && user != null) formFullName = user.getFull_name();
-    
-    String formEmail = (String) request.getAttribute("profileFormEmail");
-    if (formEmail == null && user != null && user.getEmail() != null) formEmail = user.getEmail();
-    
-    String formPhone = (String) request.getAttribute("profileFormPhone");
-    if (formPhone == null && user != null && user.getPhone() != null) formPhone = user.getPhone();
-    
-    String rawAvatarPath = (user != null && user.getAvatar() != null && !user.getAvatar().isBlank())
-            ? user.getAvatar()
-            : "static/img/default-avatar.svg";
-    String avatarUrl = rawAvatarPath.startsWith("http") ? rawAvatarPath : contextPath + "/" + rawAvatarPath;
-    
-    String profileError = (String) request.getAttribute("profileError");
-%>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -40,7 +7,39 @@
 </head>
 <body class="bg-gray-50">
 <jsp:include page="/WEB-INF/jsp/common/header.jsp" />
+<%
+    String username = (String) session.getAttribute("username");
+    String userRole = (String) session.getAttribute("type_user");
 
+    if (username == null) {
+        response.sendRedirect(request.getContextPath() + "/login");
+        return;
+    }
+
+    if (!"stall".equals(userRole)) {
+        response.sendRedirect(request.getContextPath() + "/home");
+        return;
+    }
+
+    model.UserDAO user = (model.UserDAO) request.getAttribute("user");
+    String contextPath = request.getContextPath();
+
+    String formFullName = (String) request.getAttribute("profileFormFullName");
+    if (formFullName == null && user != null) formFullName = user.getFull_name();
+
+    String formEmail = (String) request.getAttribute("profileFormEmail");
+    if (formEmail == null && user != null && user.getEmail() != null) formEmail = user.getEmail();
+
+    String formPhone = (String) request.getAttribute("profileFormPhone");
+    if (formPhone == null && user != null && user.getPhone() != null) formPhone = user.getPhone();
+
+    String rawAvatarPath = (user != null && user.getAvatar() != null && !user.getAvatar().isBlank())
+            ? user.getAvatar()
+            : "static/img/default-avatar.svg";
+    String avatarUrl = rawAvatarPath.startsWith("http") ? rawAvatarPath : contextPath + "/" + rawAvatarPath;
+
+    String profileError = (String) request.getAttribute("profileError");
+%>
 <main class="min-h-screen">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
