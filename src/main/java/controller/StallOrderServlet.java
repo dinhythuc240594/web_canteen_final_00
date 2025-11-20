@@ -1,5 +1,6 @@
 package controller;
 
+import dto.FoodDTO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -10,10 +11,8 @@ import model.OrderDAO;
 import model.Order_FoodDAO;
 import model.StallDAO;
 import model.UserDAO;
-import serviceimpl.OrderServiceImpl;
-import serviceimpl.StallServiceImpl;
-import serviceimpl.Order_FoodServiceImpl;
-import serviceimpl.UserServiceImpl;
+import service.FoodService;
+import serviceimpl.*;
 import utils.DataSourceUtil;
 
 import java.io.IOException;
@@ -31,6 +30,7 @@ public class StallOrderServlet extends HttpServlet {
 	private StallServiceImpl stallService;
 	private Order_FoodServiceImpl orderFoodService;
 	private UserServiceImpl userService;
+    private FoodService foodServiceImpl;
 	
 	@Override
 	public void init() throws ServletException {
@@ -39,6 +39,7 @@ public class StallOrderServlet extends HttpServlet {
 		this.stallService = new StallServiceImpl(ds);
 		this.orderFoodService = new Order_FoodServiceImpl(ds);
 		this.userService = new UserServiceImpl(ds);
+        this.foodServiceImpl = new FoodServiceImpl(ds);
 	}
 	
 	@Override
@@ -93,6 +94,15 @@ public class StallOrderServlet extends HttpServlet {
 		Map<Integer, List<Order_FoodDAO>> orderFoodMap = new HashMap<>();
 		for (OrderDAO order : orders) {
 			List<Order_FoodDAO> items = orderFoodService.findByOrderId(order.getId());
+            // Load food name and image for each item
+            for (Order_FoodDAO item : items) {
+                FoodDTO food = foodServiceImpl.findById(item.getFoodId());
+                if (food != null) {
+                    item.setName(food.getNameFood());
+                    item.setImage(food.getImage());
+                }
+            }
+
 			orderFoodMap.put(order.getId(), items);
 		}
 		
