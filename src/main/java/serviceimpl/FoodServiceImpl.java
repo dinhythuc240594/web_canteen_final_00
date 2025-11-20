@@ -10,15 +10,19 @@ import model.FoodDAO;
 import model.Page;
 import model.PageRequest;
 import repository.FoodRepository;
+import repository.Order_FoodRepository;
 import repositoryimpl.FoodRepositoryImpl;
+import repositoryimpl.Order_FoodRepositoryImpl;
 import service.FoodService;
 
 public class FoodServiceImpl implements FoodService {
 
 	private FoodRepository foodRepository;
+	private Order_FoodRepository orderFoodRepository;
 	
 	public FoodServiceImpl(DataSource ds) {
 		this.foodRepository = new FoodRepositoryImpl(ds);
+		this.orderFoodRepository = new Order_FoodRepositoryImpl(ds);
 	}
 	
 	@Override
@@ -46,7 +50,13 @@ public class FoodServiceImpl implements FoodService {
 
 	@Override
 	public boolean delete(int id) {
-		return this.foodRepository.delete(id);
+		try {
+			this.orderFoodRepository.deleteByFoodId(id);
+			return this.foodRepository.delete(id);
+		} catch (RuntimeException e) {
+			System.err.println("Lỗi delete food: " + e.getMessage());
+			return false;
+		}
 	}
 
 	@Override

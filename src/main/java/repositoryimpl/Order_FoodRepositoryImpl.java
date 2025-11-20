@@ -145,6 +145,20 @@ public class Order_FoodRepositoryImpl implements Order_FoodRepository{
         }
 		
 	}
+
+	@Override
+	public void deleteByFoodId(int foodId) {
+		String sql = "DELETE FROM order_foods WHERE food_id = ?";
+        try (Connection conn = ds.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, foodId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi xóa chi tiết đơn hàng theo Food ID: " + foodId, e);
+        }
+	}
 	
 	private Order_FoodDAO mapResultSetToOrderFoodDAO(ResultSet rs) throws SQLException {
         Order_FoodDAO item = new Order_FoodDAO();

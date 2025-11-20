@@ -14,6 +14,7 @@ public interface Order_FoodRepository {
     void deleteById(int id);
     List<Order_FoodDAO> findByOrderId(int orderId);
     void deleteByOrderId(int orderId);
+    void deleteByFoodId(int foodId);
     int count(String keyword);
 	
 }

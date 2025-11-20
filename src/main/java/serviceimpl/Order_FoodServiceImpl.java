@@ -54,6 +54,11 @@ public class Order_FoodServiceImpl implements Order_FoodService{
 	}
 
 	@Override
+	public void deleteByFoodId(int foodId) {
+		this.order_FoodRepository.deleteByFoodId(foodId);
+	}
+
+	@Override
 	public int count(String keyword) {
 		return this.order_FoodRepository.count(keyword);
 	}
