@@ -167,11 +167,13 @@
                  class="p-1 text-yellow-600 hover:text-yellow-700" title="Sửa">
                 <i data-lucide="edit" class="w-4 h-4"></i>
               </a>
-              <a href="foods?id=<%= food.getId() %>&action=delete"
-                 onclick="return confirm('Bạn có chắc chắn muốn xóa món ăn này?');"
-                 class="p-1 text-red-600 hover:text-red-700" title="Xóa">
+              <button type="button"
+                      class="p-1 text-red-600 hover:text-red-700"
+                      title="Xóa"
+                      data-food-id="<%= food.getId() %>"
+                      onclick="handleDeleteFood(this.dataset.foodId)">
                 <i data-lucide="trash-2" class="w-4 h-4"></i>
-              </a>
+              </button>
             </div>
             <% } %>
           </div>
@@ -194,111 +196,40 @@
 </section>
 
 <jsp:include page="/WEB-INF/jsp/common/footer.jsp" />
-<jsp:include page="/WEB-INF/jsp/common/cart-sidebar.jsp" />
-
 <script>
-  let cart = JSON.parse(localStorage.getItem('cart')) || [];
-  const defaultFoodImage = '<%= contextPath %>/image/food-thumbnail.png';
-
-  document.addEventListener('DOMContentLoaded', function() {
-    lucide.createIcons();
-    updateCartCount();
-    renderCart();
-  });
-
-  function updateCartCount() {
-    const count = cart.reduce((sum, i) => sum + i.quantity, 0);
-    const el = document.getElementById('cart-count');
-    if (el) {
-      el.textContent = count;
-      el.classList.toggle('hidden', count === 0);
-    }
-  }
-
-  function renderCart() {
-    const container = document.getElementById('cart-items');
-    const footer = document.getElementById('cart-footer');
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-    let total = 0;
-
-    if (!container) return;
-
-    if (cart.length === 0) {
-      container.innerHTML = '<div class="text-center py-6 text-gray-500">Giỏ hàng trống</div>';
-      if (footer) footer.classList.add('hidden');
+  async function handleDeleteFood(foodId) {
+    const numericId = Number(foodId);
+    if (Number.isNaN(numericId)) {
+      alert('ID món ăn không hợp lệ.');
       return;
     }
 
-    container.innerHTML = cart.map(item => {
-      const price = Number(item.price) || 0;
-      const quantity = Number(item.quantity) || 0;
-      total += price * quantity;
-
-      var html = "";
-      html += '<div class="flex items-center space-x-3 bg-gray-50 p-2 rounded mb-2">';
-      const resolvedImage = item.image ? item.image : defaultFoodImage;
-      html += '<img src="'+ resolvedImage +'" class="w-12 h-12 object-cover rounded">';
-      html += '<div class="flex-1">';
-      html += '<h3 class="text-sm font-medium text-gray-800 truncate">' + (item.name || "Không rõ món") + '</h3>';
-      html += '<p class="text-blue-600 text-sm font-semibold">' + price.toLocaleString('vi-VN') + 'đ</p>';
-      html += '</div>';
-      html += '<div class="flex items-center space-x-1">';
-      html += '<button onclick="updateQuantity(' + item.id + ',' + (item.quantity - 1) + ')" class="p-1 bg-gray-200 rounded-full">-</button>';
-      html += '<span class="w-6 text-center">' + item.quantity + '</span>';
-      html += '<button onclick="updateQuantity(' + item.id + ',' + (item.quantity + 1) + ')" class="p-1 bg-gray-200 rounded-full">+</button>';
-      html += '</div>';
-      html += '<button onclick="removeFromCart(' + item.id + ')" class="text-red-600">✕</button>';
-      html += '</div>';
-
-      return html;
-    }).join('');
-
-    if (footer) {
-      document.getElementById('cart-total').textContent = total.toLocaleString('vi-VN') + 'đ';
-      footer.classList.remove('hidden');
-    }
-  }
-
-  function updateQuantity(id, newQty) {
-    if (newQty <= 0) return removeFromCart(id);
-    const item = cart.find(i => i.id === id);
-    if (item) item.quantity = newQty;
-    localStorage.setItem('cart', JSON.stringify(cart));
-    updateCartCount();
-    renderCart();
-  }
-
-  function removeFromCart(id) {
-    cart = cart.filter(i => i.id !== id);
-    localStorage.setItem('cart', JSON.stringify(cart));
-    updateCartCount();
-    renderCart();
-  }
-
-  function checkout() {
-    if (cart.length === 0) {
-      alert('Giỏ hàng trống!');
+    if (!confirm('Bạn có chắc chắn muốn xóa món ăn này?')) {
       return;
     }
-    
-    // Send cart data to server via POST
-    $.ajax({
-      type: "POST",
-      url: "cart",
-      data: {
-        'orders': JSON.stringify(cart),
-        'action': 'add'
-      },
-      success: function(response) {
-        console.log("Cart saved successfully");
-        // Redirect to cart page
-        window.location.href = 'cart';
-      },
-      error: function(xhr, status, error) {
-        console.error("Error saving cart:", status, error);
-        alert("Có lỗi xảy ra khi lưu giỏ hàng. Vui lòng thử lại!");
+
+    const params = new URLSearchParams();
+    params.append('action', 'delete');
+    params.append('id', numericId);
+
+    try {
+      const response = await fetch('foods', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: params.toString()
+      });
+      const result = await response.json();
+
+      if (result.success) {
+        window.location.reload();
+      } else {
+        alert(result.message || 'Xóa món ăn thất bại');
       }
-    });
+    } catch (error) {
+      alert('Không thể xóa món ăn. Vui lòng thử lại sau.');
+    }
   }
 </script>
 </body>

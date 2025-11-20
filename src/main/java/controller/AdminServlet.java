@@ -428,7 +428,7 @@ public class AdminServlet extends HttpServlet {
 		String json = gson.toJson(report);
 		response.getWriter().write(json);
 	}
-    
+
 	private void handleStatistics(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String startDateStr = RequestUtil.getString(request, "startDate", "");
 		String endDateStr = RequestUtil.getString(request, "endDate", "");
