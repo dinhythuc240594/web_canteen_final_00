@@ -6,6 +6,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import model.Page;
 import model.PageRequest;
 import model.StallDAO;
 import serviceimpl.FoodServiceImpl;
@@ -66,7 +67,8 @@ public class HomeServerlet extends HttpServlet {
 		List<StallDAO> stalls = this.stallServiceImpl.findAll();
 		LocalDate today = LocalDate.now();
 		Date _today = Date.valueOf(today);
-		List<FoodDTO> dailyMenuFoods = this.foodServiceImpl.findByUpdatedDate(_today, null, keyword);
+		Page<FoodDTO> dailyMenuPage = this.foodServiceImpl.findByUpdatedDate(_today, pageReq);
+		List<FoodDTO> dailyMenuFoods = dailyMenuPage != null ? dailyMenuPage.getData() : new ArrayList<>();
 		
 		Map<Integer, List<FoodDTO>> dailyMenuByStall = new HashMap<>();
 		if (dailyMenuFoods != null) {
@@ -87,6 +89,7 @@ public class HomeServerlet extends HttpServlet {
         request.setAttribute("dailyMenuByStall", dailyMenuByStall);
         request.setAttribute("dailyMenuStalls", dailyMenuStalls);
         request.setAttribute("dailyMenuFoods", dailyMenuFoods);
+        request.setAttribute("dailyMenuPage", dailyMenuPage);
 		
         RequestDispatcher rd = request.getRequestDispatcher("home.jsp");
         rd.forward(request, response);

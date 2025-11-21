@@ -2,6 +2,9 @@
 <%@ page import="java.util.List" %>
 <%@ page import="dto.FoodDTO" %>
 <%@ page import="model.StallDAO" %>
+<%@ page import="model.Page" %>
+<%@ page import="java.net.URLEncoder" %>
+<%@ page import="java.nio.charset.StandardCharsets" %>
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -14,6 +17,9 @@
 
 <%
     model.PageRequest pageReq = (model.PageRequest) request.getAttribute("pageReq");
+    Page<dto.FoodDTO> dailyMenuPage = (Page<dto.FoodDTO>) request.getAttribute("dailyMenuPage");
+    int dailyMenuCurrentPage = dailyMenuPage != null ? dailyMenuPage.getCurrentPage() : 1;
+    int dailyMenuTotalPages = dailyMenuPage != null ? dailyMenuPage.getTotalPage() : 1;
     String keyword = pageReq != null ? pageReq.getKeyword() : "";
     String contextPath = request.getContextPath();
     String defaultFoodImage = contextPath + "/image/food-thumbnail.png";
@@ -23,6 +29,27 @@
 //    java.util.Map<Integer, java.util.List<dto.FoodDTO>> dailyMenuByStall = (java.util.Map<Integer, java.util.List<dto.FoodDTO>>) request.getAttribute("dailyMenuByStall");
 //    java.util.List<model.StallDAO> dailyMenuStalls = (java.util.List<model.StallDAO>) request.getAttribute("dailyMenuStalls");
     java.util.List<dto.FoodDTO> dailyMenuFoods = (java.util.List<dto.FoodDTO>) request.getAttribute("dailyMenuFoods");
+    StringBuilder homePageUrlBuilder = new StringBuilder("home");
+    boolean homeHasQuery = false;
+    if (keyword != null && !keyword.trim().isEmpty()) {
+        homePageUrlBuilder.append(homeHasQuery ? "&" : "?")
+                          .append("keyword=").append(URLEncoder.encode(keyword, StandardCharsets.UTF_8));
+        homeHasQuery = true;
+    }
+    if (pageReq != null) {
+        if (pageReq.getSortField() != null && !pageReq.getSortField().isEmpty()) {
+            homePageUrlBuilder.append(homeHasQuery ? "&" : "?")
+                              .append("sortField=").append(pageReq.getSortField());
+            homeHasQuery = true;
+        }
+        if (pageReq.getOrderField() != null && !pageReq.getOrderField().isEmpty()) {
+            homePageUrlBuilder.append(homeHasQuery ? "&" : "?")
+                              .append("orderField=").append(pageReq.getOrderField());
+            homeHasQuery = true;
+        }
+    }
+    String homePageBaseUrl = homePageUrlBuilder.toString();
+    String homePageUrlPrefix = homePageBaseUrl + (homeHasQuery ? "&" : "?") + "page=";
 %>
 
 <!-- 🔍 Tìm kiếm -->
@@ -142,6 +169,25 @@
     <div class="text-center py-12">
       <i data-lucide="info" class="w-12 h-12 text-gray-400 mx-auto mb-4"></i>
       <p class="text-gray-600">Chưa có món ăn nào được lên thực đơn cho ngày này.</p>
+    </div>
+    <% } %>
+    <% if (dailyMenuPage != null && dailyMenuTotalPages > 1) { %>
+    <div class="mt-8 flex justify-center">
+      <nav class="inline-flex items-center gap-2 text-sm" aria-label="Phân trang thực đơn">
+        <% if (dailyMenuCurrentPage > 1) { %>
+        <a href="<%= homePageUrlPrefix + (dailyMenuCurrentPage - 1) %>" class="px-3 py-1.5 border border-gray-300 rounded-full text-gray-700 bg-white hover:border-blue-400">Trước</a>
+        <% } else { %>
+        <span class="px-3 py-1.5 border border-gray-200 rounded-full text-gray-400 bg-gray-100 cursor-not-allowed">Trước</span>
+        <% } %>
+        <% for (int i = 1; i <= dailyMenuTotalPages; i++) { boolean isActive = (i == dailyMenuCurrentPage); %>
+        <a href="<%= homePageUrlPrefix + i %>" class="px-3 py-1.5 border rounded-full <%= isActive ? "bg-blue-600 border-blue-600 text-white" : "border-gray-300 text-gray-700 bg-white hover:border-blue-400" %>"><%= i %></a>
+        <% } %>
+        <% if (dailyMenuCurrentPage < dailyMenuTotalPages) { %>
+        <a href="<%= homePageUrlPrefix + (dailyMenuCurrentPage + 1) %>" class="px-3 py-1.5 border border-gray-300 rounded-full text-gray-700 bg-white hover:border-blue-400">Sau</a>
+        <% } else { %>
+        <span class="px-3 py-1.5 border border-gray-200 rounded-full text-gray-400 bg-gray-100 cursor-not-allowed">Sau</span>
+        <% } %>
+      </nav>
     </div>
     <% } %>
   </div>

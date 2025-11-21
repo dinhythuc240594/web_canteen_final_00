@@ -17,7 +17,11 @@ public class Page<T> {
 		this.data = data;
 		this.currentPage = currentPage;
 		this.totalItem = totalItem;
-		this.totalPage = (int) Math.ceil((double)(totalItem/pageSize));
+		if (pageSize > 0) {
+			this.totalPage = (int) Math.ceil((double) totalItem / pageSize);
+		} else {
+			this.totalPage = 0;
+		}
 	}
 
 	public List<T> getData() {

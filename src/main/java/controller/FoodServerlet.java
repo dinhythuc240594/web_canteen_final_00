@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 import model.FoodDAO;
 import model.Food_CategoryDAO;
+import model.Page;
 import model.PageRequest;
 import model.StallDAO;
 import repositoryimpl.Food_CategoryRepositoryImpl;
@@ -152,7 +153,8 @@ public class FoodServerlet extends HttpServlet {
 
 		        LocalDate today = LocalDate.now();
 		        Date _today = Date.valueOf(today);
-		        List<FoodDTO> dailyMenuFoods = this.foodServiceImpl.findByUpdatedDate(_today, stallId, keyword);
+		        Page<FoodDTO> dailyMenuPage = this.foodServiceImpl.findByUpdatedDate(_today, pageReq);
+		        List<FoodDTO> dailyMenuFoods = dailyMenuPage != null ? dailyMenuPage.getData() : new ArrayList<>();
 
 		        Map<Integer, List<FoodDTO>> dailyMenuByStall = new HashMap<>();
 		        if (dailyMenuFoods != null) {
@@ -180,6 +182,7 @@ public class FoodServerlet extends HttpServlet {
 		        request.setAttribute("dailyMenuByStall", dailyMenuByStall);
 		        request.setAttribute("dailyMenuStalls", dailyMenuStalls);
 		        request.setAttribute("dailyMenuFoods", dailyMenuFoods);
+		        request.setAttribute("dailyMenuPage", dailyMenuPage);
 		        
 		        rd = request.getRequestDispatcher("/foodTemplates/food-list.jsp");
 		        rd.forward(request, response);

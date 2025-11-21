@@ -1,5 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ page import="model.Page" %>
+<%@ page import="java.net.URLEncoder" %>
+<%@ page import="java.nio.charset.StandardCharsets" %>
     
 <!DOCTYPE html>
 <html lang="vi">
@@ -13,6 +16,9 @@
 
 <%
 	model.PageRequest pageReq = (model.PageRequest) request.getAttribute("pageReq");
+	Page<dto.FoodDTO> dailyMenuPage = (Page<dto.FoodDTO>) request.getAttribute("dailyMenuPage");
+	int currentPage = dailyMenuPage != null ? dailyMenuPage.getCurrentPage() : 1;
+	int totalPages = dailyMenuPage != null ? dailyMenuPage.getTotalPage() : 1;
 	String keyword = pageReq != null ? pageReq.getKeyword() : "";
 	Integer selectedStallId = pageReq != null ? pageReq.getStallId() : null;
 	
@@ -35,6 +41,22 @@
 	java.util.Map<Integer, java.util.List<dto.FoodDTO>> dailyMenuByStall = (java.util.Map<Integer, java.util.List<dto.FoodDTO>>) request.getAttribute("dailyMenuByStall");
 	java.util.List<model.StallDAO> dailyMenuStalls = (java.util.List<model.StallDAO>) request.getAttribute("dailyMenuStalls");
 	java.util.List<dto.FoodDTO> dailyMenuFoods = (java.util.List<dto.FoodDTO>) request.getAttribute("dailyMenuFoods");
+	StringBuilder foodListUrlBuilder = new StringBuilder("foods?action=list");
+	if (keyword != null && !keyword.trim().isEmpty()) {
+		foodListUrlBuilder.append("&keyword=").append(URLEncoder.encode(keyword, StandardCharsets.UTF_8));
+	}
+	if (selectedStallId != null) {
+		foodListUrlBuilder.append("&stallId=").append(selectedStallId);
+	}
+	if (pageReq != null) {
+		if (pageReq.getSortField() != null && !pageReq.getSortField().isEmpty()) {
+			foodListUrlBuilder.append("&sortField=").append(pageReq.getSortField());
+		}
+		if (pageReq.getOrderField() != null && !pageReq.getOrderField().isEmpty()) {
+			foodListUrlBuilder.append("&orderField=").append(pageReq.getOrderField());
+		}
+	}
+	String foodListUrlPrefix = foodListUrlBuilder.toString() + "&page=";
 %>
 
 <!-- 🔍 Tìm kiếm -->
@@ -190,6 +212,25 @@
     <div class="text-center py-12">
       <i data-lucide="info" class="w-12 h-12 text-gray-400 mx-auto mb-4"></i>
       <p class="text-gray-600">Chưa có món ăn nào được lên thực đơn cho ngày này.</p>
+    </div>
+    <% } %>
+    <% if (dailyMenuPage != null && totalPages > 1) { %>
+    <div class="mt-8 flex justify-center">
+      <nav class="inline-flex items-center gap-2 text-sm" aria-label="Phân trang món ăn">
+        <% if (currentPage > 1) { %>
+        <a href="<%= foodListUrlPrefix + (currentPage - 1) %>" class="px-3 py-1.5 border border-gray-300 rounded-full text-gray-700 bg-white hover:border-blue-400">Trước</a>
+        <% } else { %>
+        <span class="px-3 py-1.5 border border-gray-200 rounded-full text-gray-400 bg-gray-100 cursor-not-allowed">Trước</span>
+        <% } %>
+        <% for (int i = 1; i <= totalPages; i++) { boolean isActive = (i == currentPage); %>
+        <a href="<%= foodListUrlPrefix + i %>" class="px-3 py-1.5 border rounded-full <%= isActive ? "bg-blue-600 border-blue-600 text-white" : "border-gray-300 text-gray-700 bg-white hover:border-blue-400" %>"><%= i %></a>
+        <% } %>
+        <% if (currentPage < totalPages) { %>
+        <a href="<%= foodListUrlPrefix + (currentPage + 1) %>" class="px-3 py-1.5 border border-gray-300 rounded-full text-gray-700 bg-white hover:border-blue-400">Sau</a>
+        <% } else { %>
+        <span class="px-3 py-1.5 border border-gray-200 rounded-full text-gray-400 bg-gray-100 cursor-not-allowed">Sau</span>
+        <% } %>
+      </nav>
     </div>
     <% } %>
   </div>

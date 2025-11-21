@@ -14,7 +14,7 @@ public interface FoodService {
 	FoodDTO findById(int id);	
 	List<FoodDTO> newFoods();
 	List<FoodDTO> promotionFoods();
-	List<FoodDTO> findByUpdatedDate(Date targetDate, Integer stallId, String keyword);
+	Page<FoodDTO> findByUpdatedDate(Date targetDate, PageRequest pageRequest);
 	boolean create(String nameFood, double priceFood, int inventoryFood, int stallId, Integer categoryId, String image, String description, Double promotion, Boolean isAvailable);
 	boolean update(int id, String nameFood, double priceFood, int inventoryFood, Integer categoryId, String image, String description, Double promotion, Boolean isAvailable);
 	boolean delete(int id);

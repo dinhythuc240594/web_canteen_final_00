@@ -359,11 +359,18 @@ public class FoodRepositoryImpl implements FoodRepository{
 	}
 
 	@Override
-	public List<FoodDTO> findByUpdatedDate(Date targetDate, Integer stallId, String keyword) {
+	public List<FoodDTO> findByUpdatedDate(Date targetDate, PageRequest pageRequest) {
 		List<FoodDTO> foods = new ArrayList<>();
 		if (targetDate == null) {
 			return foods;
 		}
+		
+		int limit = pageRequest != null ? pageRequest.getPageSize() : 25;
+		int offset = pageRequest != null ? pageRequest.getOffset() : 0;
+		String sortField = resolveSortField(pageRequest != null ? pageRequest.getSortField() : null);
+		String orderField = resolveOrderField(pageRequest != null ? pageRequest.getOrderField() : null);
+		Integer stallId = pageRequest != null ? pageRequest.getStallId() : null;
+		String keyword = pageRequest != null ? pageRequest.getKeyword() : null;
 		
 		StringBuilder sql = new StringBuilder("SELECT id, name, price, inventory, promotion, stall_id, category_id, image FROM foods WHERE DATE(updated_at) = ?");
 		List<Object> params = new ArrayList<>();
@@ -381,7 +388,10 @@ public class FoodRepositoryImpl implements FoodRepository{
 			params.add(likeKeyword);
 		}
 		
-		sql.append(" ORDER BY name ASC");
+		sql.append(" ORDER BY ").append(sortField).append(" ").append(orderField);
+		sql.append(" LIMIT ? OFFSET ?");
+		params.add(limit);
+		params.add(offset);
 		
 		try (Connection conn = ds.getConnection();
 			 PreparedStatement ps = conn.prepareStatement(sql.toString())) {
@@ -422,5 +432,76 @@ public class FoodRepositoryImpl implements FoodRepository{
 		}
 		
 		return foods;
+	}
+	
+	@Override
+	public int countByUpdatedDate(Date targetDate, PageRequest pageRequest) {
+		if (targetDate == null) {
+			return 0;
+		}
+		
+		Integer stallId = pageRequest != null ? pageRequest.getStallId() : null;
+		String keyword = pageRequest != null ? pageRequest.getKeyword() : null;
+		
+		StringBuilder sql = new StringBuilder("SELECT COUNT(1) FROM foods WHERE DATE(updated_at) = ?");
+		List<Object> params = new ArrayList<>();
+		params.add(targetDate);
+		
+		if (stallId != null && stallId > 0) {
+			sql.append(" AND stall_id = ?");
+			params.add(stallId);
+		}
+		
+		if (keyword != null && !keyword.trim().isEmpty()) {
+			sql.append(" AND (name LIKE ? OR CAST(price AS CHAR) LIKE ?)");
+			String likeKeyword = "%" + keyword.trim() + "%";
+			params.add(likeKeyword);
+			params.add(likeKeyword);
+		}
+		
+		try (Connection conn = ds.getConnection();
+			 PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+			
+			for (int i = 0; i < params.size(); i++) {
+				Object param = params.get(i);
+				if (param instanceof String) {
+					ps.setString(i + 1, (String) param);
+				} else if (param instanceof Integer) {
+					ps.setInt(i + 1, (Integer) param);
+				} else if (param instanceof Double) {
+					ps.setDouble(i + 1, (Double) param);
+				} else if (param instanceof Boolean) {
+					ps.setBoolean(i + 1, (Boolean) param);
+				} else if (param instanceof Date) {
+					ps.setDate(i + 1, (Date) param);
+				}
+			}
+			
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				return rs.getInt(1);
+			}
+		} catch (Exception e) {
+			System.err.println("Lỗi countByUpdatedDate: " + e.getMessage());
+		}
+		
+		return 0;
+	}
+	
+	private String resolveSortField(String sortField) {
+		if (sortField == null || sortField.isBlank()) {
+			return "name";
+		}
+		return switch (sortField) {
+			case "price", "updated_at", "name" -> sortField;
+			default -> "name";
+		};
+	}
+	
+	private String resolveOrderField(String orderField) {
+		if ("DESC".equalsIgnoreCase(orderField)) {
+			return "DESC";
+		}
+		return "ASC";
 	}
 }

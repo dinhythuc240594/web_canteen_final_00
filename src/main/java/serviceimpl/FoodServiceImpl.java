@@ -75,8 +75,14 @@ public class FoodServiceImpl implements FoodService {
 	}
 	
 	@Override
-	public List<FoodDTO> findByUpdatedDate(Date targetDate, Integer stallId, String keyword) {
-		return this.foodRepository.findByUpdatedDate(targetDate, stallId, keyword);
+	public Page<FoodDTO> findByUpdatedDate(Date targetDate, PageRequest pageRequest) {
+		PageRequest effectivePageRequest = pageRequest;
+		if (effectivePageRequest == null) {
+			effectivePageRequest = new PageRequest(1, 25, "name", "ASC", null);
+		}
+		List<FoodDTO> data = this.foodRepository.findByUpdatedDate(targetDate, effectivePageRequest);
+		int totalCount = this.foodRepository.countByUpdatedDate(targetDate, effectivePageRequest);
+		return new Page<>(data, effectivePageRequest.getPage(), totalCount, effectivePageRequest.getPageSize());
 	}
 
 }
