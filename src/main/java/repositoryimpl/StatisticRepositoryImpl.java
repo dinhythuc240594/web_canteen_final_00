@@ -180,8 +180,7 @@ public class StatisticRepositoryImpl implements StatisticRepository{
         return stats;
     }
 
-    // ---
-    
+
     @Override
     public void deleteById(int id) {
         String sql = "DELETE FROM statistics WHERE id = ?";

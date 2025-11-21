@@ -54,7 +54,7 @@ public class AdminServlet extends HttpServlet {
 	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// Security check: Only admin can access
+		// check session
 		HttpSession session = request.getSession(false);
 		String userRole = (String) (session != null ? session.getAttribute("type_user") : null);
 		String username = (String) (session != null ? session.getAttribute("username") : null);
@@ -128,11 +128,8 @@ public class AdminServlet extends HttpServlet {
 		
 		String action = request.getParameter("action");
 		
-		// Check permissions based on action
+		// Check action
 		boolean isStallAction = "createStall".equals(action) || "updateStall".equals(action) || "deleteStall".equals(action);
-		
-		// For non-stall actions, only admin can access
-		// For stall actions, admin or stall managers can access
 		if (!isStallAction && !"admin".equals(userRole)) {
 			response.sendRedirect(request.getContextPath() + "/home");
 			return;
@@ -174,31 +171,25 @@ public class AdminServlet extends HttpServlet {
 	private void handleDashboard(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		HttpSession session = request.getSession(false);
 		
-		// Get statistics
 		int totalUsers = this.userServiceImpl.count();
 		List<StallDAO> stalls = this.stallServiceImpl.findAll();
 		int totalStalls = stalls.size();
 		
-		// Get today's statistics
 		LocalDate today = LocalDate.now();
 		Date _today = Date.valueOf(today);
 		
-		// Calculate total revenue from completed orders (all time)
 		double totalRevenue = this.orderServiceImpl.getTotalRevenueFromCompletedOrders();
 		
-		// Get today's orders count
 		int totalOrders = 0;
 		List<StatisticDAO> todayStats = this.statisticServiceImpl.findByDateRange(_today, _today);
 		for (StatisticDAO stat : todayStats) {
 			totalOrders += stat.getOrdersCount();
 		}
 		
-		// Get recent orders (last 10)
 		PageRequest pageReq = new PageRequest(1, 10, "created_at", "DESC", "");
 		Page<OrderDAO> pageOrders = this.orderServiceImpl.findAll(pageReq);
 		List<OrderDAO> recentOrders = pageOrders.getData();
 		
-		// Load user and stall names for each order
 		Map<Integer, String> userNames = new HashMap<>();
 		Map<Integer, String> stallNames = new HashMap<>();
 		for (OrderDAO order : recentOrders) {
@@ -255,7 +246,7 @@ public class AdminServlet extends HttpServlet {
 		Page<OrderDAO> pageOrders = this.orderServiceImpl.findAll(pageReq);
 		List<OrderDAO> orders = pageOrders.getData();
 		
-		// Load user and stall names for each order
+		// load order
 		List<Map<String, Object>> ordersWithDetails = new ArrayList<>();
 		for (OrderDAO order : orders) {
 			Map<String, Object> orderData = new HashMap<>();
@@ -293,7 +284,7 @@ public class AdminServlet extends HttpServlet {
 	private void handleCustomers(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		List<UserDAO> customers = this.userServiceImpl.findByRole("customer");
 		
-		// Load orders for each customer
+		// Load orders for customer
 		List<Map<String, Object>> customersWithOrders = new ArrayList<>();
 		for (UserDAO customer : customers) {
 			Map<String, Object> customerData = new HashMap<>();
@@ -329,7 +320,7 @@ public class AdminServlet extends HttpServlet {
 	private void handleStallsUsers(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		List<UserDAO> stallUsers = this.userServiceImpl.findByRole("stall");
 		
-		// Load orders for each stall user
+		// Load orders for stall
 		List<Map<String, Object>> stallUsersWithOrders = new ArrayList<>();
 		for (UserDAO stallUser : stallUsers) {
 			Map<String, Object> userData = new HashMap<>();
@@ -341,7 +332,6 @@ public class AdminServlet extends HttpServlet {
 			userData.put("status", stallUser.isStatus());
 			userData.put("createDate", stallUser.getCreateDate());
 			
-			// Get stall for this user
 			List<StallDAO> stalls = this.stallServiceImpl.findByManagerUserId(stallUser.getId());
 			if (!stalls.isEmpty()) {
 				StallDAO stall = stalls.get(0);
@@ -381,7 +371,6 @@ public class AdminServlet extends HttpServlet {
 		Page<FoodDTO> pageFoods = this.foodServiceImpl.findAll(pageReq);
 		List<FoodDTO> foods = pageFoods.getData();
 		
-		// Load stall and category names for each food
 		List<Map<String, Object>> foodsWithDetails = new ArrayList<>();
 		for (FoodDTO food : foods) {
 			Map<String, Object> foodData = new HashMap<>();
@@ -411,10 +400,9 @@ public class AdminServlet extends HttpServlet {
 	}
 	
 	private void handleRevenueReport(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// Get total revenue from completed orders
+
 		double totalRevenue = this.orderServiceImpl.getTotalRevenueFromCompletedOrders();
 		
-		// Get best selling foods from order_foods
 		List<Map<String, Object>> bestSellingFoods = this.adminServiceImpl.getBestSellingFoods();
 		
 		Map<String, Object> report = new HashMap<>();
@@ -568,7 +556,6 @@ public class AdminServlet extends HttpServlet {
 		String statusParam = request.getParameter("status");
 		boolean status = false;
 		
-		// Safely parse boolean from request parameter
 		if (statusParam != null) {
 			String statusStr = statusParam.trim().toLowerCase();
 			status = "true".equals(statusStr) || "1".equals(statusStr) || "yes".equals(statusStr);
@@ -589,8 +576,7 @@ public class AdminServlet extends HttpServlet {
 	}
 	
 	private void handleCreateStall(HttpServletRequest request, HttpServletResponse response, Integer userId, String userRole) throws ServletException, IOException {
-		// Check permission: Only admin or stall managers can create stalls
-		// Stall managers can only create stalls for themselves
+		// check role
 		if (!"admin".equals(userRole) && !"stall".equals(userRole)) {
 			response.setContentType("application/json");
 			response.setCharacterEncoding("UTF-8");
@@ -606,7 +592,6 @@ public class AdminServlet extends HttpServlet {
 		String description = request.getParameter("description");
 		int managerUserId = Integer.parseInt(request.getParameter("managerUserId"));
 		
-		// Safely parse boolean from request parameter
 		String isOpenParam = request.getParameter("isOpen");
 		boolean isOpen = false;
 		if (isOpenParam != null) {
@@ -614,7 +599,6 @@ public class AdminServlet extends HttpServlet {
 			isOpen = "true".equals(isOpenStr) || "1".equals(isOpenStr) || "yes".equals(isOpenStr);
 		}
 		
-		// If user is stall manager, they can only create stalls for themselves
 		if ("stall".equals(userRole) && userId != null && !userId.equals(managerUserId)) {
 			response.setContentType("application/json");
 			response.setCharacterEncoding("UTF-8");
@@ -653,8 +637,7 @@ public class AdminServlet extends HttpServlet {
 	}
 	
 	private void handleUpdateStall(HttpServletRequest request, HttpServletResponse response, Integer userId, String userRole) throws ServletException, IOException {
-		// Check permission: Only admin or stall managers can update stalls
-		// Stall managers can only update their own stalls
+		// Check role
 		if (!"admin".equals(userRole) && !"stall".equals(userRole)) {
 			response.setContentType("application/json");
 			response.setCharacterEncoding("UTF-8");
@@ -668,7 +651,6 @@ public class AdminServlet extends HttpServlet {
 		
 		int id = Integer.parseInt(request.getParameter("id"));
 		
-		// Check if stall exists and user has permission
 		StallDAO existingStall = this.stallServiceImpl.findById(id);
 		if (existingStall == null) {
 			response.setContentType("application/json");
@@ -681,7 +663,6 @@ public class AdminServlet extends HttpServlet {
 			return;
 		}
 		
-		// If user is stall manager, they can only update their own stalls
 		if ("stall".equals(userRole) && userId != null && !userId.equals(existingStall.getManagerUserId())) {
 			response.setContentType("application/json");
 			response.setCharacterEncoding("UTF-8");
@@ -697,7 +678,6 @@ public class AdminServlet extends HttpServlet {
 		String description = request.getParameter("description");
 		int managerUserId = Integer.parseInt(request.getParameter("managerUserId"));
 		
-		// Safely parse boolean from request parameter
 		String isOpenParam = request.getParameter("isOpen");
 		boolean isOpen = false;
 		if (isOpenParam != null) {
@@ -705,7 +685,6 @@ public class AdminServlet extends HttpServlet {
 			isOpen = "true".equals(isOpenStr) || "1".equals(isOpenStr) || "yes".equals(isOpenStr);
 		}
 		
-		// If user is stall manager, they cannot change the manager
 		if ("stall".equals(userRole) && userId != null && !userId.equals(managerUserId)) {
 			response.setContentType("application/json");
 			response.setCharacterEncoding("UTF-8");
@@ -744,8 +723,7 @@ public class AdminServlet extends HttpServlet {
 	}
 	
 	private void handleDeleteStall(HttpServletRequest request, HttpServletResponse response, Integer userId, String userRole) throws ServletException, IOException {
-		// Check permission: Only admin or stall managers can delete stalls
-		// Stall managers can only delete their own stalls
+		// Check role
 		if (!"admin".equals(userRole) && !"stall".equals(userRole)) {
 			response.setContentType("application/json");
 			response.setCharacterEncoding("UTF-8");
@@ -758,8 +736,7 @@ public class AdminServlet extends HttpServlet {
 		}
 		
 		int id = Integer.parseInt(request.getParameter("id"));
-		
-		// Check if stall exists and user has permission
+
 		StallDAO existingStall = this.stallServiceImpl.findById(id);
 		if (existingStall == null) {
 			response.setContentType("application/json");
@@ -772,7 +749,6 @@ public class AdminServlet extends HttpServlet {
 			return;
 		}
 		
-		// If user is stall manager, they can only delete their own stalls
 		if ("stall".equals(userRole) && userId != null && !userId.equals(existingStall.getManagerUserId())) {
 			response.setContentType("application/json");
 			response.setCharacterEncoding("UTF-8");

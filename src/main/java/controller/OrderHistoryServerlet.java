@@ -77,15 +77,14 @@ public class OrderHistoryServerlet extends HttpServlet {
         String userRole = (String) session.getAttribute("type_user");
         
         if (userRole == null) {
-            userRole = "customer"; // default role
+            userRole = "customer";
         }
 
         List<OrderDAO> orders = new ArrayList<>();
         Map<Integer, List<Order_FoodDAO>> orderFoodMap = new HashMap<>();
         
-        // Role-based order retrieval
+        // check role admin
         if ("admin".equals(userRole)) {
-            // Admin sees all orders
             String keyword = RequestUtil.getString(request, "keyword", "");
             String sortField = RequestUtil.getString(request, "sortField", "created_at");
             String orderField = RequestUtil.getString(request, "orderField", "DESC");
@@ -98,22 +97,18 @@ public class OrderHistoryServerlet extends HttpServlet {
             request.setAttribute("pageReq", pageReq);
             request.setAttribute("pageOrder", pageOrder);
         } else if ("stall".equals(userRole)) {
-            // Stall user sees only orders for their stall
             List<StallDAO> stalls = stallService.findByManagerUserId(userId);
             if (!stalls.isEmpty()) {
-                int stallId = stalls.get(0).getId(); // Get first stall (assuming one stall per user)
+                int stallId = stalls.get(0).getId();
                 orders = orderService.findByStallId(stallId);
                 request.setAttribute("stallId", stallId);
             }
         } else {
-            // Customer sees only their own orders
             orders = orderService.findByUserId(userId);
         }
         
-        // Get order details (food items) for each order and load food information
         for (OrderDAO order : orders) {
             List<Order_FoodDAO> items = orderFoodRepository.findByOrderId(order.getId());
-            // Load food name and image for each item
             for (Order_FoodDAO item : items) {
                 FoodDTO food = foodService.findById(item.getFoodId());
                 if (food != null) {

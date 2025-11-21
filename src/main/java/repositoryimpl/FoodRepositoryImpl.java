@@ -92,7 +92,7 @@ public class FoodRepositoryImpl implements FoodRepository{
 
 	@Override
 	public boolean update(int id, String nameFood, double priceFood, int inventoryFood, Integer categoryId, String image, String description, Double promotion, Boolean isAvailable) {
-        // Build dynamic SQL based on which fields are provided
+
         StringBuilder sql = new StringBuilder("UPDATE foods SET name = ?, price = ?, inventory = ?");
         List<Object> params = new ArrayList<>();
         params.add(nameFood);

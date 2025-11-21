@@ -40,7 +40,7 @@ public class StatisticsServlet extends HttpServlet {
 	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// Security check: Only admin and stall can access
+
 		HttpSession session = request.getSession(false);
 		String userRole = (String) (session != null ? session.getAttribute("type_user") : null);
 		String username = (String) (session != null ? session.getAttribute("username") : null);
@@ -86,7 +86,7 @@ public class StatisticsServlet extends HttpServlet {
 		HttpSession session = request.getSession();
 		String userRole = (String) session.getAttribute("type_user");
 		
-		// Get date range from parameters or default to last 7 days
+		// Get date to 7 day
 		String startDateStr = request.getParameter("startDate");
 		String endDateStr = request.getParameter("endDate");
 		
@@ -97,8 +97,7 @@ public class StatisticsServlet extends HttpServlet {
 		Date _endDate = Date.valueOf(endDate);
 		
 		List<StatisticDAO> statistics = statisticService.findByDateRange(_startDate, _endDate);
-		
-		// Calculate totals
+
 		double totalRevenue = 0.0;
 		int totalOrders = 0;
 		int totalQuantitySold = 0;
@@ -153,7 +152,6 @@ public class StatisticsServlet extends HttpServlet {
 		
 		List<StatisticDAO> statistics = statisticService.findByDateRange(_startDate, _endDate);
 		
-		// Group by food and sum quantities
 		Map<Integer, Map<String, Object>> foodStats = new HashMap<>();
 		
 		for (StatisticDAO stat : statistics) {
@@ -174,7 +172,6 @@ public class StatisticsServlet extends HttpServlet {
 			foodData.put("revenue", currentRevenue + stat.getRevenue());
 		}
 		
-		// Convert to list and sort by quantity sold
 		List<Map<String, Object>> bestSelling = new ArrayList<>(foodStats.values());
 		bestSelling.sort((a, b) -> Integer.compare((int) b.get("quantitySold"), (int) a.get("quantitySold")));
 		
@@ -243,10 +240,8 @@ public class StatisticsServlet extends HttpServlet {
 		List<StatisticDAO> statistics = statisticService.findByDateRange(_startDate, _endDate);
 		List<StallDAO> stalls = stallService.findAll();
 		
-		// Group by stall
 		Map<Integer, Map<String, Object>> stallRevenue = new HashMap<>();
 		
-		// Initialize all stalls
 		for (StallDAO stall : stalls) {
 			Map<String, Object> stallData = new HashMap<>();
 			stallData.put("stallId", stall.getId());
@@ -256,7 +251,6 @@ public class StatisticsServlet extends HttpServlet {
 			stallRevenue.put(stall.getId(), stallData);
 		}
 		
-		// Aggregate statistics
 		for (StatisticDAO stat : statistics) {
 			int stallId = stat.getStallId();
 			if (stallRevenue.containsKey(stallId)) {

@@ -41,28 +41,22 @@ public class LogoutServerlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// Get the remember me token before invalidating session
 		String rawToken = getRememberMeToken(request);
 		
-		// If remember me token exists, delete it from database
 		if (rawToken != null) {
 			String tokenHash = SHA256.hash256(rawToken);
 			TokenDAO dbToken = this.tokenSerImpl.findTokenByHash(tokenHash);
 			if (dbToken != null) {
-				// Delete token from database
 				this.tokenSerImpl.deleteTokenBySeries(dbToken.getSeries());
 			}
-			// Delete the remember me cookie
 			deleteRememberMeCookie(response);
 		}
 		
-		// Invalidate session to clear all session data
 		HttpSession session = request.getSession(false);
         if (session != null) {
         	session.invalidate();
         }
         
-        // Redirect to home page
         response.sendRedirect(request.getContextPath() + "/home");
 	}
 

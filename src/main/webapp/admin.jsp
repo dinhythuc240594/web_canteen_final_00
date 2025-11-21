@@ -9,7 +9,7 @@
 <jsp:include page="/WEB-INF/jsp/common/header.jsp" />
 
 <%
-    // Security check: Only admin can access this page
+
     String username = (String) session.getAttribute("username");
     String userRole = (String) session.getAttribute("type_user");
 
@@ -23,7 +23,6 @@
         return;
     }
 
-    // Get data from servlet with null safety
     Object totalUsersObj = request.getAttribute("totalUsers");
     int totalUsers = (totalUsersObj != null) ? (Integer) totalUsersObj : 0;
 

@@ -52,7 +52,7 @@
     String homePageUrlPrefix = homePageBaseUrl + (homeHasQuery ? "&" : "?") + "page=";
 %>
 
-<!-- 🔍 Tìm kiếm -->
+<!-- Search -->
 <section class="py-6 bg-white/90 backdrop-blur-sm shadow-sm">
   <div class="max-w-5xl mx-auto text-center px-4">
     <form action="home" method="get" class="flex flex-col sm:flex-row items-center gap-3 justify-center">
@@ -68,58 +68,7 @@
   </div>
 </section>
 
-<%--<!-- 📅 Menu theo ngày -->--%>
-<%--<section class="py-6 bg-gradient-to-r from-blue-50 to-indigo-50">--%>
-<%--  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">--%>
-<%--    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">--%>
-<%--      <div>--%>
-<%--        <h2 class="text-xl font-bold text-gray-800">Thực đơn hôm nay</h2>--%>
-<%--        <p class="text-sm text-gray-600">Ngày: <span class="font-semibold text-gray-900"><%= dailyMenuDateLabel != null ? dailyMenuDateLabel : "Chưa xác định" %></span></p>--%>
-<%--      </div>--%>
-<%--      <p class="text-sm text-gray-500">Các món đã được công bố cho thực đơn của từng quầy.</p>--%>
-<%--    </div>--%>
-<%--    --%>
-<%--    <% if (dailyMenuStalls != null && !dailyMenuStalls.isEmpty()) { %>--%>
-<%--    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">--%>
-<%--      <% for (model.StallDAO stallItem : dailyMenuStalls) {--%>
-<%--           java.util.List<dto.FoodDTO> stallMenu = dailyMenuByStall != null ? dailyMenuByStall.get(stallItem.getId()) : null;--%>
-<%--      %>--%>
-<%--      <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">--%>
-<%--        <div class="flex items-start justify-between">--%>
-<%--          <div>--%>
-<%--            <h3 class="text-lg font-semibold text-gray-800"><%= stallItem.getName() %></h3>--%>
-<%--            <p class="text-sm text-gray-500"><%= stallItem.getDescription() != null ? stallItem.getDescription() : "Quầy ăn trong căng tin" %></p>--%>
-<%--          </div>--%>
-<%--          <span class="text-xs px-2 py-1 rounded-full <%= stallItem.getIsOpen() != null && stallItem.getIsOpen() ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700" %>">--%>
-<%--            <%= stallItem.getIsOpen() != null && stallItem.getIsOpen() ? "Đang mở" : "Tạm đóng" %>--%>
-<%--          </span>--%>
-<%--        </div>--%>
-<%--        <% if (stallMenu != null && !stallMenu.isEmpty()) { %>--%>
-<%--        <div class="mt-3 space-y-2 text-sm">--%>
-<%--          <% for (dto.FoodDTO menuFood : stallMenu) { --%>
-<%--               Double menuPrice = menuFood.getPriceFood() != null ? menuFood.getPriceFood() : 0.0;--%>
-<%--          %>--%>
-<%--          <div class="flex items-center justify-between border-b border-gray-100 pb-2 last:border-b-0 last:pb-0">--%>
-<%--            <span class="text-gray-700 truncate pr-3"><%= menuFood.getNameFood() %></span>--%>
-<%--            <span class="text-blue-600 font-semibold whitespace-nowrap"><%= String.format("%,.0f", menuPrice) %>đ</span>--%>
-<%--          </div>--%>
-<%--          <% } %>--%>
-<%--        </div>--%>
-<%--        <% } else { %>--%>
-<%--        <p class="text-sm text-gray-500 mt-3 italic">Chưa có món nào được đăng cho ngày này.</p>--%>
-<%--        <% } %>--%>
-<%--      </div>--%>
-<%--      <% } %>--%>
-<%--    </div>--%>
-<%--    <% } else { %>--%>
-<%--    <div class="text-center py-8 text-gray-600 bg-white rounded-xl border border-dashed border-gray-300">--%>
-<%--      Chưa có thực đơn nào được đăng cho ngày này.--%>
-<%--    </div>--%>
-<%--    <% } %>--%>
-<%--  </div>--%>
-<%--</section>--%>
-
-<!-- 🥗 Danh sách món ăn -->
+<!-- Food list -->
 <section class="py-8 bg-gradient-to-b from-gray-50 to-blue-50">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div>

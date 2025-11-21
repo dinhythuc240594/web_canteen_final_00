@@ -44,7 +44,7 @@ public class StallOrderServlet extends HttpServlet {
 	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// Security check: Only stall and admin can access
+
 		HttpSession session = request.getSession(false);
 		String userRole = (String) (session != null ? session.getAttribute("type_user") : null);
 		String username = (String) (session != null ? session.getAttribute("username") : null);
@@ -60,7 +60,6 @@ public class StallOrderServlet extends HttpServlet {
 			return;
 		}
 		
-		// Get stall for this user
 		List<StallDAO> userStalls = stallService.findByManagerUserId(userId);
 		
 		if (userStalls.isEmpty() && !"admin".equals(userRole)) {
@@ -68,20 +67,17 @@ public class StallOrderServlet extends HttpServlet {
 			return;
 		}
 		
-		// Get orders
 		String statusFilter = request.getParameter("status");
 		List<OrderDAO> orders;
 		
 		if ("admin".equals(userRole)) {
-			// Admin sees all orders
+
 			if (statusFilter != null && !statusFilter.equals("all")) {
-				orders = orderService.findByStallIdAndStatus(0, statusFilter); // This won't work properly, need to adjust
+				orders = orderService.findByStallIdAndStatus(0, statusFilter);
 			} else {
-				// For admin, we'd need a findAll method that returns List<OrderDAO>
-				orders = orderService.findByUserId(userId); // Placeholder - needs proper implementation
+				orders = orderService.findByUserId(userId);
 			}
 		} else {
-			// Stall user sees only their orders
 			int stallId = userStalls.get(0).getId();
 			if (statusFilter != null && !statusFilter.equals("all")) {
 				orders = orderService.findByStallIdAndStatus(stallId, statusFilter);
@@ -89,12 +85,10 @@ public class StallOrderServlet extends HttpServlet {
 				orders = orderService.findByStallId(stallId);
 			}
 		}
-		
-		// Get order items for each order
+
 		Map<Integer, List<Order_FoodDAO>> orderFoodMap = new HashMap<>();
 		for (OrderDAO order : orders) {
 			List<Order_FoodDAO> items = orderFoodService.findByOrderId(order.getId());
-            // Load food name and image for each item
             for (Order_FoodDAO item : items) {
                 FoodDTO food = foodServiceImpl.findById(item.getFoodId());
                 if (food != null) {

@@ -1,4 +1,4 @@
-// Set current user ID for JavaScript
+
 // var adminContextPath = '<%=contextPath%>';
 var adminContextPath = URL_ADMIN;
 // var currentUserIdAttr = document.body.getAttribute('data-current-user-id');
@@ -10,7 +10,6 @@ var allFoodsData = [];
 var allOrdersData = [];
 var currentUserType = 'customer';
 
-// Active state cho menu + chuyển view theo hash
 function setActiveView(hash) {
     const views = document.querySelectorAll('.admin-view');
     views.forEach(v => v.classList.add('hidden'));
@@ -29,7 +28,7 @@ function setActiveView(hash) {
     if (mobile && ('#' + (hash || 'dashboard')) !== mobile.value) {
         mobile.value = '#' + (hash || 'dashboard');
     }
-    // cập nhật icon
+
     if (window.lucide) lucide.createIcons();
 }
 
@@ -40,13 +39,10 @@ document.getElementById('admin-mobile-nav')?.addEventListener('change', (e) => {
     location.hash = e.target.value;
 });
 
-// Initialize report dates
 updateReportDates();
 
-// Lần đầu vào trang
 setActiveView(location.hash.replace('#', '') || 'dashboard');
 
-// Load data when switching tabs
 window.addEventListener('hashchange', function() {
     const hash = location.hash.replace('#', '');
     if (hash === 'users') {
@@ -62,7 +58,6 @@ window.addEventListener('hashchange', function() {
     }
 });
 
-// Load on initial page load if hash is set
 const initialHash = location.hash.replace('#', '');
 if (initialHash === 'foods') {
     loadFoods();
@@ -72,8 +67,6 @@ if (initialHash === 'foods') {
     loadReports();
 }
 
-
-// Load users data - loads customers or stall users with orders
 function loadUsers(type) {
     type = type || 'customer';
     currentUserType = type;
@@ -208,7 +201,6 @@ function loadFoods() {
                 } else {
                     // Populate stall filter
                     const stallFilter = document.getElementById('foods-stall-filter');
-                    // Clear existing options except "Tất cả quầy"
                     while (stallFilter.children.length > 1) {
                         stallFilter.removeChild(stallFilter.lastChild);
                     }
@@ -479,15 +471,12 @@ function updateReportDates() {
         startDate.value = monthAgo.toISOString().split('T')[0];
         endDate.value = today.toISOString().split('T')[0];
     }
-    // For 'custom', user can manually select dates
 }
 
 function updateReportPeriod() {
-    // When user manually changes dates, set period to 'custom'
     document.getElementById('reports-period').value = 'custom';
 }
 
-// ---------- Dashboard revenue chart & best sellers ----------
 function getDateString(date) {
     return date.toISOString().split('T')[0];
 }
@@ -650,13 +639,11 @@ function loadStalls() {
         .catch(error => console.error('Error loading stalls:', error));
 }
 
-// Toggle user status
 function toggleUserStatus(userId, newStatus) {
     if (!confirm('Bạn có chắc chắn muốn ' + (newStatus ? 'mở khóa' : 'khóa') + ' tài khoản này?')) {
         return;
     }
 
-    // Ensure boolean is converted to string "true" or "false"
     const statusValue = newStatus === true || newStatus === 'true' || newStatus === 1 ? 'true' : 'false';
 
     fetch(adminContextPath + '/admin', {
@@ -683,7 +670,6 @@ function toggleUserStatus(userId, newStatus) {
         });
 }
 
-// Initial loads for dashboard widgets
 loadUsers('customer');
 loadStalls();
 const defaultRange = chartRangeSelect ? chartRangeSelect.value : 7;

@@ -39,7 +39,7 @@ public class StallServlet extends HttpServlet {
 	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// Security check: Only stall can access
+
 		HttpSession session = request.getSession(false);
 		String userRole = (String) (session != null ? session.getAttribute("type_user") : null);
 		String username = (String) (session != null ? session.getAttribute("username") : null);
@@ -55,10 +55,8 @@ public class StallServlet extends HttpServlet {
 			return;
 		}
 		
-		// Get user information
 		UserDAO user = userService.getUserById(userId);
 		
-		// Get stall for this user
 		List<StallDAO> userStalls = stallService.findByManagerUserId(userId);
 		
 		if (userStalls.isEmpty()) {
@@ -66,12 +64,10 @@ public class StallServlet extends HttpServlet {
 			return;
 		}
 		
-		StallDAO stall = userStalls.get(0); // Get first stall (assuming one stall per user)
-		
-		// Get orders for this stall
+		StallDAO stall = userStalls.get(0);
+
 		List<OrderDAO> orders = orderService.findByStallId(stall.getId());
-		
-		// Calculate statistics
+
 		int totalOrders = orders.size();
 		double totalRevenue = 0.0;
 		int newOrders = 0;
@@ -132,7 +128,6 @@ public class StallServlet extends HttpServlet {
 	
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// Handle stall status update
 		HttpSession session = request.getSession(false);
 		String userRole = (String) (session != null ? session.getAttribute("type_user") : null);
 		Integer userId = (Integer) (session != null ? session.getAttribute("userId") : null);

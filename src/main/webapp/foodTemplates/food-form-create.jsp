@@ -130,12 +130,10 @@ $(document).ready(function() {
 
         var formData = new FormData(this);
 
-        // Xử lý giá trị checkbox (vì checkbox chỉ gửi đi khi được check)
         if (!formData.has('is_available')) {
             formData.append('is_available', '0');
         }
 
-        // Thực hiện AJAX call
         $.ajax({
             url: 'foods?action=create',
             type: 'POST',

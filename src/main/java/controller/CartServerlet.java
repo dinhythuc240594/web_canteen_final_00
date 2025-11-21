@@ -62,14 +62,12 @@ public class CartServerlet extends HttpServlet {
         // }
         System.out.println("Get cart page");
         
-        // Get cart from session - will be null/empty after successful checkout
         List<Order_FoodDAO> cart = (List<Order_FoodDAO>) session.getAttribute("cart");
         if (cart == null) {
             cart = new ArrayList<>();
             session.setAttribute("cart", cart);
         }
         
-        // Forward to cart page
         request.getRequestDispatcher("cart.jsp").forward(request, response);
     }
 
@@ -79,9 +77,7 @@ public class CartServerlet extends HttpServlet {
 
         HttpSession session = request.getSession(false);
         String action = RequestUtil.getString(request, "action", "");
-        // Check if user is logged in for checkout operation
         if ((session == null || session.getAttribute("username") == null) && action.equals("checkout")) {
-            // Lưu URL trang cart vào session để redirect về sau khi đăng nhập
             if (session == null) {
                 session = request.getSession(true);
             }
@@ -91,17 +87,16 @@ public class CartServerlet extends HttpServlet {
             return;
         }
         
+        // Handler page base on action
         switch (action) {
             case "add":
                 try {
                     String orders_raw = RequestUtil.getString(request, "orders", "[]");
                     System.out.println("Received cart data: " + orders_raw);
                     
-                    // Parse JSON cart data from localStorage using json-simple
                     JSONParser parser = new JSONParser();
                     JSONArray cartItems = (JSONArray) parser.parse(orders_raw);
                     
-                    // Convert to Order_FoodDAO objects
                     List<Order_FoodDAO> cart = new ArrayList<>();
                     int stallId = 0;
                     
@@ -109,11 +104,9 @@ public class CartServerlet extends HttpServlet {
                         JSONObject item = (JSONObject) obj;
                         Order_FoodDAO orderFood = new Order_FoodDAO();
                         
-                        // Parse each field from JSON object
                         orderFood.setFoodId(((Long) item.get("id")).intValue());
                         orderFood.setQuantity(((Long) item.get("quantity")).intValue());
                         
-                        // Handle price as either Long or Double
                         Object priceObj = item.get("price");
                         if (priceObj instanceof Long) {
                             orderFood.setPriceAtOrder(((Long) priceObj).doubleValue());
@@ -124,7 +117,6 @@ public class CartServerlet extends HttpServlet {
                         orderFood.setName((String) item.get("name"));
                         orderFood.setImage((String) item.get("image"));
                         
-                        // Store stallId for the order (all items should be from same stall)
                         if (stallId == 0 && item.get("stall_id") != null) {
                             stallId = ((Long) item.get("stall_id")).intValue();
                         }
@@ -132,7 +124,6 @@ public class CartServerlet extends HttpServlet {
                         cart.add(orderFood);
                     }
                     
-                    // Save cart and stallId to session
                     session.setAttribute("cart", cart);
                     if (stallId > 0) {
                         session.setAttribute("stallId", stallId);
@@ -168,13 +159,11 @@ public class CartServerlet extends HttpServlet {
         try {
         	
             if (cart == null || cart.isEmpty()) {
-                // Giỏ hàng trống - load trang thất bại
                 request.setAttribute("errorMessage", "Giỏ hàng trống. Vui lòng thêm sản phẩm vào giỏ hàng trước khi đặt hàng.");
                 request.getRequestDispatcher("order-failed.jsp").forward(request, response);
                 return;
             }
 
-            // Lấy userId từ session (đã được kiểm tra ở trên khi checkout)
             int userId = (int) session.getAttribute("userId");
 
             String address = request.getParameter("address");
@@ -182,33 +171,28 @@ public class CartServerlet extends HttpServlet {
             String stallParam = request.getParameter("stallId");
 
             if (address == null || address.trim().isEmpty()) {
-                // Địa chỉ trống - load trang thất bại
                 request.setAttribute("errorMessage", "Vui lòng nhập địa chỉ giao hàng.");
                 request.getRequestDispatcher("order-failed.jsp").forward(request, response);
                 return;
             }
 
-            // Get stallId from parameter or session
             int stallId = 0;
             if (stallParam != null && !stallParam.isEmpty()) {
                 try {
                     stallId = Integer.parseInt(stallParam);
                 } catch (NumberFormatException e) {
-                    // stallId không hợp lệ - load trang thất bại
                     request.setAttribute("errorMessage", "Thông tin quầy hàng không hợp lệ.");
                     request.getRequestDispatcher("order-failed.jsp").forward(request, response);
                     return;
                 }
             }
             
-            // If not in parameter, try to get from session
             if (stallId == 0) {
                 Object sessionStallIdObj = session.getAttribute("stallId");
                 if (sessionStallIdObj != null) {
                     try {
                         stallId = (int) sessionStallIdObj;
                     } catch (ClassCastException e) {
-                        // stallId trong session không hợp lệ
                         request.setAttribute("errorMessage", "Thông tin quầy hàng không hợp lệ.");
                         request.getRequestDispatcher("order-failed.jsp").forward(request, response);
                         return;
@@ -228,26 +212,21 @@ public class CartServerlet extends HttpServlet {
             order.setPaymentMethod(payment != null ? payment : "COD");
             order.setDeliveryLocation(address);
 
-            // Lưu đơn hàng - nếu thất bại sẽ throw exception
             OrderDAO createdOrder = orderRepository.save(order);
             if (createdOrder == null || createdOrder.getId() == 0) {
-                // Không thể tạo đơn hàng
                 request.setAttribute("errorMessage", "Không thể tạo đơn hàng. Vui lòng thử lại sau.");
                 request.getRequestDispatcher("order-failed.jsp").forward(request, response);
                 return;
             }
 
-            // Lưu các món ăn trong đơn hàng
             for (Order_FoodDAO item : cart) {
                 item.setOrderId(createdOrder.getId());
                 orderFoodRepository.create(item);
             }
 
-            // Clear cart and stallId from session immediately after successful order
             session.removeAttribute("cart");
             session.removeAttribute("stallId");
             
-            // Đặt hàng thành công - load trang thành công
             request.setAttribute("order", createdOrder);
             request.getRequestDispatcher("order-success.jsp").forward(request, response);
 
@@ -257,7 +236,6 @@ public class CartServerlet extends HttpServlet {
             request.getRequestDispatcher("order-failed.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
-            // Lỗi hệ thống - load trang thất bại
             request.setAttribute("errorMessage", "Đã xảy ra lỗi hệ thống khi xử lý đơn hàng. Vui lòng thử lại sau.");
             request.getRequestDispatcher("order-failed.jsp").forward(request, response);
         }

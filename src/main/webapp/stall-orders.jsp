@@ -1,7 +1,16 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.*, model.OrderDAO, model.Order_FoodDAO, model.StallDAO, model.UserDAO" %>
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý đơn hàng - Quầy</title>
+    <jsp:include page="/WEB-INF/jsp/common/head.jsp" />
+</head>
+<body class="bg-gray-50">
 <%
-    // Security check: Only stall and admin can access this page
     String username = (String) session.getAttribute("username");
     String userRole = (String) session.getAttribute("type_user");
     
@@ -23,15 +32,6 @@
     String selectedStatus = request.getParameter("status") != null ? request.getParameter("status") : "all";
 %>
 
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý đơn hàng - Quầy</title>
-    <jsp:include page="/WEB-INF/jsp/common/head.jsp" />
-</head>
-<body class="bg-gray-50">
 <jsp:include page="/WEB-INF/jsp/common/header.jsp" />
 
 <main class="min-h-screen">

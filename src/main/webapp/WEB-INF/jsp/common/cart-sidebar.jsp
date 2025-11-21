@@ -43,16 +43,13 @@
     alert('Tính năng đặt hàng sẽ được triển khai sau khi kết nối backend!');
   }
 
-  // Make functions available globally
   if (typeof window.updateQuantity === 'undefined') {
     window.updateQuantity = function(foodId, newQuantity) {
-      // This will be overridden by home.jsp
     };
   }
 
   if (typeof window.removeFromCart === 'undefined') {
     window.removeFromCart = function(foodId) {
-      // This will be overridden by home.jsp
     };
   }
 </script>
@@ -153,7 +150,6 @@
             return;
         }
 
-        // Send cart data to server via POST
         $.ajax({
             type: "POST",
             url: "cart",
@@ -163,7 +159,6 @@
             },
             success: function(response) {
                 console.log("Cart saved successfully");
-                // Redirect to cart page
                 window.location.href = 'cart';
             },
             error: function(xhr, status, error) {

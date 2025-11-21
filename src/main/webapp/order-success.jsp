@@ -2,15 +2,13 @@
 <%@ page import="model.OrderDAO" %>
 
 <%
-    // Security check: Redirect to login if not authenticated
-    // Kiểm tra này đã được xử lý bởi AuthFilter và OrderSuccessServlet
+
     // String username = (String) session.getAttribute("username");
     // if (username == null) {
     //     response.sendRedirect(request.getContextPath() + "/login");
     //     return;
     // }
-    
-    // Order data được load bởi OrderSuccessServlet
+
     OrderDAO order = (OrderDAO) request.getAttribute("order");
     if (order == null) {
         response.sendRedirect(request.getContextPath() + "/home");
@@ -107,7 +105,6 @@
 <jsp:include page="/WEB-INF/jsp/common/footer.jsp" />
 
 <script>
-  // Add confetti animation or success sound here if desired
   console.log('Order #<%= order.getId() %> placed successfully!');
 </script>
 

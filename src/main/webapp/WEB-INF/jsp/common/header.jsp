@@ -88,7 +88,6 @@
 				</div>
 				<% } else { %>
 				<div class="flex items-center space-x-4">
-					<!-- Cart button hiển thị cả khi chưa đăng nhập -->
 					<button onclick="toggleCart()"
 							class="relative p-2 text-white hover:text-white/80 transition-colors">
 						<i data-lucide="shopping-cart" class="w-6 h-6"></i>
@@ -156,14 +155,12 @@
 		const cartSidebar = document.getElementById('cart-sidebar');
 		if (cartSidebar) {
 			cartSidebar.classList.toggle('hidden');
-			lucide.createIcons(); // Re-initialize icons after showing sidebar
+			lucide.createIcons();
 		} else {
-			// Nếu cart-sidebar chưa được include, hiển thị thông báo
 			alert('Vui lòng đăng nhập để sử dụng giỏ hàng!');
 		}
 	}
 
-	// Update cart count từ localStorage (nếu có)
 	function updateCartCount() {
 		try {
 			const cart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -178,14 +175,11 @@
 				}
 			}
 		} catch (e) {
-			// Ignore errors if localStorage is not available
 		}
 	}
 
-	// Cập nhật cart count khi trang load
 	document.addEventListener('DOMContentLoaded', function() {
 		updateCartCount();
-		// Listen for storage changes (nếu mở nhiều tab)
 		window.addEventListener('storage', function(e) {
 			if (e.key === 'cart') {
 				updateCartCount();

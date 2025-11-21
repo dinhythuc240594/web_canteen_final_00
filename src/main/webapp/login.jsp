@@ -37,12 +37,10 @@
 						class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
 				/>
 			</div>
-		    <!-- ========== COMMENT: Chức năng Remember Me đã được tắt ========== -->
 		    <!-- <div class="mb-3 form-check">
 		    	<input type="checkbox" class="form-check-input" id="remember" name="remember">
 		        <label class="form-check-label" for="rememberMe">Remember me</label>
 		    </div> -->
-		    <!-- ========== END COMMENT: Remember Me ========== -->
 			<div>
 				<button
 						type="submit"
@@ -79,16 +77,10 @@
 		
 		var username = $('#username').val();
 		var password = $('#password').val();
-		// ========== COMMENT: Chức năng Remember Me đã được tắt ==========
-		// var remember = $('#remember').val();
-		// ========== END COMMENT: Remember Me ==========
 		
 		var data = {
-				"username": username,
-				"password": password
-				// ========== COMMENT: Chức năng Remember Me đã được tắt ==========
-				// "remember": remember
-				// ========== END COMMENT: Remember Me ==========
+			"username": username,
+			"password": password
 		}
 		
 		$.ajax({

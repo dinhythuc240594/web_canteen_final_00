@@ -24,7 +24,7 @@ public class StallRepositoryImpl implements StallRepository{
     @Override
     public StallDAO save(StallDAO stall) {
         if (stall.getId() == 0) {
-            // INSERT
+
             String sql = "INSERT INTO stalls (name, description, manager_user_id, is_open) VALUES (?, ?, ?, ?)";
             try (Connection conn = ds.getConnection();
                  PreparedStatement pstmt = conn.prepareStatement(sql)) { 
@@ -42,7 +42,7 @@ public class StallRepositoryImpl implements StallRepository{
                 throw new RuntimeException("Lỗi khi thêm mới gian hàng.", e);
             }
         } else {
-            // UPDATE
+
             String SQL_UPDATE = "UPDATE stalls SET name = ?, description = ?, manager_user_id = ?, is_open = ? WHERE id = ?";
             try (Connection conn = ds.getConnection();
                  PreparedStatement pstmt = conn.prepareStatement(SQL_UPDATE)) {
@@ -62,8 +62,7 @@ public class StallRepositoryImpl implements StallRepository{
             }
         }
     }
-    
-    // --- FIND BY ID ---
+
     @Override
     public StallDAO findById(int id) {
         String sql = "SELECT id, name, description, manager_user_id, is_open FROM stalls WHERE id = ?";
@@ -85,7 +84,6 @@ public class StallRepositoryImpl implements StallRepository{
         return null;
     }
 
-    // --- FIND ALL ---
     @Override
     public List<StallDAO> findAll() {
         List<StallDAO> stalls = new ArrayList<>();
@@ -105,7 +103,6 @@ public class StallRepositoryImpl implements StallRepository{
         return stalls;
     }
 
-    // --- DELETE BY ID ---
     @Override
     public void deleteById(int id) {
         String sql = "DELETE FROM stalls WHERE id = ?";
@@ -122,7 +119,6 @@ public class StallRepositoryImpl implements StallRepository{
         }
     }
     
-    // --- FIND BY MANAGER USER ID ---
     @Override
     public List<StallDAO> findByManagerUserId(int managerUserId) {
         List<StallDAO> stalls = new ArrayList<>();
@@ -145,14 +141,13 @@ public class StallRepositoryImpl implements StallRepository{
         return stalls;
     }
 
-    // --- FIND OPEN STALLS ---
     @Override
     public List<StallDAO> findOpenStalls() {
         List<StallDAO> stalls = new ArrayList<>();
         String sql = "SELECT id, name, description, manager_user_id, is_open FROM stalls WHERE is_open = TRUE";
 
         try (Connection conn = ds.getConnection();
-             Statement stmt = conn.createStatement(); // Hoặc PreparedStatement nếu DB cần giá trị boolean đặc biệt
+             Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
@@ -164,8 +159,7 @@ public class StallRepositoryImpl implements StallRepository{
         }
         return stalls;
     }
-    
-    // --- UPDATE OPEN STATUS ---
+
     @Override
     public void updateOpenStatus(int id, Boolean isOpen) {
         String sql = "UPDATE stalls SET is_open = ? WHERE id = ?";

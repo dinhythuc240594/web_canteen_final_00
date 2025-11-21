@@ -2,14 +2,13 @@
 <%@ page import="java.util.*, model.Order_FoodDAO" %>
 
 <%
-//    // Security check: Redirect to login if not authenticated
+
     String username = (String) session.getAttribute("username");
 //    if (username == null) {
 //        response.sendRedirect(request.getContextPath() + "/login");
 //        return;
 //    }
     
-    // Lấy thông tin người dùng và giỏ hàng từ session
     List<Order_FoodDAO> cart = (List<Order_FoodDAO>) session.getAttribute("cart");
     if (cart == null) {
         cart = new ArrayList<>();
@@ -152,35 +151,32 @@
 <jsp:include page="/WEB-INF/jsp/common/footer.jsp" />
 
 <script>
-  // Check if user is logged in before checkout
+
   document.getElementById('checkoutForm')?.addEventListener('submit', function(e) {
     <% if (username == null) { %>
       e.preventDefault();
       alert('Vui lòng đăng nhập để thanh toán.');
       window.location.href = 'login';
     <% } else { %>
-      // Clear localStorage cart when submitting checkout
+
       localStorage.removeItem('cart');
       localStorage.removeItem('cartStallId');
     <% } %>
   });
-  
-  // Always ensure cart is cleared from localStorage if session cart is empty
+
   <% if (cart.isEmpty()) { %>
     localStorage.removeItem('cart');
     localStorage.removeItem('cartStallId');
     
-    // Update cart count in header
     const cartCountEl = document.getElementById('cart-count');
     if (cartCountEl) {
       cartCountEl.textContent = '0';
       cartCountEl.classList.add('hidden');
     }
   <% } %>
-  
-  // Initialize cart display when page loads
+
   window.addEventListener('DOMContentLoaded', function() {
-    // If cart was just cleared after checkout, ensure localStorage is also cleared
+
     <% if (cart.isEmpty()) { %>
       localStorage.removeItem('cart');
       localStorage.removeItem('cartStallId');

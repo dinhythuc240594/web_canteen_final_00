@@ -43,7 +43,7 @@ public class CustomerServlet extends HttpServlet {
 	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// Security check: Only customer can access
+
 		HttpSession session = request.getSession(false);
 		String userRole = (String) (session != null ? session.getAttribute("type_user") : null);
 		String username = (String) (session != null ? session.getAttribute("username") : null);
@@ -59,13 +59,10 @@ public class CustomerServlet extends HttpServlet {
 			return;
 		}
 		
-		// Get user information
 		UserDAO user = userService.getUserById(userId);
 		
-		// Get user's orders
 		List<OrderDAO> orders = orderService.findByUserId(userId);
 		
-		// Calculate statistics
 		int totalOrders = orders.size();
 		double totalSpent = 0.0;
 		int pendingOrders = 0;
@@ -80,7 +77,7 @@ public class CustomerServlet extends HttpServlet {
 			}
 		}
 		
-		// Get recent orders (last 5)
+		// Get orders (last 5)
 		List<OrderDAO> recentOrders = orders.size() > 5 ? orders.subList(0, 5) : orders;
 		
 		request.setAttribute("user", user);

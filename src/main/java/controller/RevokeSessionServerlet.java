@@ -21,13 +21,11 @@ import javax.sql.DataSource;
 public class RevokeSessionServerlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
    
-//	private UserServiceImpl userSerImpl;
 	private TokenServiceImpl tokenSerImpl;
 
 	@Override
 	public void init() throws ServletException {
 		DataSource ds = DataSourceUtil.getDataSource();
-//		this.userSerImpl = new UserServiceImpl(ds);
 		this.tokenSerImpl = new TokenServiceImpl(ds);
 	}
 	

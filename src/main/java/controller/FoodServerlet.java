@@ -87,25 +87,23 @@ public class FoodServerlet extends HttpServlet {
 		}
 		FoodDTO foundFood = null;
 		
-		// Check authentication for sensitive operations
+		// Check authentication and role
 		HttpSession session = request.getSession(false);
 		String userRole = (String) (session != null ? session.getAttribute("type_user") : null);
 		String username = (String) (session != null ? session.getAttribute("username") : null);
 		Integer userId = (Integer) (session != null ? session.getAttribute("userId") : null);
 		
-		// Operations that require authentication and authorization
 		if ("create".equals(action) || "update".equals(action) || "delete".equals(action)) {
 			if (username == null || userId == null) {
 				response.sendRedirect(request.getContextPath() + "/login");
 				return;
 			}
-			// Only stall role can create/update/delete foods
+
 			if (!"stall".equals(userRole)) {
 				response.sendRedirect(request.getContextPath() + "/home");
 				return;
 			}
 			
-			// Get user's stall to verify ownership
 			List<StallDAO> userStalls = this.stallServiceImpl.findByManagerUserId(userId);
 			if (userStalls.isEmpty()) {
 				response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không quản lý quầy nào");
@@ -113,21 +111,18 @@ public class FoodServerlet extends HttpServlet {
 			}
 			int userStallId = userStalls.getFirst().getId();
 			
-			// For update and delete, verify that the food belongs to the user's stall
 			if ("update".equals(action) || "delete".equals(action)) {
 				FoodDTO food = this.foodServiceImpl.findById(id);
 				if (food == null) {
 					response.sendError(HttpServletResponse.SC_NOT_FOUND);
 					return;
 				}
-				// Verify ownership: food must belong to user's stall
 				if (food.getStallId() != userStallId) {
 					response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền chỉnh sửa hoặc xóa món này");
 					return;
 				}
 			}
 			
-			// Store userStallId in request for create/update operations
 			request.setAttribute("userStallId", userStallId);
 		}
 		
@@ -141,7 +136,6 @@ public class FoodServerlet extends HttpServlet {
 		        request.setAttribute("stalls", stalls);
 		        request.setAttribute("userRole", userRole);
 		        
-		        // Get user's stall ID if user is a stall owner
 		        Integer userStallId = null;
 		        if ("stall".equals(userRole) && userId != null) {
 		        	List<StallDAO> userStalls = this.stallServiceImpl.findByManagerUserId(userId);
@@ -246,7 +240,7 @@ public class FoodServerlet extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// Check authentication for POST operations (create, update, delete)
+
 		HttpSession session = request.getSession(false);
 		String userRole = (String) (session != null ? session.getAttribute("type_user") : null);
 		String username = (String) (session != null ? session.getAttribute("username") : null);
@@ -257,13 +251,11 @@ public class FoodServerlet extends HttpServlet {
 			return;
 		}
 		
-		// Only stall role can create/update foods
 		if (!"stall".equals(userRole)) {
 			response.sendRedirect(request.getContextPath() + "/home");
 			return;
 		}
 		
-		// Get user's stall to verify ownership
 		List<StallDAO> userStalls = this.stallServiceImpl.findByManagerUserId(userId);
 		if (userStalls.isEmpty()) {
 			response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không quản lý quầy nào");
@@ -273,7 +265,7 @@ public class FoodServerlet extends HttpServlet {
 		
 		String action = RequestUtil.getString(request, "action", null);
 		System.out.println(action);
-		// Handle JSON response for AJAX requests
+
 		response.setContentType("application/json; charset=UTF-8");
 		PrintWriter out = response.getWriter();
 		
@@ -289,7 +281,6 @@ public class FoodServerlet extends HttpServlet {
 					double priceFood = Double.parseDouble(request.getParameter("priceFood"));
 					int inventoryFood = Integer.parseInt(request.getParameter("inventoryFood"));
 					
-					// Get optional fields
 					String categoryIdStr = request.getParameter("category_id");
 					Integer categoryId = (categoryIdStr != null && !categoryIdStr.trim().isEmpty()) 
 						? Integer.parseInt(categoryIdStr) : null;
@@ -340,7 +331,6 @@ public class FoodServerlet extends HttpServlet {
 					
 					String imageUrl = handleImageUpload(request);
 					
-					// Verify ownership before updating
 					FoodDTO food = this.foodServiceImpl.findById(id);
 					if (food == null) {
 						out.print("{\"success\":false,\"message\":\"Không tìm thấy món ăn\"}");
@@ -350,8 +340,7 @@ public class FoodServerlet extends HttpServlet {
 						out.print("{\"success\":false,\"message\":\"Bạn không có quyền chỉnh sửa món này\"}");
 						return;
 					}
-					
-					// If no new image uploaded, keep the existing one
+
 					if (imageUrl == null) {
 						imageUrl = food.getImage();
 					}

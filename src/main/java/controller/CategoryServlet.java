@@ -47,10 +47,8 @@ public class CategoryServlet extends HttpServlet {
 		int page = RequestUtil.getInt(request, "page", 1);
 		int categoryId = RequestUtil.getInt(request, "categoryId", 0);
 		
-		// Load all categories
 		List<Food_CategoryDAO> categories = this.categoryServiceImpl.findAll();
 		
-		// Create page request with category filter
 		PageRequest pageReq = new PageRequest(page, PAGE_SIZE, sortField, orderField, keyword, null, categoryId > 0 ? categoryId : null);
 		Page<FoodDTO> pageFood = this.foodServiceImpl.findAll(pageReq);
 		

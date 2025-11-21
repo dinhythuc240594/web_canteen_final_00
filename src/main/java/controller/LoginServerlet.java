@@ -50,7 +50,6 @@ public class LoginServerlet extends HttpServlet {
 		HttpSession session = request.getSession();
 		Boolean isLogin = (Boolean) session.getAttribute("is_login");
 		
-		// Nếu đã đăng nhập, điều hướng về trang home
 		if (isLogin != null) {
             if(isLogin){
                 response.sendRedirect(request.getContextPath() + "/home");
@@ -58,7 +57,6 @@ public class LoginServerlet extends HttpServlet {
             }
 		}
 		
-		// Nếu chưa đăng nhập, hiển thị trang login
         RequestDispatcher rd = request.getRequestDispatcher("login.jsp");
         rd.forward(request, response);
 	}
@@ -69,9 +67,7 @@ public class LoginServerlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String username = request.getParameter("username");
 		String password = request.getParameter("password");
-		// ========== COMMENT: Chức năng Remember Me đã được tắt ==========
-		// String rememberMe = request.getParameter("remember");
-		// ========== END COMMENT: Remember Me ==========
+
 		boolean isLogin = this.userSerImpl.isAuthenticated(username, password);
 		HttpSession session = request.getSession();
 		UserDAO user = this.userSerImpl.getUser(username);
@@ -81,8 +77,7 @@ public class LoginServerlet extends HttpServlet {
 			session.setAttribute("username", user.getUsername());
 			session.setAttribute("type_user", user.getRole());
 			session.setAttribute("userAvatar", user.getAvatar());
-			
-			// ========== COMMENT: Chức năng Remember Me đã được tắt ==========
+
 			// if (rememberMe != null && rememberMe.equals("on")) {
 			// 	String rawToken = UUID.randomUUID().toString();
 			// 	String tokenHash = SHA256.hash256(rawToken);
@@ -107,7 +102,6 @@ public class LoginServerlet extends HttpServlet {
 			//     
 			//     response.addCookie(rememberCookie);
 			// }
-			// ========== END COMMENT: Remember Me ==========
 			
 			// Check if there's a saved URL to redirect to after login
 			String redirectUrl = (String) session.getAttribute("redirectAfterLogin");
@@ -115,7 +109,6 @@ public class LoginServerlet extends HttpServlet {
 				session.removeAttribute("redirectAfterLogin");
 				response.sendRedirect(redirectUrl);
 			} else {
-				// Nếu không có URL redirect, chuyển về trang home
 				response.sendRedirect(request.getContextPath() + "/home");
 			}
 		}
