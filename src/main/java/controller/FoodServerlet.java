@@ -75,7 +75,7 @@ public class FoodServerlet extends HttpServlet {
 		String orderField = RequestUtil.getString(request, "orderField", "DESC");
 		int page = RequestUtil.getInt(request, "page", 1);
 		int id = RequestUtil.getInt(request, "id", 1);
-		String stallIdParam = request.getParameter("stallId");
+		String stallIdParam = RequestUtil.getString(request, "stallId", null);
 		Integer stallId = null;
 		if (stallIdParam != null && !stallIdParam.trim().isEmpty()) {
 			try {
@@ -277,22 +277,24 @@ public class FoodServerlet extends HttpServlet {
 			
 			switch (action) {
 				case "create": {
-					String nameFood = request.getParameter("nameFood");
+					String nameFood = RequestUtil.getString(request, "nameFood", "");
 					double priceFood = Double.parseDouble(request.getParameter("priceFood"));
-					int inventoryFood = Integer.parseInt(request.getParameter("inventoryFood"));
+					int inventoryFood = RequestUtil.getInt(request, "inventoryFood", 10);
 					
-					String categoryIdStr = request.getParameter("category_id");
+					String categoryIdStr = RequestUtil.getString(request, "category_id", null);
 					Integer categoryId = (categoryIdStr != null && !categoryIdStr.trim().isEmpty()) 
 						? Integer.parseInt(categoryIdStr) : null;
 					
-					String description = request.getParameter("description");
+//					String description = RequestUtil.getString(request, "description", "");
+                    String description = request.getParameter("description");
+                    System.out.println(description);
 					if (description == null) description = "";
 					
-					String promotionStr = request.getParameter("promotion");
+					String promotionStr = RequestUtil.getString(request, "promotion", null);
 					Double promotion = (promotionStr != null && !promotionStr.trim().isEmpty()) 
 						? Double.parseDouble(promotionStr) : 0.0;
 					
-					String isAvailableStr = request.getParameter("is_available");
+					String isAvailableStr = RequestUtil.getString(request, "is_available", null);
 					Boolean isAvailable = (isAvailableStr != null && "1".equals(isAvailableStr));
 					
 					String imageUrl = handleImageUpload(request);
@@ -310,23 +312,23 @@ public class FoodServerlet extends HttpServlet {
 				}
 				
 				case "update": {
-					int id = Integer.parseInt(request.getParameter("id"));
-					String nameFood = request.getParameter("nameFood");
+					int id = RequestUtil.getInt(request, "id", 0);
+					String nameFood = RequestUtil.getString(request, "nameFood", "");
 					double priceFood = Double.parseDouble(request.getParameter("priceFood"));
-					int inventoryFood = Integer.parseInt(request.getParameter("inventoryFood"));
+					int inventoryFood = RequestUtil.getInt(request, "inventoryFood", 10);
 					
-					String categoryIdStr = request.getParameter("category_id");
+					String categoryIdStr = RequestUtil.getString(request, "category_id", null);
 					Integer categoryId = (categoryIdStr != null && !categoryIdStr.trim().isEmpty()) 
 						? Integer.parseInt(categoryIdStr) : null;
 					
-					String description = request.getParameter("description");
+					String description = RequestUtil.getString(request, "description", "");
 					if (description == null) description = "";
 					
-					String promotionStr = request.getParameter("promotion");
+					String promotionStr = RequestUtil.getString(request, "promotion", null);
 					Double promotion = (promotionStr != null && !promotionStr.trim().isEmpty()) 
 						? Double.parseDouble(promotionStr) : 0.0;
 					
-					String isAvailableStr = request.getParameter("is_available");
+					String isAvailableStr = RequestUtil.getString(request, "is_available", null);
 					Boolean isAvailable = (isAvailableStr != null && "1".equals(isAvailableStr));
 					
 					String imageUrl = handleImageUpload(request);
@@ -358,7 +360,7 @@ public class FoodServerlet extends HttpServlet {
 				}
 				
 				case "delete": {
-					int id = Integer.parseInt(request.getParameter("id"));
+					int id = RequestUtil.getInt(request, "id", 0);
 					FoodDTO food = this.foodServiceImpl.findById(id);
 					if (food == null) {
 						out.print("{\"success\":false,\"message\":\"Không tìm thấy món ăn\"}");

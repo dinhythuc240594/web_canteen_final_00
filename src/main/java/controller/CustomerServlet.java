@@ -15,6 +15,7 @@ import serviceimpl.UserServiceImpl;
 import utils.DataSourceUtil;
 import utils.FileUpload;
 import utils.FileUpload.FileUploadException;
+import utils.RequestUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -96,7 +97,7 @@ public class CustomerServlet extends HttpServlet {
 			}
 		}
 		
-		String view = request.getParameter("view");
+		String view = RequestUtil.getString(request, "view", "");
 		if ("edit".equals(view)) {
 			prepareProfileFormDefaults(request, user);
 			request.getRequestDispatcher("/customer_edit.jsp").forward(request, response);
@@ -130,9 +131,9 @@ public class CustomerServlet extends HttpServlet {
 		}
 		
 		List<String> errors = new ArrayList<>();
-		String fullName = trimToNull(request.getParameter("fullName"));
-		String email = trimToNull(request.getParameter("email"));
-		String phone = trimToNull(request.getParameter("phone"));
+		String fullName = trimToNull(RequestUtil.getString(request, "fullName",""));
+		String email = trimToNull(RequestUtil.getString(request, "email", ""));
+		String phone = trimToNull(RequestUtil.getString(request, "phone",""));
 		
 		if (fullName == null) {
 			errors.add("Họ và tên không được để trống.");

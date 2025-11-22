@@ -69,7 +69,7 @@ public class AdminServlet extends HttpServlet {
 			return;
 		}
 		
-		String action = request.getParameter("action");
+		String action = RequestUtil.getString(request, "action", null);
 		if (action == null) {
 			action = "dashboard";
 		}
@@ -126,7 +126,7 @@ public class AdminServlet extends HttpServlet {
 			return;
 		}
 		
-		String action = request.getParameter("action");
+		String action = RequestUtil.getString(request, "action", null);
 		
 		// Check action
 		boolean isStallAction = "createStall".equals(action) || "updateStall".equals(action) || "deleteStall".equals(action);
@@ -438,7 +438,7 @@ public class AdminServlet extends HttpServlet {
 	}
 	
 	private void handleGetUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		int id = Integer.parseInt(request.getParameter("id"));
+		int id = RequestUtil.getInt(request, "id", 0);
 		UserDAO user = this.userServiceImpl.getUserById(id);
 		
 		response.setContentType("application/json");
@@ -450,7 +450,7 @@ public class AdminServlet extends HttpServlet {
 	}
 	
 	private void handleGetStall(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		int id = Integer.parseInt(request.getParameter("id"));
+		int id = RequestUtil.getInt(request, "id", 0);
 		StallDAO stall = this.stallServiceImpl.findById(id);
 		
 		response.setContentType("application/json");
@@ -462,11 +462,11 @@ public class AdminServlet extends HttpServlet {
 	}
 	
 	private void handleCreateUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String username = request.getParameter("username");
-		String fullName = request.getParameter("fullName");
-		String email = request.getParameter("email");
-		String phone = request.getParameter("phone");
-		String role = request.getParameter("role");
+		String username = RequestUtil.getString(request, "username", "");
+		String fullName = RequestUtil.getString(request, "fullName", "");
+		String email = RequestUtil.getString(request, "email", "");
+		String phone = RequestUtil.getString(request, "phone", "");
+		String role= RequestUtil.getString(request, "role", "");
 		
 		UserDAO user = new UserDAO();
 		user.setUsername(username);
@@ -497,15 +497,14 @@ public class AdminServlet extends HttpServlet {
 	}
 	
 	private void handleUpdateUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		int id = Integer.parseInt(request.getParameter("id"));
-		String username = request.getParameter("username");
-		String fullName = request.getParameter("fullName");
-		String email = request.getParameter("email");
-		String phone = request.getParameter("phone");
-		String role = request.getParameter("role");
+		int id = RequestUtil.getInt(request, "id", 0);
+		String username = RequestUtil.getString(request, "username", "");
+		String fullName = RequestUtil.getString(request, "fullName", "");
+		String email = RequestUtil.getString(request, "email", "");
+		String phone = RequestUtil.getString(request, "phone", "");
+		String role= RequestUtil.getString(request, "role", "");
 		
-		// Safely parse boolean from request parameter
-		String statusParam = request.getParameter("status");
+		String statusParam = RequestUtil.getString(request, "status", null);
 		boolean status = false;
 		if (statusParam != null) {
 			String statusStr = statusParam.trim().toLowerCase();
@@ -536,7 +535,7 @@ public class AdminServlet extends HttpServlet {
 	}
 	
 	private void handleDeleteUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		int id = Integer.parseInt(request.getParameter("id"));
+		int id = RequestUtil.getInt(request, "id", 0);
 		boolean deleted = this.userServiceImpl.deleteById(id);
 		
 		response.setContentType("application/json");
@@ -552,8 +551,8 @@ public class AdminServlet extends HttpServlet {
 	}
 	
 	private void handleToggleUserStatus(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		int id = Integer.parseInt(request.getParameter("id"));
-		String statusParam = request.getParameter("status");
+		int id = RequestUtil.getInt(request, "id", 0);
+		String statusParam = RequestUtil.getString(request, "status", null);
 		boolean status = false;
 		
 		if (statusParam != null) {
@@ -588,11 +587,11 @@ public class AdminServlet extends HttpServlet {
 			return;
 		}
 		
-		String name = request.getParameter("name");
-		String description = request.getParameter("description");
-		int managerUserId = Integer.parseInt(request.getParameter("managerUserId"));
+		String name = RequestUtil.getString(request, "name", "");
+		String description = RequestUtil.getString(request, "description", "");
+		int managerUserId = RequestUtil.getInt(request, "managerUserId", 0);
 		
-		String isOpenParam = request.getParameter("isOpen");
+		String isOpenParam = RequestUtil.getString(request, "isOpen", null);
 		boolean isOpen = false;
 		if (isOpenParam != null) {
 			String isOpenStr = isOpenParam.trim().toLowerCase();
@@ -649,7 +648,7 @@ public class AdminServlet extends HttpServlet {
 			return;
 		}
 		
-		int id = Integer.parseInt(request.getParameter("id"));
+		int id = RequestUtil.getInt(request, "id", 0);
 		
 		StallDAO existingStall = this.stallServiceImpl.findById(id);
 		if (existingStall == null) {
@@ -674,11 +673,11 @@ public class AdminServlet extends HttpServlet {
 			return;
 		}
 		
-		String name = request.getParameter("name");
-		String description = request.getParameter("description");
-		int managerUserId = Integer.parseInt(request.getParameter("managerUserId"));
+		String name = RequestUtil.getString(request, "name", "");
+		String description = RequestUtil.getString(request, "description", "");
+		int managerUserId = RequestUtil.getInt(request, "managerUserId", 0);
 		
-		String isOpenParam = request.getParameter("isOpen");
+		String isOpenParam = RequestUtil.getString(request, "isOpen", null);
 		boolean isOpen = false;
 		if (isOpenParam != null) {
 			String isOpenStr = isOpenParam.trim().toLowerCase();
@@ -735,7 +734,7 @@ public class AdminServlet extends HttpServlet {
 			return;
 		}
 		
-		int id = Integer.parseInt(request.getParameter("id"));
+		int id = RequestUtil.getInt(request, "id", 0);
 
 		StallDAO existingStall = this.stallServiceImpl.findById(id);
 		if (existingStall == null) {

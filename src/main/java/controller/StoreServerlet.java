@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import model.StallDAO;
 import serviceimpl.StallServiceImpl;
 import utils.DataSourceUtil;
+import utils.RequestUtil;
 
 import java.io.IOException;
 import java.util.List;
@@ -31,7 +32,7 @@ public class StoreServerlet extends HttpServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String action = request.getParameter("action");
+		String action = RequestUtil.getString(request, "action", null);
 		
 		if (action == null) {
 			action = "list";
@@ -67,7 +68,7 @@ public class StoreServerlet extends HttpServlet {
 	}
 	
 	private void handleDetail(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		int id = Integer.parseInt(request.getParameter("id"));
+		int id = RequestUtil.getInt(request, "id", 0);
 		StallDAO stall = stallService.findById(id);
 		
 		if (stall != null) {

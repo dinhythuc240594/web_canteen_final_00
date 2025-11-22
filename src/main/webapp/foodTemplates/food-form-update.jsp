@@ -157,6 +157,13 @@ $(document).ready(function() {
     $('#updateProductForm').on('submit', function(e) {
         e.preventDefault();
 
+        for (instance in CKEDITOR.instances) {
+            CKEDITOR.instances[instance].updateElement();
+        }
+
+        var editorData = CKEDITOR.instances['description'].getData();
+        // formData.append("description", editorData);
+
         var formData = new FormData(this);
 
         if (!formData.has('is_available')) {

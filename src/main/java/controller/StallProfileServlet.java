@@ -13,6 +13,7 @@ import serviceimpl.UserServiceImpl;
 import utils.DataSourceUtil;
 import utils.FileUpload;
 import utils.FileUpload.FileUploadException;
+import utils.RequestUtil;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -88,9 +89,9 @@ public class StallProfileServlet extends HttpServlet {
 		}
 		
 		List<String> errors = new ArrayList<>();
-		String fullName = trimToNull(request.getParameter("fullName"));
-		String email = trimToNull(request.getParameter("email"));
-		String phone = trimToNull(request.getParameter("phone"));
+		String fullName = trimToNull(RequestUtil.getString(request, "fullName", ""));
+		String email = trimToNull(RequestUtil.getString(request, "email", ""));
+		String phone = trimToNull(RequestUtil.getString(request, "phone", ""));
 		
 		if (fullName == null) {
 			errors.add("Họ và tên không được để trống.");

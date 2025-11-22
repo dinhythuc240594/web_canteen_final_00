@@ -12,6 +12,7 @@ import model.UserDAO;
 import serviceimpl.TokenServiceImpl;
 import serviceimpl.UserServiceImpl;
 import utils.DataSourceUtil;
+import utils.RequestUtil;
 import utils.SHA256;
 
 import java.io.IOException;
@@ -65,8 +66,8 @@ public class LoginServerlet extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String username = request.getParameter("username");
-		String password = request.getParameter("password");
+		String username = RequestUtil.getString(request, "username", "");
+		String password = RequestUtil.getString(request, "password", "");
 
 		boolean isLogin = this.userSerImpl.isAuthenticated(username, password);
 		HttpSession session = request.getSession();

@@ -491,14 +491,19 @@ function fetchRevenueStatistics(days) {
         endDate: getDateString(endDate)
     });
     return fetch(adminContextPath + '/admin?' + params.toString())
-        .then(res => res.json())
+        .then(res =>
+        {
+            res.json();
+        })
         .catch(() => []);
 }
 
 function prepareRevenueData(stats, days) {
     const map = new Map();
     (stats || []).forEach(stat => {
-        const date = stat.statDate ? stat.statDate.split('T')[0] : '';
+        var date = stat.statDate ? stat.statDate.split('T')[0] : '';
+        date = new Date(date);
+        date = date.toLocaleDateString('vi-VN').replace(/-/g, '/');
         if (!date) return;
         const revenue = stat.revenue || 0;
         map.set(date, (map.get(date) || 0) + revenue);
@@ -514,6 +519,7 @@ function prepareRevenueData(stats, days) {
             revenue: map.get(key) || 0
         });
     }
+    console.log(dataPoints);
     return dataPoints;
 }
 

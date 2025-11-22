@@ -11,6 +11,8 @@ public class StatisticDAO {
     private int ordersCount;  
     private Double revenue;   
     private int quantitySold;
+    private int totalOrders;
+    private double totalRevenue;
 
     public StatisticDAO() {
     	
@@ -80,5 +82,11 @@ public class StatisticDAO {
 	public void setQuantitySold(int quantitySold) {
 		this.quantitySold = quantitySold;
 	}
-	
+
+    public int getTotalOrders() { return totalOrders; }
+    public void setTotalOrders(int totalOrders) { this.totalOrders = totalOrders; }
+
+    public double getTotalRevenue() { return totalRevenue; }
+    public void setTotalRevenue(double totalRevenue) { this.totalRevenue = totalRevenue; }
+
 }

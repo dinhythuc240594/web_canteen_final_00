@@ -54,12 +54,12 @@
               </p>
             </div> -->
             
-            <% if (food.getDescription() != null && !food.getDescription().isEmpty()) { %>
-            <div>
-              <label class="text-sm font-semibold text-gray-600">Mô tả:</label>
-              <p class="text-gray-700 mt-1"><%= food.getDescription() %></p>
-            </div>
-            <% } %>
+<%--            <% if (food.getDescription() != null && !food.getDescription().isEmpty()) { %>--%>
+<%--            <div>--%>
+<%--              <label class="text-sm font-semibold text-gray-600">Mô tả:</label>--%>
+<%--              <p class="text-gray-700 mt-1"><%= food.getDescription() %></p>--%>
+<%--            </div>--%>
+<%--            <% } %>--%>
           </div>
           
           <!-- Action Buttons -->
@@ -96,6 +96,14 @@
       </div>
     </div>
   </div>
+    <% if (food.getDescription() != null && !food.getDescription().isEmpty()) { %>
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div>
+        <label class="text-sm font-semibold text-gray-600">Mô tả:</label>
+        <p class="text-gray-700 mt-1"><%= food.getDescription() %></p>
+    </div>
+    </div>
+    <% } %>
 </section>
 <% } else { %>
 <section class="py-8">

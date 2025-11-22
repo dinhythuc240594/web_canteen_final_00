@@ -121,7 +121,18 @@ public class StatisticRepositoryImpl implements StatisticRepository{
     @Override
     public List<StatisticDAO> findByDateRange(Date startDate, Date endDate) {
         List<StatisticDAO> stats = new ArrayList<>();
-        String sql = "SELECT * FROM statistics WHERE stat_date BETWEEN ? AND ? ORDER BY stat_date ASC, stall_id ASC, food_id ASC";
+        String sql = "SELECT " +
+//                "    stall_id, " +
+                "    DATE(created_at) as stat_date, " +
+                "    COUNT(id) as total_orders, " +
+                "    SUM(total_price) as total_revenue " +
+                "FROM orders " +
+                "WHERE DATE(created_at) BETWEEN ? AND ? " +
+                 "AND status = 'delivered' "
+                + "GROUP BY DATE(created_at) "
+                + "ORDER BY stat_date ASC";
+//                "GROUP BY stall_id, DATE(created_at) " +
+//                "ORDER BY stat_date ASC, stall_id ASC";
 
         try (Connection conn = ds.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -131,14 +142,39 @@ public class StatisticRepositoryImpl implements StatisticRepository{
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
-                    stats.add(mapResultSetToStatisticsDAO(rs));
+                    StatisticDAO stat = new StatisticDAO();
+//                    stat.setStallId(rs.getInt("stall_id"));
+                    stat.setStatDate(rs.getDate("stat_date"));
+                    stat.setTotalOrders(rs.getInt("total_orders"));
+                    stat.setTotalRevenue(rs.getDouble("total_revenue")); // Hoặc getBigDecimal nếu dùng tiền lớn
+
+                    stats.add(stat);
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException("Lỗi khi tìm thống kê theo khoảng thời gian.", e);
+            throw new RuntimeException("Lỗi khi thống kê dữ liệu orders.", e);
         }
         return stats;
+
+//        String sql = "SELECT * FROM statistics WHERE stat_date BETWEEN ? AND ? ORDER BY stat_date ASC, stall_id ASC, food_id ASC";
+//
+//        try (Connection conn = ds.getConnection();
+//             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+//
+//            pstmt.setDate(1, startDate);
+//            pstmt.setDate(2, endDate);
+//
+//            try (ResultSet rs = pstmt.executeQuery()) {
+//                while (rs.next()) {
+//                    stats.add(mapResultSetToStatisticsDAO(rs));
+//                }
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//            throw new RuntimeException("Lỗi khi tìm thống kê theo khoảng thời gian.", e);
+//        }
+//        return stats;
     }
 
 	public StatisticDAO findById(int id) {

@@ -93,7 +93,7 @@ public class OrderServerlet extends HttpServlet {
             return;
         }
         
-        String action = request.getParameter("action");
+        String action = RequestUtil.getString(request, "action", null);
         
         if ("updateStatus".equals(action)) {
         	handleUpdateStatus(request, response);
@@ -112,7 +112,7 @@ public class OrderServerlet extends HttpServlet {
 			return;
 		}
 		
-		int orderId = Integer.parseInt(request.getParameter("orderId"));
+		int orderId = RequestUtil.getInt(request, "orderId", 0);
 		String newStatus = request.getParameter("status");
 		
 		// Validate status

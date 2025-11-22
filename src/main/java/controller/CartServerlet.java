@@ -166,9 +166,9 @@ public class CartServerlet extends HttpServlet {
 
             int userId = (int) session.getAttribute("userId");
 
-            String address = request.getParameter("address");
-            String payment = request.getParameter("payment");
-            String stallParam = request.getParameter("stallId");
+            String address = RequestUtil.getString(request, "address", "");
+            String payment = RequestUtil.getString(request, "payment", "");
+            String stallParam = RequestUtil.getString(request, "stallId", "");
 
             if (address == null || address.trim().isEmpty()) {
                 request.setAttribute("errorMessage", "Vui lòng nhập địa chỉ giao hàng.");

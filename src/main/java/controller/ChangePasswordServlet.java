@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import serviceimpl.UserServiceImpl;
 import utils.DataSourceUtil;
+import utils.RequestUtil;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -62,9 +63,9 @@ public class ChangePasswordServlet extends HttpServlet {
 		}
 
 		List<String> errors = new ArrayList<>();
-		String currentPassword = trimToNull(request.getParameter("currentPassword"));
-		String newPassword = trimToNull(request.getParameter("newPassword"));
-		String confirmPassword = trimToNull(request.getParameter("confirmPassword"));
+		String currentPassword = trimToNull(RequestUtil.getString(request, "currentPassword", ""));
+		String newPassword = trimToNull(RequestUtil.getString(request, "newPassword", ""));
+		String confirmPassword = trimToNull(RequestUtil.getString(request, "confirmPassword", ""));
 
 		if (currentPassword == null) {
 			errors.add("Vui lòng nhập mật khẩu hiện tại.");

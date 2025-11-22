@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import com.google.gson.Gson;
+import utils.RequestUtil;
 
 @WebServlet("/statistics")
 public class StatisticsServlet extends HttpServlet {
@@ -55,7 +56,7 @@ public class StatisticsServlet extends HttpServlet {
 			return;
 		}
 		
-		String action = request.getParameter("action");
+		String action = RequestUtil.getString(request, "action", null);
 		if (action == null) {
 			action = "overview";
 		}

@@ -13,6 +13,7 @@ import serviceimpl.OrderServiceImpl;
 import serviceimpl.StallServiceImpl;
 import serviceimpl.UserServiceImpl;
 import utils.DataSourceUtil;
+import utils.RequestUtil;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -137,7 +138,7 @@ public class StallServlet extends HttpServlet {
 			return;
 		}
 		
-		String action = request.getParameter("action");
+		String action = RequestUtil.getString(request, "action", null);
 		if ("toggleStatus".equals(action)) {
 			List<StallDAO> userStalls = stallService.findByManagerUserId(userId);
 			if (!userStalls.isEmpty()) {
